@@ -3,7 +3,8 @@
   import {
     buildOverviewSections,
     buildDetailModel,
-    drawRadarChart,
+    drawDivergingBars,
+    drawPairedDivergingBars,
     renderMetric,
     formatDollars,
     formatPercent,
@@ -14,9 +15,12 @@
   export let counts = { holdCount: 0, flipCount: 0, mixedCount: 0, lowDataCount: 0 };
   export let ranges = {};
   export let cityAverages = {};
+  export let holdingAverages = {};
+  export let flippingAverages = {};
 
-  let radarContainer;
-  let radarFrame = null;
+  let barsContainer;
+  let barsFrame = null;
+  let pairedBarsContainer;
 
   let activeTract = null;
   let detail = null;
@@ -24,12 +28,8 @@
   let overviewTab = 'overview';
 
   let metricsHtml = {
-    price: '',
-    investors: '',
-    flipRate: '',
-    condos: '',
-    multiFamily: '',
-    nonWhite: ''
+    price: '', investors: '', flipRate: '',
+    condos: '', multiFamily: '', nonWhite: ''
   };
 
   $: overviewSections = buildOverviewSections(counts);
@@ -37,65 +37,43 @@
 
   $: if (activeTract) {
     detail = buildDetailModel(activeTract);
-
     metricsHtml = {
       price: renderMetric('Price', activeTract.median_price, 'median_price', formatDollars, detail.barColor, ranges, cityAverages),
-      investors: renderMetric(
-        'Investors',
-        activeTract.investor_share,
-        'investor_share',
-        formatPercent,
-        detail.barColor,
-        ranges,
-        cityAverages
-      ),
+      investors: renderMetric('Investors', activeTract.investor_share, 'investor_share', formatPercent, detail.barColor, ranges, cityAverages),
       flipRate: renderMetric('Flip rate', activeTract.flip_rate, 'flip_rate', formatPercent, detail.barColor, ranges, cityAverages),
       condos: renderMetric('Condos', activeTract.condo_share, 'condo_share', formatPercent, detail.barColor, ranges, cityAverages),
-      multiFamily: renderMetric(
-        'Multi-family',
-        activeTract.r23_share,
-        'r23_share',
-        formatPercent,
-        detail.barColor,
-        ranges,
-        cityAverages
-      ),
-      nonWhite: renderMetric(
-        'Non-white',
-        activeTract.pct_nonwhite,
-        'pct_nonwhite',
-        formatPercent,
-        detail.barColor,
-        ranges,
-        cityAverages
-      )
+      multiFamily: renderMetric('Multi-family', activeTract.r23_share, 'r23_share', formatPercent, detail.barColor, ranges, cityAverages),
+      nonWhite: renderMetric('Non-white', activeTract.pct_nonwhite, 'pct_nonwhite', formatPercent, detail.barColor, ranges, cityAverages)
     };
   }
 
-  $: if (activeTract && detail && radarContainer) {
-    if (radarFrame) cancelAnimationFrame(radarFrame);
-
+  /* ── Per-tract diverging bars (detail view) ── */
+  $: if (activeTract && detail && barsContainer) {
+    if (barsFrame) cancelAnimationFrame(barsFrame);
     const tract = activeTract;
     const accent = detail.accent;
-
-    radarFrame = requestAnimationFrame(() => {
-      radarFrame = null;
-      if (!radarContainer || !activeTract || activeTract.geoid !== tract.geoid) return;
-      drawRadarChart(radarContainer, tract, ranges, cityAverages, accent);
+    barsFrame = requestAnimationFrame(() => {
+      barsFrame = null;
+      if (!barsContainer || !activeTract || activeTract.geoid !== tract.geoid) return;
+      drawDivergingBars(barsContainer, tract, ranges, cityAverages, accent);
     });
   }
 
-  $: if (!activeTract && radarContainer) {
-    if (radarFrame) {
-      cancelAnimationFrame(radarFrame);
-      radarFrame = null;
-    }
-    radarContainer.innerHTML = '';
+  $: if (!activeTract) {
+    if (barsFrame) { cancelAnimationFrame(barsFrame); barsFrame = null; }
+    if (barsContainer) barsContainer.innerHTML = '';
+  }
+
+  /* ── Paired diverging bars (overview) ── */
+  $: if (!activeTract && overviewTab === 'overview' && pairedBarsContainer
+      && cityAverages && Object.keys(cityAverages).length > 0
+      && holdingAverages && Object.keys(holdingAverages).length > 0) {
+    drawPairedDivergingBars(pairedBarsContainer, holdingAverages, flippingAverages, ranges, cityAverages);
   }
 
   onDestroy(() => {
-    if (radarFrame) cancelAnimationFrame(radarFrame);
-    radarFrame = null;
+    if (barsFrame) cancelAnimationFrame(barsFrame);
+    barsFrame = null;
   });
 </script>
 
@@ -112,6 +90,13 @@
     <div class="overview-tab-panel">
       {#if overviewTab === 'overview'}
         {@html overviewSections.overview}
+        <div class="section-heading" style="margin-top: 16px">Holding vs. flipping profiles</div>
+        <div class="profile-chart-container" bind:this={pairedBarsContainer}></div>
+        <div class="profile-caption">
+          Average metric values for each tract type, relative to the city average (center line).
+          <span style="color: var(--navy)">■</span> Holding &ensp;
+          <span style="color: var(--amber)">■</span> Flipping
+        </div>
       {:else if overviewTab === 'howToExplore'}
         {@html overviewSections.howToExplore}
       {:else}
@@ -131,10 +116,10 @@
     <div class="tract-context">{@html detail.contextText}</div>
 
     <div class="section-heading">Profile vs. city average</div>
-    <div class="radar-container" bind:this={radarContainer}></div>
-    <div class="radar-caption">
-      Solid shape = this tract. Dashed outline = city average.
-      Each axis is normalized to the range across all 173 tracts.
+    <div class="profile-chart-container" bind:this={barsContainer}></div>
+    <div class="profile-caption">
+      Bar length shows deviation from the city average (center line).
+      Right of center&nbsp;= above average.
     </div>
 
     <div class="section-heading">Key metrics</div>

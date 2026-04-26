@@ -17,6 +17,8 @@
   let geoData = null;
   let ranges = {};
   let cityAverages = {};
+  let holdingAverages = {};
+  let flippingAverages = {};
 
   let counts = {
     holdCount: 0,
@@ -74,19 +76,34 @@
         }
       });
 
+      /* ── City-wide averages ── */
       const averages = {};
+      const validFeatures = data.features.filter((f) => !isLowDataTract(f.properties));
       for (const key of METRIC_KEYS) {
-        const values = data.features
-          .filter((feature) => !isLowDataTract(feature.properties))
-          .map((feature) => feature.properties[key])
-          .filter((value) => value != null && Number.isFinite(value));
-
+        const values = validFeatures
+          .map((f) => f.properties[key])
+          .filter((v) => v != null && Number.isFinite(v));
         averages[key] = d3.mean(values);
+      }
+
+      /* ── Per-type averages (for paired diverging bars) ── */
+      const holdFeatures = validFeatures.filter((f) => f.properties.dominant === 'holding');
+      const flipFeatures = validFeatures.filter((f) => f.properties.dominant === 'flipping');
+
+      const hAvg = {};
+      const fAvg = {};
+      for (const key of METRIC_KEYS) {
+        const hVals = holdFeatures.map((f) => f.properties[key]).filter((v) => v != null && Number.isFinite(v));
+        const fVals = flipFeatures.map((f) => f.properties[key]).filter((v) => v != null && Number.isFinite(v));
+        hAvg[key] = d3.mean(hVals);
+        fAvg[key] = d3.mean(fVals);
       }
 
       counts = { holdCount, flipCount, mixedCount, lowDataCount };
       ranges = metricRanges;
       cityAverages = averages;
+      holdingAverages = hAvg;
+      flippingAverages = fAvg;
       geoData = data;
     } catch (error) {
       console.error('Could not load GeoJSON:', error);
@@ -250,5 +267,12 @@
     on:tooltipHide={handleTooltipHide}
   />
 
-  <SidePanel hoveredTract={lockedTract ?? hoveredTract} {counts} {ranges} {cityAverages} />
+  <SidePanel
+    hoveredTract={lockedTract ?? hoveredTract}
+    {counts}
+    {ranges}
+    {cityAverages}
+    {holdingAverages}
+    {flippingAverages}
+  />
 </div>
