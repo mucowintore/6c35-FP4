@@ -1,0 +1,232 @@
+[
+  {
+    "year": 2000,
+    "pattern": "holding",
+    "premium": 20.82
+  },
+  {
+    "year": 2000,
+    "pattern": "flipping",
+    "premium": 11.32
+  },
+  {
+    "year": 2001,
+    "pattern": "holding",
+    "premium": 17.45
+  },
+  {
+    "year": 2001,
+    "pattern": "flipping",
+    "premium": 1.09
+  },
+  {
+    "year": 2002,
+    "pattern": "holding",
+    "premium": 12.32
+  },
+  {
+    "year": 2002,
+    "pattern": "flipping",
+    "premium": 13.97
+  },
+  {
+    "year": 2003,
+    "pattern": "holding",
+    "premium": 22.65
+  },
+  {
+    "year": 2003,
+    "pattern": "flipping",
+    "premium": 11.11
+  },
+  {
+    "year": 2004,
+    "pattern": "holding",
+    "premium": 29.87
+  },
+  {
+    "year": 2004,
+    "pattern": "flipping",
+    "premium": 13.0
+  },
+  {
+    "year": 2005,
+    "pattern": "holding",
+    "premium": 33.86
+  },
+  {
+    "year": 2005,
+    "pattern": "flipping",
+    "premium": 19.2
+  },
+  {
+    "year": 2006,
+    "pattern": "holding",
+    "premium": 38.29
+  },
+  {
+    "year": 2006,
+    "pattern": "flipping",
+    "premium": 0.77
+  },
+  {
+    "year": 2007,
+    "pattern": "holding",
+    "premium": 40.12
+  },
+  {
+    "year": 2007,
+    "pattern": "flipping",
+    "premium": 6.47
+  },
+  {
+    "year": 2008,
+    "pattern": "holding",
+    "premium": 21.34
+  },
+  {
+    "year": 2008,
+    "pattern": "flipping",
+    "premium": -5.85
+  },
+  {
+    "year": 2009,
+    "pattern": "holding",
+    "premium": 9.3
+  },
+  {
+    "year": 2009,
+    "pattern": "flipping",
+    "premium": -24.66
+  },
+  {
+    "year": 2010,
+    "pattern": "holding",
+    "premium": 10.36
+  },
+  {
+    "year": 2010,
+    "pattern": "flipping",
+    "premium": -21.05
+  },
+  {
+    "year": 2011,
+    "pattern": "holding",
+    "premium": 30.95
+  },
+  {
+    "year": 2011,
+    "pattern": "flipping",
+    "premium": -14.53
+  },
+  {
+    "year": 2012,
+    "pattern": "holding",
+    "premium": 23.6
+  },
+  {
+    "year": 2012,
+    "pattern": "flipping",
+    "premium": -20.76
+  },
+  {
+    "year": 2013,
+    "pattern": "holding",
+    "premium": 32.09
+  },
+  {
+    "year": 2013,
+    "pattern": "flipping",
+    "premium": -16.01
+  },
+  {
+    "year": 2014,
+    "pattern": "holding",
+    "premium": 29.81
+  },
+  {
+    "year": 2014,
+    "pattern": "flipping",
+    "premium": 5.26
+  },
+  {
+    "year": 2015,
+    "pattern": "holding",
+    "premium": 30.78
+  },
+  {
+    "year": 2015,
+    "pattern": "flipping",
+    "premium": 14.71
+  },
+  {
+    "year": 2016,
+    "pattern": "holding",
+    "premium": 29.76
+  },
+  {
+    "year": 2016,
+    "pattern": "flipping",
+    "premium": 1.2
+  },
+  {
+    "year": 2017,
+    "pattern": "holding",
+    "premium": 42.86
+  },
+  {
+    "year": 2017,
+    "pattern": "flipping",
+    "premium": 14.29
+  },
+  {
+    "year": 2018,
+    "pattern": "holding",
+    "premium": 49.79
+  },
+  {
+    "year": 2018,
+    "pattern": "flipping",
+    "premium": 15.31
+  },
+  {
+    "year": 2019,
+    "pattern": "holding",
+    "premium": 120.69
+  },
+  {
+    "year": 2019,
+    "pattern": "flipping",
+    "premium": 22.19
+  },
+  {
+    "year": 2020,
+    "pattern": "holding",
+    "premium": 71.14
+  },
+  {
+    "year": 2020,
+    "pattern": "flipping",
+    "premium": 36.61
+  },
+  {
+    "year": 2021,
+    "pattern": "holding",
+    "premium": 80.02
+  },
+  {
+    "year": 2021,
+    "pattern": "flipping",
+    "premium": 41.37
+  },
+  {
+    "year": 2022,
+    "pattern": "holding",
+    "premium": 81.88
+  },
+  {
+    "year": 2022,
+    "pattern": "flipping",
+    "premium": 31.5
+  }
+]

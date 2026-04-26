@@ -1,0 +1,117 @@
+[
+  {
+    "year": 2000,
+    "investor_share": 0.1657,
+    "top_decile_share": 0.3248
+  },
+  {
+    "year": 2001,
+    "investor_share": 0.1582,
+    "top_decile_share": 0.3119
+  },
+  {
+    "year": 2002,
+    "investor_share": 0.153,
+    "top_decile_share": 0.2719
+  },
+  {
+    "year": 2003,
+    "investor_share": 0.1471,
+    "top_decile_share": 0.3131
+  },
+  {
+    "year": 2004,
+    "investor_share": 0.1534,
+    "top_decile_share": 0.3635
+  },
+  {
+    "year": 2005,
+    "investor_share": 0.1571,
+    "top_decile_share": 0.3692
+  },
+  {
+    "year": 2006,
+    "investor_share": 0.1844,
+    "top_decile_share": 0.3925
+  },
+  {
+    "year": 2007,
+    "investor_share": 0.2226,
+    "top_decile_share": 0.4463
+  },
+  {
+    "year": 2008,
+    "investor_share": 0.2998,
+    "top_decile_share": 0.4117
+  },
+  {
+    "year": 2009,
+    "investor_share": 0.2779,
+    "top_decile_share": 0.3099
+  },
+  {
+    "year": 2010,
+    "investor_share": 0.3041,
+    "top_decile_share": 0.4126
+  },
+  {
+    "year": 2011,
+    "investor_share": 0.2906,
+    "top_decile_share": 0.5449
+  },
+  {
+    "year": 2012,
+    "investor_share": 0.2731,
+    "top_decile_share": 0.5246
+  },
+  {
+    "year": 2013,
+    "investor_share": 0.2667,
+    "top_decile_share": 0.5208
+  },
+  {
+    "year": 2014,
+    "investor_share": 0.2718,
+    "top_decile_share": 0.5687
+  },
+  {
+    "year": 2015,
+    "investor_share": 0.2729,
+    "top_decile_share": 0.6424
+  },
+  {
+    "year": 2016,
+    "investor_share": 0.2792,
+    "top_decile_share": 0.5997
+  },
+  {
+    "year": 2017,
+    "investor_share": 0.2841,
+    "top_decile_share": 0.6707
+  },
+  {
+    "year": 2018,
+    "investor_share": 0.2843,
+    "top_decile_share": 0.6691
+  },
+  {
+    "year": 2019,
+    "investor_share": 0.2896,
+    "top_decile_share": 0.816
+  },
+  {
+    "year": 2020,
+    "investor_share": 0.2526,
+    "top_decile_share": 0.6913
+  },
+  {
+    "year": 2021,
+    "investor_share": 0.2486,
+    "top_decile_share": 0.6987
+  },
+  {
+    "year": 2022,
+    "investor_share": 0.266,
+    "top_decile_share": 0.6951
+  }
+]
