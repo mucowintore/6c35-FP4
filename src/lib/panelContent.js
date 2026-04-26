@@ -1,19 +1,17 @@
 import * as d3 from 'd3';
 import { COLORS, formatDollars, formatPercent, formatScore } from '$lib/formatters';
 
-/* ── Diverging-bar metrics (same six as the old radar) ── */
-
-const DIVERGING_METRICS = [
-  { key: 'median_price', label: 'Price', format: formatDollars },
-  { key: 'investor_share', label: 'Investors', format: formatPercent },
-  { key: 'flip_rate', label: 'Flip rate', format: formatPercent },
-  { key: 'condo_share', label: 'Condos', format: formatPercent },
-  { key: 'r23_share', label: 'Multi-family', format: formatPercent },
-  { key: 'pct_nonwhite', label: 'Non-white', format: formatPercent }
+const BAR_METRICS = [
+  { key: 'median_price', label: 'Price' },
+  { key: 'investor_share', label: 'Investors' },
+  { key: 'flip_rate', label: 'Flip rate' },
+  { key: 'condo_share', label: 'Condos' },
+  { key: 'r23_share', label: 'Multi-family' },
+  { key: 'pct_nonwhite', label: 'Non-white' }
 ];
 
 const METRIC_EXPLANATIONS = {
-  median_price: 'Median residential sale price, 2000–2022',
+  median_price: 'Median residential sale price, 2000\u20132022',
   investor_share: 'Purchases by LLC, trust, bank, or business entities',
   flip_rate: 'Properties bought and resold within two years',
   condo_share: 'Vehicle for long-term capital parking',
@@ -21,7 +19,9 @@ const METRIC_EXPLANATIONS = {
   pct_nonwhite: 'ACS 5-Year Estimates, Census 2020'
 };
 
-/* ── Overview (no tract selected) ── */
+function fmtForKey(key) {
+  return key === 'median_price' ? formatDollars : formatPercent;
+}
 
 export function buildOverviewSections({ holdCount, flipCount }) {
   const overview = `
@@ -54,8 +54,8 @@ export function buildOverviewSections({ holdCount, flipCount }) {
       <b style="color: var(--amber)">Amber tracts</b> are <b>flipping zones</b>.
       Investors here buy less expensive multi-family homes, renovate or convert
       them, and resell within months. They pay a much smaller premium than in
-      holding zones&nbsp;&mdash; and during the 2008 crisis, they bought at
-      discounts of up to 25%. Darker amber means more flipping.
+      holding zones. During the 2008 crisis they bought at discounts of up to
+      25%. Darker amber means more flipping.
     </div>
 
     <div class="overview-text">
@@ -137,8 +137,6 @@ export function buildOverviewSections({ holdCount, flipCount }) {
   return { overview, howToExplore, about };
 }
 
-/* ── Detail model (tract selected) ── */
-
 export function buildDetailModel(props) {
   const neighborhood = props.neighborhood || 'Unknown';
   const dominant = props.dominant;
@@ -202,8 +200,6 @@ export function buildDetailModel(props) {
   };
 }
 
-/* ── Metric bar with explanation ── */
-
 export function renderMetric(label, value, key, formatter, color, ranges, cityAverages) {
   if (value == null || !Number.isFinite(value) || (value === 0 && key === 'r_mhi')) {
     return `<div>
@@ -241,164 +237,142 @@ export function renderMetric(label, value, key, formatter, color, ranges, cityAv
   </div>`;
 }
 
-/* ── Diverging bar chart (replaces radar) ── */
-
+/* Diverging bar chart: one tract vs city average */
 export function drawDivergingBars(container, props, ranges, cityAverages, accentCol) {
   if (!container) return;
   container.innerHTML = '';
 
-  const svgW = 396;
-  const rowH = 36;
-  const barH = 14;
-  const m = { top: 8, right: 54, bottom: 8, left: 76 };
-  const barW = svgW - m.left - m.right;
-  const n = DIVERGING_METRICS.length;
-  const svgH = m.top + n * rowH + m.bottom;
+  var W = 396, rowH = 36, barH = 14;
+  var ml = 76, mr = 54;
+  var barW = W - ml - mr;
+  var totalH = 8 + BAR_METRICS.length * rowH + 8;
 
-  const svg = d3.select(container).append('svg')
-    .attr('width', svgW).attr('height', svgH)
-    .style('max-width', '100%');
+  var svg = d3.select(container).append('svg')
+    .attr('width', W).attr('height', totalH).style('max-width', '100%');
 
-  DIVERGING_METRICS.forEach((metric, i) => {
-    const value = props[metric.key];
-    const avg = cityAverages[metric.key];
-    const range = ranges[metric.key];
-    if (value == null || avg == null || !range || range.max === range.min) return;
+  for (var i = 0; i < BAR_METRICS.length; i++) {
+    var metric = BAR_METRICS[i];
+    var val = props[metric.key];
+    var avg = cityAverages[metric.key];
+    var rng = ranges[metric.key];
 
-    const rowY = m.top + i * rowH;
-    const barY = rowY + (rowH - barH) / 2;
+    if (val == null || avg == null || !rng || rng.max === rng.min) continue;
 
-    const xScale = d3.scaleLinear()
-      .domain([range.min, range.max]).range([0, barW]);
+    var rowY = 8 + i * rowH;
+    var barY = rowY + (rowH - barH) / 2;
 
-    const centerPx = xScale(avg);
-    const clampedVal = Math.max(range.min, Math.min(range.max, value));
-    const valuePx = xScale(clampedVal);
+    var scale = d3.scaleLinear().domain([rng.min, rng.max]).range([0, barW]);
+    var cx = scale(avg);
+    var clamped = Math.max(rng.min, Math.min(rng.max, val));
+    var vx = scale(clamped);
 
-    const barStart = Math.min(centerPx, valuePx);
-    const barWidth = Math.abs(valuePx - centerPx);
+    var bx = Math.min(cx, vx);
+    var bw = Math.abs(vx - cx);
 
-    // background track
-    svg.append('rect')
-      .attr('x', m.left).attr('y', barY)
+    /* gray track */
+    svg.append('rect').attr('x', ml).attr('y', barY)
       .attr('width', barW).attr('height', barH)
       .attr('fill', '#ECEAE2').attr('rx', 2);
 
-    // center line (city average)
-    svg.append('line')
-      .attr('x1', m.left + centerPx).attr('x2', m.left + centerPx)
-      .attr('y1', barY - 4).attr('y2', barY + barH + 4)
-      .attr('stroke', '#B0A898').attr('stroke-width', 1);
-
-    // value bar (animated from center)
+    /* colored bar (no animation, just draw it) */
     svg.append('rect')
-      .attr('x', m.left + centerPx).attr('y', barY)
-      .attr('width', 0).attr('height', barH)
-      .attr('fill', accentCol).attr('opacity', 0.72).attr('rx', 2)
-      .transition().duration(500).delay(i * 60).ease(d3.easeCubicOut)
-      .attr('x', m.left + barStart)
-      .attr('width', Math.max(1, barWidth));
+      .attr('x', ml + bx).attr('y', barY)
+      .attr('width', Math.max(1, bw)).attr('height', barH)
+      .attr('fill', accentCol).attr('opacity', 0.75).attr('rx', 2);
 
-    // metric label
+    /* center line (city average) */
+    svg.append('line')
+      .attr('x1', ml + cx).attr('x2', ml + cx)
+      .attr('y1', barY - 4).attr('y2', barY + barH + 4)
+      .attr('stroke', '#9C9890').attr('stroke-width', 1);
+
+    /* metric label */
     svg.append('text')
-      .attr('x', m.left - 8).attr('y', rowY + rowH / 2)
+      .attr('x', ml - 8).attr('y', rowY + rowH / 2)
       .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
-      .attr('fill', '#9C9890').style('font-size', '11px')
-      .style('font-family', 'Plus Jakarta Sans, sans-serif')
-      .style('font-weight', '600')
+      .attr('fill', '#9C9890').attr('font-size', '11px')
+      .attr('font-family', 'Plus Jakarta Sans, sans-serif')
+      .attr('font-weight', '600')
       .text(metric.label);
 
-    // value label
+    /* value label */
     svg.append('text')
-      .attr('x', m.left + barW + 6).attr('y', rowY + rowH / 2)
+      .attr('x', ml + barW + 6).attr('y', rowY + rowH / 2)
       .attr('text-anchor', 'start').attr('dominant-baseline', 'central')
-      .attr('fill', '#46433C').style('font-size', '11px')
-      .style('font-family', 'IBM Plex Mono, monospace')
-      .style('font-weight', '500')
-      .text(metric.format(value));
-  });
+      .attr('fill', '#46433C').attr('font-size', '11px')
+      .attr('font-family', 'IBM Plex Mono, monospace')
+      .attr('font-weight', '500')
+      .text(fmtForKey(metric.key)(val));
+  }
 }
 
-/* ── Paired diverging bars for overview ── */
-
+/* Paired diverging bars: holding avg vs flipping avg */
 export function drawPairedDivergingBars(container, holdAvg, flipAvg, ranges, cityAverages) {
   if (!container) return;
   container.innerHTML = '';
 
-  const svgW = 396;
-  const rowH = 36;
-  const subBarH = 6;
-  const subGap = 2;
-  const m = { top: 8, right: 54, bottom: 8, left: 76 };
-  const barW = svgW - m.left - m.right;
-  const n = DIVERGING_METRICS.length;
-  const svgH = m.top + n * rowH + m.bottom;
+  var W = 396, rowH = 36, subH = 6, gap = 2;
+  var ml = 76, mr = 54;
+  var barW = W - ml - mr;
+  var totalH = 8 + BAR_METRICS.length * rowH + 8;
 
-  const svg = d3.select(container).append('svg')
-    .attr('width', svgW).attr('height', svgH)
-    .style('max-width', '100%');
+  var svg = d3.select(container).append('svg')
+    .attr('width', W).attr('height', totalH).style('max-width', '100%');
 
-  DIVERGING_METRICS.forEach((metric, i) => {
-    const avg = cityAverages[metric.key];
-    const range = ranges[metric.key];
-    const hVal = holdAvg[metric.key];
-    const fVal = flipAvg[metric.key];
-    if (avg == null || !range || range.max === range.min) return;
+  for (var i = 0; i < BAR_METRICS.length; i++) {
+    var metric = BAR_METRICS[i];
+    var avg = cityAverages[metric.key];
+    var rng = ranges[metric.key];
+    var hVal = holdAvg[metric.key];
+    var fVal = flipAvg[metric.key];
 
-    const rowY = m.top + i * rowH;
-    const totalBarH = subBarH * 2 + subGap;
-    const barY = rowY + (rowH - totalBarH) / 2;
+    if (avg == null || !rng || rng.max === rng.min) continue;
 
-    const xScale = d3.scaleLinear()
-      .domain([range.min, range.max]).range([0, barW]);
-    const centerPx = xScale(avg);
+    var rowY = 8 + i * rowH;
+    var blockH = subH + gap + subH;
+    var barY = rowY + (rowH - blockH) / 2;
 
-    // background track
-    svg.append('rect')
-      .attr('x', m.left).attr('y', barY)
-      .attr('width', barW).attr('height', totalBarH)
+    var scale = d3.scaleLinear().domain([rng.min, rng.max]).range([0, barW]);
+    var cx = scale(avg);
+
+    /* gray track */
+    svg.append('rect').attr('x', ml).attr('y', barY)
+      .attr('width', barW).attr('height', blockH)
       .attr('fill', '#ECEAE2').attr('rx', 2);
 
-    // center line
+    /* center line */
     svg.append('line')
-      .attr('x1', m.left + centerPx).attr('x2', m.left + centerPx)
-      .attr('y1', barY - 3).attr('y2', barY + totalBarH + 3)
-      .attr('stroke', '#B0A898').attr('stroke-width', 1);
+      .attr('x1', ml + cx).attr('x2', ml + cx)
+      .attr('y1', barY - 3).attr('y2', barY + blockH + 3)
+      .attr('stroke', '#9C9890').attr('stroke-width', 1);
 
-    // holding bar (navy)
+    /* holding bar (navy) */
     if (hVal != null) {
-      const hPx = xScale(Math.max(range.min, Math.min(range.max, hVal)));
-      const s = Math.min(centerPx, hPx);
-      const w = Math.abs(hPx - centerPx);
+      var hx = scale(Math.max(rng.min, Math.min(rng.max, hVal)));
       svg.append('rect')
-        .attr('x', m.left + centerPx).attr('y', barY).attr('width', 0).attr('height', subBarH)
-        .attr('fill', COLORS.navy).attr('opacity', 0.75).attr('rx', 1)
-        .transition().duration(500).delay(i * 50).ease(d3.easeCubicOut)
-        .attr('x', m.left + s).attr('width', Math.max(1, w));
+        .attr('x', ml + Math.min(cx, hx)).attr('y', barY)
+        .attr('width', Math.max(1, Math.abs(hx - cx))).attr('height', subH)
+        .attr('fill', COLORS.navy).attr('opacity', 0.8).attr('rx', 1);
     }
 
-    // flipping bar (amber)
+    /* flipping bar (amber) */
     if (fVal != null) {
-      const fPx = xScale(Math.max(range.min, Math.min(range.max, fVal)));
-      const s = Math.min(centerPx, fPx);
-      const w = Math.abs(fPx - centerPx);
+      var fx = scale(Math.max(rng.min, Math.min(rng.max, fVal)));
       svg.append('rect')
-        .attr('x', m.left + centerPx).attr('y', barY + subBarH + subGap)
-        .attr('width', 0).attr('height', subBarH)
-        .attr('fill', COLORS.amber).attr('opacity', 0.75).attr('rx', 1)
-        .transition().duration(500).delay(i * 50 + 30).ease(d3.easeCubicOut)
-        .attr('x', m.left + s).attr('width', Math.max(1, w));
+        .attr('x', ml + Math.min(cx, fx)).attr('y', barY + subH + gap)
+        .attr('width', Math.max(1, Math.abs(fx - cx))).attr('height', subH)
+        .attr('fill', COLORS.amber).attr('opacity', 0.8).attr('rx', 1);
     }
 
-    // label
+    /* label */
     svg.append('text')
-      .attr('x', m.left - 8).attr('y', rowY + rowH / 2)
+      .attr('x', ml - 8).attr('y', rowY + rowH / 2)
       .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
-      .attr('fill', '#9C9890').style('font-size', '11px')
-      .style('font-family', 'Plus Jakarta Sans, sans-serif')
-      .style('font-weight', '600')
+      .attr('fill', '#9C9890').attr('font-size', '11px')
+      .attr('font-family', 'Plus Jakarta Sans, sans-serif')
+      .attr('font-weight', '600')
       .text(metric.label);
-  });
+  }
 }
 
 export { formatDollars, formatPercent, formatScore };

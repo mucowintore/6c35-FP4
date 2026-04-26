@@ -1,5 +1,5 @@
 <script>
-  import { onDestroy } from 'svelte';
+  import { afterUpdate, onDestroy } from 'svelte';
   import {
     buildOverviewSections,
     buildDetailModel,
@@ -19,7 +19,6 @@
   export let flippingAverages = {};
 
   let barsContainer;
-  let barsFrame = null;
   let pairedBarsContainer;
 
   let activeTract = null;
@@ -31,6 +30,9 @@
     price: '', investors: '', flipRate: '',
     condos: '', multiFamily: '', nonWhite: ''
   };
+
+  let lastDrawnGeoid = null;
+  let pairedDrawn = false;
 
   $: overviewSections = buildOverviewSections(counts);
   $: activeTract = hoveredTract;
@@ -45,42 +47,36 @@
       multiFamily: renderMetric('Multi-family', activeTract.r23_share, 'r23_share', formatPercent, detail.barColor, ranges, cityAverages),
       nonWhite: renderMetric('Non-white', activeTract.pct_nonwhite, 'pct_nonwhite', formatPercent, detail.barColor, ranges, cityAverages)
     };
-  }
-
-  /* ── Per-tract diverging bars (detail view) ── */
-  $: if (activeTract && detail && barsContainer) {
-    if (barsFrame) cancelAnimationFrame(barsFrame);
-    const tract = activeTract;
-    const accent = detail.accent;
-    barsFrame = requestAnimationFrame(() => {
-      barsFrame = null;
-      if (!barsContainer || !activeTract || activeTract.geoid !== tract.geoid) return;
-      drawDivergingBars(barsContainer, tract, ranges, cityAverages, accent);
-    });
+  } else {
+    detail = null;
+    lastDrawnGeoid = null;
   }
 
   $: if (!activeTract) {
-    if (barsFrame) { cancelAnimationFrame(barsFrame); barsFrame = null; }
-    if (barsContainer) barsContainer.innerHTML = '';
+    pairedDrawn = false;
   }
 
-  /* ── Paired diverging bars (overview) ── */
-  $: if (!activeTract && overviewTab === 'overview' && pairedBarsContainer
-      && cityAverages && Object.keys(cityAverages).length > 0
-      && holdingAverages && Object.keys(holdingAverages).length > 0) {
-    drawPairedDivergingBars(pairedBarsContainer, holdingAverages, flippingAverages, ranges, cityAverages);
-  }
+  afterUpdate(() => {
+    if (activeTract && detail && barsContainer) {
+      var gid = activeTract.geoid;
+      if (gid !== lastDrawnGeoid) {
+        drawDivergingBars(barsContainer, activeTract, ranges, cityAverages, detail.accent);
+        lastDrawnGeoid = gid;
+      }
+    }
 
-  onDestroy(() => {
-    if (barsFrame) cancelAnimationFrame(barsFrame);
-    barsFrame = null;
+    if (!activeTract && overviewTab === 'overview' && pairedBarsContainer
+        && holdingAverages && Object.keys(holdingAverages).length > 0 && !pairedDrawn) {
+      drawPairedDivergingBars(pairedBarsContainer, holdingAverages, flippingAverages, ranges, cityAverages);
+      pairedDrawn = true;
+    }
   });
 </script>
 
 <aside class="detail-panel" id="detail-panel">
   {#if !activeTract}
     <div class="overview-tabs">
-      <button class:active={overviewTab === 'overview'} on:click={() => (overviewTab = 'overview')}>Overview</button>
+      <button class:active={overviewTab === 'overview'} on:click={() => { overviewTab = 'overview'; pairedDrawn = false; }}>Overview</button>
       <button class:active={overviewTab === 'howToExplore'} on:click={() => (overviewTab = 'howToExplore')}>
         How to explore
       </button>
@@ -94,8 +90,8 @@
         <div class="profile-chart-container" bind:this={pairedBarsContainer}></div>
         <div class="profile-caption">
           Average metric values for each tract type, relative to the city average (center line).
-          <span style="color: var(--navy)">■</span> Holding &ensp;
-          <span style="color: var(--amber)">■</span> Flipping
+          <span style="color: var(--navy)">\u25A0</span> Holding &ensp;
+          <span style="color: var(--amber)">\u25A0</span> Flipping
         </div>
       {:else if overviewTab === 'howToExplore'}
         {@html overviewSections.howToExplore}
@@ -118,8 +114,8 @@
     <div class="section-heading">Profile vs. city average</div>
     <div class="profile-chart-container" bind:this={barsContainer}></div>
     <div class="profile-caption">
-      Bar length shows deviation from the city average (center line).
-      Right of center&nbsp;= above average.
+      Bar shows deviation from city average (center line).
+      Right of center = above average.
     </div>
 
     <div class="section-heading">Key metrics</div>
