@@ -4,6 +4,7 @@
   import IntroOverlay from '$lib/components/IntroOverlay.svelte';
   import MapPane from '$lib/components/MapPane.svelte';
   import SidePanel from '$lib/components/SidePanel.svelte';
+  import NeighborhoodTimeline from '$lib/components/NeighborhoodTimeline.svelte';
   import {
     DEFAULT_CONTEXT,
     METRIC_KEYS,
@@ -275,4 +276,5 @@
     {holdingAverages}
     {flippingAverages}
   />
+
 </div>

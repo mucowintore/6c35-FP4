@@ -1,0 +1,3439 @@
+[
+  {
+    "year": 2000,
+    "neighborhood": "Allston",
+    "investor_share": 0.2388888888888889,
+    "flip_rate": 0.03333333333333333,
+    "price_premium": 0.1823529411764706
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Allston",
+    "investor_share": 0.2857142857142857,
+    "flip_rate": 0.14285714285714285,
+    "price_premium": 0.44024390243902434
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Allston",
+    "investor_share": 0.20224719101123595,
+    "flip_rate": 0.17415730337078653,
+    "price_premium": 0.015151515151515138
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Allston",
+    "investor_share": 0.1791044776119403,
+    "flip_rate": 0.1044776119402985,
+    "price_premium": 0.8333333333333333
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Allston",
+    "investor_share": 0.1902834008097166,
+    "flip_rate": 0.10931174089068826,
+    "price_premium": 0.9292035398230087
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Allston",
+    "investor_share": 0.21122112211221122,
+    "flip_rate": 0.12211221122112212,
+    "price_premium": 0.26694444444444443
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Allston",
+    "investor_share": 0.3004694835680751,
+    "flip_rate": 0.12206572769953052,
+    "price_premium": 0.3762416666666666
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Allston",
+    "investor_share": 0.1746987951807229,
+    "flip_rate": 0.12048192771084337,
+    "price_premium": 0.941747572815534
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Allston",
+    "investor_share": 0.24793388429752067,
+    "flip_rate": 0.08264462809917356,
+    "price_premium": 0.5716459143968871
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Allston",
+    "investor_share": 0.32786885245901637,
+    "flip_rate": 0.04918032786885246,
+    "price_premium": -0.017262830482115077
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Allston",
+    "investor_share": 0.3049645390070922,
+    "flip_rate": 0.05673758865248227,
+    "price_premium": 0.15486025663561254
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Allston",
+    "investor_share": 0.3987341772151899,
+    "flip_rate": 0.05063291139240506,
+    "price_premium": 2.8461538461538463
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Allston",
+    "investor_share": 0.45925925925925926,
+    "flip_rate": 0.044444444444444446,
+    "price_premium": 0.42164179104477606
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Allston",
+    "investor_share": 0.38064516129032255,
+    "flip_rate": 0.08387096774193549,
+    "price_premium": 0.3157894736842106
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Allston",
+    "investor_share": 0.362962962962963,
+    "flip_rate": 0.05185185185185185,
+    "price_premium": 0.265625
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Allston",
+    "investor_share": 0.4774193548387097,
+    "flip_rate": 0.07741935483870968,
+    "price_premium": 0.9525641025641025
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Allston",
+    "investor_share": 0.4090909090909091,
+    "flip_rate": 0.045454545454545456,
+    "price_premium": 0.0
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Allston",
+    "investor_share": 0.4830508474576271,
+    "flip_rate": 0.0847457627118644,
+    "price_premium": 0.18556701030927836
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Allston",
+    "investor_share": 0.41,
+    "flip_rate": 0.04,
+    "price_premium": 0.19092273068267063
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Allston",
+    "investor_share": 0.43010752688172044,
+    "flip_rate": 0.0967741935483871,
+    "price_premium": 1.189922480620155
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Allston",
+    "investor_share": 0.43243243243243246,
+    "flip_rate": 0.04054054054054054,
+    "price_premium": 0.20935618341824913
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Allston",
+    "investor_share": 0.4244604316546763,
+    "flip_rate": 0.050359712230215826,
+    "price_premium": 0.545538178472861
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Allston",
+    "investor_share": 0.48,
+    "flip_rate": 0.01,
+    "price_premium": 0.7462673535318258
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.14426229508196722,
+    "flip_rate": 0.02459016393442623,
+    "price_premium": 0.43430656934306566
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.16321243523316062,
+    "flip_rate": 0.10103626943005181,
+    "price_premium": 0.4640883977900552
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.137291280148423,
+    "flip_rate": 0.16512059369202226,
+    "price_premium": 0.6774193548387097
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.13972055888223553,
+    "flip_rate": 0.13572854291417166,
+    "price_premium": 0.22448979591836737
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.203125,
+    "flip_rate": 0.140625,
+    "price_premium": 0.6909090909090909
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.1649269311064718,
+    "flip_rate": 0.1315240083507307,
+    "price_premium": 0.3728813559322033
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.208067940552017,
+    "flip_rate": 0.09978768577494693,
+    "price_premium": 0.40284757118927983
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.24719101123595505,
+    "flip_rate": 0.09737827715355805,
+    "price_premium": 1.8301886792452828
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.25,
+    "flip_rate": 0.08854166666666667,
+    "price_premium": 2.1666666666666665
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.19931271477663232,
+    "flip_rate": 0.07560137457044673,
+    "price_premium": 1.0327731092436974
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.2810810810810811,
+    "flip_rate": 0.10270270270270271,
+    "price_premium": 0.5155038759689923
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.3144963144963145,
+    "flip_rate": 0.05405405405405406,
+    "price_premium": 1.396551724137931
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.24948875255623723,
+    "flip_rate": 0.05930470347648262,
+    "price_premium": 1.3895951704545455
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.3026634382566586,
+    "flip_rate": 0.09927360774818401,
+    "price_premium": 1.0270270270270272
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.3236842105263158,
+    "flip_rate": 0.07631578947368421,
+    "price_premium": 1.393939393939394
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.33240997229916897,
+    "flip_rate": 0.08033240997229917,
+    "price_premium": 0.6221692491060786
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.36384439359267734,
+    "flip_rate": 0.09839816933638444,
+    "price_premium": 0.2988372093023255
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.35714285714285715,
+    "flip_rate": 0.0873015873015873,
+    "price_premium": 1.1538461538461537
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.42005420054200543,
+    "flip_rate": 0.08943089430894309,
+    "price_premium": 1.3762376237623761
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.47794117647058826,
+    "flip_rate": 0.07107843137254902,
+    "price_premium": 2.4460093896713615
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.45426829268292684,
+    "flip_rate": 0.07926829268292683,
+    "price_premium": 2.5714285714285716
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.34577114427860695,
+    "flip_rate": 0.06716417910447761,
+    "price_premium": 3.1488222698072805
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Back Bay",
+    "investor_share": 0.34441087613293053,
+    "flip_rate": 0.06948640483383686,
+    "price_premium": 2.6666666666666665
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.23591549295774647,
+    "flip_rate": 0.028169014084507043,
+    "price_premium": 2.039348710990502
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.16129032258064516,
+    "flip_rate": 0.13306451612903225,
+    "price_premium": 0.6928571428571428
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.1346153846153846,
+    "flip_rate": 0.13846153846153847,
+    "price_premium": 0.17374005305039786
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.16379310344827586,
+    "flip_rate": 0.09482758620689655,
+    "price_premium": 1.1994091580502215
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.14204545454545456,
+    "flip_rate": 0.08238636363636363,
+    "price_premium": 0.6337874659400544
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.1414790996784566,
+    "flip_rate": 0.09003215434083602,
+    "price_premium": 0.26129685916919954
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.18951612903225806,
+    "flip_rate": 0.11290322580645161,
+    "price_premium": 0.7597471022128557
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.17446808510638298,
+    "flip_rate": 0.11914893617021277,
+    "price_premium": 1.3596035865974518
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.21875,
+    "flip_rate": 0.0625,
+    "price_premium": 0.3951219512195121
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.22164948453608246,
+    "flip_rate": 0.06701030927835051,
+    "price_premium": 0.5168539325842696
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.24878048780487805,
+    "flip_rate": 0.04390243902439024,
+    "price_premium": 1.890995260663507
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.2785388127853881,
+    "flip_rate": 0.0776255707762557,
+    "price_premium": 1.4906015037593985
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.24701195219123506,
+    "flip_rate": 0.06374501992031872,
+    "price_premium": 0.7738938053097346
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.25462962962962965,
+    "flip_rate": 0.09722222222222222,
+    "price_premium": 0.6935483870967742
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.23333333333333334,
+    "flip_rate": 0.1,
+    "price_premium": 1.3381294964028778
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.29385964912280704,
+    "flip_rate": 0.07456140350877193,
+    "price_premium": 0.2056737588652482
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.2864583333333333,
+    "flip_rate": 0.06770833333333333,
+    "price_premium": 0.6876623376623376
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.2553191489361702,
+    "flip_rate": 0.0851063829787234,
+    "price_premium": 1.353113124817305
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.3236994219653179,
+    "flip_rate": 0.06936416184971098,
+    "price_premium": 1.402014652014652
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.3188405797101449,
+    "flip_rate": 0.057971014492753624,
+    "price_premium": 0.46944444444444455
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.2356687898089172,
+    "flip_rate": 0.050955414012738856,
+    "price_premium": 0.7131652661064425
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.3029045643153527,
+    "flip_rate": 0.05394190871369295,
+    "price_premium": 3.0768782760629003
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Beacon Hill",
+    "investor_share": 0.34134615384615385,
+    "flip_rate": 0.0625,
+    "price_premium": 2.003003003003003
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Brighton",
+    "investor_share": 0.1679506933744222,
+    "flip_rate": 0.032357473035439135,
+    "price_premium": -0.059266227657572945
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Brighton",
+    "investor_share": 0.1636029411764706,
+    "flip_rate": 0.10477941176470588,
+    "price_premium": 0.1282051282051282
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Brighton",
+    "investor_share": 0.1559792027729636,
+    "flip_rate": 0.1369150779896014,
+    "price_premium": 0.16914893617021276
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Brighton",
+    "investor_share": 0.12130637636080871,
+    "flip_rate": 0.09486780715396578,
+    "price_premium": 0.2519607843137255
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Brighton",
+    "investor_share": 0.14648212226066898,
+    "flip_rate": 0.10265282583621683,
+    "price_premium": 0.23849964614295827
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Brighton",
+    "investor_share": 0.1306532663316583,
+    "flip_rate": 0.12060301507537688,
+    "price_premium": 0.41937641059934805
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Brighton",
+    "investor_share": 0.1406003159557662,
+    "flip_rate": 0.09004739336492891,
+    "price_premium": 0.33864541832669315
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Brighton",
+    "investor_share": 0.152276295133438,
+    "flip_rate": 0.07378335949764521,
+    "price_premium": 0.37410714285714275
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Brighton",
+    "investor_share": 0.16551724137931034,
+    "flip_rate": 0.0735632183908046,
+    "price_premium": -0.030030158730158685
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Brighton",
+    "investor_share": 0.17962466487935658,
+    "flip_rate": 0.05361930294906166,
+    "price_premium": -0.10132158590308371
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Brighton",
+    "investor_share": 0.2529002320185615,
+    "flip_rate": 0.04176334106728538,
+    "price_premium": -0.04794638253995531
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Brighton",
+    "investor_share": 0.25906735751295334,
+    "flip_rate": 0.046632124352331605,
+    "price_premium": 0.014742451154529324
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Brighton",
+    "investor_share": 0.26595744680851063,
+    "flip_rate": 0.03829787234042553,
+    "price_premium": 0.15254237288135597
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Brighton",
+    "investor_share": 0.2495697074010327,
+    "flip_rate": 0.03098106712564544,
+    "price_premium": 0.044117647058823595
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Brighton",
+    "investor_share": 0.3066132264529058,
+    "flip_rate": 0.056112224448897796,
+    "price_premium": 0.12903225806451624
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Brighton",
+    "investor_share": 0.2768878718535469,
+    "flip_rate": 0.06636155606407322,
+    "price_premium": 0.09606705351386213
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Brighton",
+    "investor_share": 0.32882882882882886,
+    "flip_rate": 0.06981981981981981,
+    "price_premium": 0.12345537757437075
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Brighton",
+    "investor_share": 0.3409090909090909,
+    "flip_rate": 0.04318181818181818,
+    "price_premium": 0.12777191129883847
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Brighton",
+    "investor_share": 0.3306878306878307,
+    "flip_rate": 0.0582010582010582,
+    "price_premium": 0.0867293625914316
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Brighton",
+    "investor_share": 0.2841225626740947,
+    "flip_rate": 0.033426183844011144,
+    "price_premium": 0.5048543689320388
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Brighton",
+    "investor_share": 0.29245283018867924,
+    "flip_rate": 0.03773584905660377,
+    "price_premium": 0.4299424184261036
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Brighton",
+    "investor_share": 0.24034334763948498,
+    "flip_rate": 0.030042918454935622,
+    "price_premium": 0.7270992366412214
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Brighton",
+    "investor_share": 0.27485380116959063,
+    "flip_rate": 0.038011695906432746,
+    "price_premium": 1.12
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.11940298507462686,
+    "flip_rate": 0.03731343283582089,
+    "price_premium": -0.0892123926838373
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.10817307692307693,
+    "flip_rate": 0.10336538461538461,
+    "price_premium": -0.0066225165562914245
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.09129511677282377,
+    "flip_rate": 0.14861995753715498,
+    "price_premium": 0.05155167991792764
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.08860759493670886,
+    "flip_rate": 0.14177215189873418,
+    "price_premium": -0.0869017632241813
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.08062015503875969,
+    "flip_rate": 0.10852713178294573,
+    "price_premium": 0.1757200145825739
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.1018363939899833,
+    "flip_rate": 0.08180300500834725,
+    "price_premium": 0.040044376412469385
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.09226932668329177,
+    "flip_rate": 0.10473815461346633,
+    "price_premium": 0.032558139534883734
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.1040339702760085,
+    "flip_rate": 0.08280254777070063,
+    "price_premium": 0.017161041027389468
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.10644257703081232,
+    "flip_rate": 0.056022408963585436,
+    "price_premium": -0.1047058823529412
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.10355029585798817,
+    "flip_rate": 0.07100591715976332,
+    "price_premium": -0.011848341232227444
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.10122699386503067,
+    "flip_rate": 0.0736196319018405,
+    "price_premium": -0.16890380313199105
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.1611842105263158,
+    "flip_rate": 0.05921052631578947,
+    "price_premium": -0.18888888888888888
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.11737089201877934,
+    "flip_rate": 0.04460093896713615,
+    "price_premium": -0.06190268334252935
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.13168724279835392,
+    "flip_rate": 0.07613168724279835,
+    "price_premium": 0.0038610038610038533
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.15816326530612246,
+    "flip_rate": 0.07908163265306123,
+    "price_premium": 0.0852607709750568
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.15668202764976957,
+    "flip_rate": 0.04377880184331797,
+    "price_premium": 0.07096774193548394
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.13551401869158877,
+    "flip_rate": 0.07009345794392523,
+    "price_premium": 0.1678486997635933
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.1385390428211587,
+    "flip_rate": 0.05037783375314862,
+    "price_premium": 0.18799142244460332
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.12535612535612536,
+    "flip_rate": 0.09971509971509972,
+    "price_premium": 0.19342105263157894
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.12137203166226913,
+    "flip_rate": 0.0633245382585752,
+    "price_premium": 0.14933333333333332
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.13421052631578947,
+    "flip_rate": 0.05263157894736842,
+    "price_premium": 0.2969696969696969
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.12422360248447205,
+    "flip_rate": 0.057971014492753624,
+    "price_premium": 0.5088757396449703
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Charlestown",
+    "investor_share": 0.13730569948186527,
+    "flip_rate": 0.05181347150259067,
+    "price_premium": 0.3327645051194539
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Chinatown",
+    "investor_share": 0.07766990291262135,
+    "flip_rate": 0.019417475728155338,
+    "price_premium": null
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Chinatown",
+    "investor_share": 0.2647058823529412,
+    "flip_rate": 0.20588235294117646,
+    "price_premium": null
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.1824623560673162,
+    "flip_rate": 0.0637732506643047,
+    "price_premium": 0.08108108108108114
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.1690682036503362,
+    "flip_rate": 0.11719500480307397,
+    "price_premium": -0.18777777777777782
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.18831168831168832,
+    "flip_rate": 0.14192949907235622,
+    "price_premium": 0.1439114391143912
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.18980169971671387,
+    "flip_rate": 0.1388101983002833,
+    "price_premium": 0.20967741935483875
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.18181818181818182,
+    "flip_rate": 0.14940098661028894,
+    "price_premium": 0.19999999999999996
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.1620775969962453,
+    "flip_rate": 0.12891113892365458,
+    "price_premium": 0.2100840336134453
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.23647871116225547,
+    "flip_rate": 0.10184119677790564,
+    "price_premium": 0.06576576576576576
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.33415233415233414,
+    "flip_rate": 0.08538083538083538,
+    "price_premium": 0.1333333333333333
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.4947916666666667,
+    "flip_rate": 0.12268518518518519,
+    "price_premium": -0.0723137254901961
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.476319350473613,
+    "flip_rate": 0.18335588633288227,
+    "price_premium": -0.2763165938864629
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.5104241552839683,
+    "flip_rate": 0.16750539180445723,
+    "price_premium": -0.2607003891050583
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.44885799404170806,
+    "flip_rate": 0.16981132075471697,
+    "price_premium": -0.19243207547169816
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.3958333333333333,
+    "flip_rate": 0.15376984126984128,
+    "price_premium": -0.19614711033274956
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.36443148688046645,
+    "flip_rate": 0.13119533527696792,
+    "price_premium": -0.08634362461421252
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.29962894248608535,
+    "flip_rate": 0.09183673469387756,
+    "price_premium": 0.032448377581120846
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.31814119749776587,
+    "flip_rate": 0.11349419124218052,
+    "price_premium": 0.05182903507116743
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.3610366398570152,
+    "flip_rate": 0.11528150134048257,
+    "price_premium": -0.009300584795321587
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.3267419962335217,
+    "flip_rate": 0.1167608286252354,
+    "price_premium": 0.17021276595744683
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.33905146316851664,
+    "flip_rate": 0.1099899091826438,
+    "price_premium": 0.1797752808988764
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.295131845841785,
+    "flip_rate": 0.10040567951318459,
+    "price_premium": 0.21771217712177116
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.29930394431554525,
+    "flip_rate": 0.07424593967517401,
+    "price_premium": 0.4482758620689655
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.27741935483870966,
+    "flip_rate": 0.09216589861751152,
+    "price_premium": 0.4516129032258065
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Dorchester",
+    "investor_share": 0.2849519743863394,
+    "flip_rate": 0.07470651013874066,
+    "price_premium": 0.40959999999999996
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Downtown",
+    "investor_share": 0.24766355140186916,
+    "flip_rate": 0.028037383177570093,
+    "price_premium": 2.473551637279597
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Downtown",
+    "investor_share": 0.21076233183856502,
+    "flip_rate": 0.05829596412556054,
+    "price_premium": 1.1875
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Downtown",
+    "investor_share": 0.15808823529411764,
+    "flip_rate": 0.11397058823529412,
+    "price_premium": 0.6083333333333334
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Downtown",
+    "investor_share": 0.24553571428571427,
+    "flip_rate": 0.125,
+    "price_premium": 0.38888888888888884
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Downtown",
+    "investor_share": 0.2486910994764398,
+    "flip_rate": 0.09162303664921466,
+    "price_premium": 0.5686274509803921
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Downtown",
+    "investor_share": 0.2780487804878049,
+    "flip_rate": 0.1073170731707317,
+    "price_premium": 0.1215589552238805
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Downtown",
+    "investor_share": 0.24470134874759153,
+    "flip_rate": 0.1001926782273603,
+    "price_premium": 0.7131079967023908
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Downtown",
+    "investor_share": 0.3944954128440367,
+    "flip_rate": 0.1834862385321101,
+    "price_premium": 1.43921568627451
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Downtown",
+    "investor_share": 0.32196969696969696,
+    "flip_rate": 0.12121212121212122,
+    "price_premium": 0.9252336448598131
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Downtown",
+    "investor_share": 0.2265193370165746,
+    "flip_rate": 0.027624309392265192,
+    "price_premium": 0.8915510718789408
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Downtown",
+    "investor_share": 0.26424870466321243,
+    "flip_rate": 0.05181347150259067,
+    "price_premium": 0.4806682577565633
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Downtown",
+    "investor_share": 0.3218884120171674,
+    "flip_rate": 0.04291845493562232,
+    "price_premium": 1.2038567493112948
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Downtown",
+    "investor_share": 0.276657060518732,
+    "flip_rate": 0.04899135446685879,
+    "price_premium": 0.703448275862069
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Downtown",
+    "investor_share": 0.31212121212121213,
+    "flip_rate": 0.07878787878787878,
+    "price_premium": 0.912751677852349
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Downtown",
+    "investor_share": 0.31208053691275167,
+    "flip_rate": 0.12751677852348994,
+    "price_premium": 1.4096385542168677
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Downtown",
+    "investor_share": 0.33766233766233766,
+    "flip_rate": 0.08441558441558442,
+    "price_premium": 0.7092198581560283
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Downtown",
+    "investor_share": 0.33865814696485624,
+    "flip_rate": 0.10543130990415335,
+    "price_premium": 1.004032258064516
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Downtown",
+    "investor_share": 0.4195804195804196,
+    "flip_rate": 0.07342657342657342,
+    "price_premium": 1.4986623863028359
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Downtown",
+    "investor_share": 0.2896551724137931,
+    "flip_rate": 0.06896551724137931,
+    "price_premium": 0.955503512880562
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Downtown",
+    "investor_share": 0.3333333333333333,
+    "flip_rate": 0.07364341085271318,
+    "price_premium": 0.9390762620837809
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Downtown",
+    "investor_share": 0.31868131868131866,
+    "flip_rate": 0.07142857142857142,
+    "price_premium": 0.5549999999999999
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Downtown",
+    "investor_share": 0.2950191570881226,
+    "flip_rate": 0.04597701149425287,
+    "price_premium": 0.6475972540045767
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Downtown",
+    "investor_share": 0.2952029520295203,
+    "flip_rate": 0.05166051660516605,
+    "price_premium": 1.1590909090909092
+  },
+  {
+    "year": 2000,
+    "neighborhood": "East Boston",
+    "investor_share": 0.27837837837837837,
+    "flip_rate": 0.032432432432432434,
+    "price_premium": 0.14448147004652445
+  },
+  {
+    "year": 2001,
+    "neighborhood": "East Boston",
+    "investor_share": 0.263768115942029,
+    "flip_rate": 0.1072463768115942,
+    "price_premium": 0.05064089094347546
+  },
+  {
+    "year": 2002,
+    "neighborhood": "East Boston",
+    "investor_share": 0.25824175824175827,
+    "flip_rate": 0.21153846153846154,
+    "price_premium": 0.26213017751479284
+  },
+  {
+    "year": 2003,
+    "neighborhood": "East Boston",
+    "investor_share": 0.2994350282485876,
+    "flip_rate": 0.1327683615819209,
+    "price_premium": 0.04681818181818187
+  },
+  {
+    "year": 2004,
+    "neighborhood": "East Boston",
+    "investor_share": 0.20616113744075829,
+    "flip_rate": 0.15639810426540285,
+    "price_premium": 0.07200000000000006
+  },
+  {
+    "year": 2005,
+    "neighborhood": "East Boston",
+    "investor_share": 0.1664025356576862,
+    "flip_rate": 0.10776545166402536,
+    "price_premium": 0.2640193998181266
+  },
+  {
+    "year": 2006,
+    "neighborhood": "East Boston",
+    "investor_share": 0.1696035242290749,
+    "flip_rate": 0.15418502202643172,
+    "price_premium": 0.12360624999999992
+  },
+  {
+    "year": 2007,
+    "neighborhood": "East Boston",
+    "investor_share": 0.2661498708010336,
+    "flip_rate": 0.10594315245478036,
+    "price_premium": 0.13493934142114394
+  },
+  {
+    "year": 2008,
+    "neighborhood": "East Boston",
+    "investor_share": 0.3415233415233415,
+    "flip_rate": 0.07616707616707617,
+    "price_premium": 0.11489361702127665
+  },
+  {
+    "year": 2009,
+    "neighborhood": "East Boston",
+    "investor_share": 0.3231552162849873,
+    "flip_rate": 0.10432569974554708,
+    "price_premium": -0.04761904761904767
+  },
+  {
+    "year": 2010,
+    "neighborhood": "East Boston",
+    "investor_share": 0.3860759493670886,
+    "flip_rate": 0.12658227848101267,
+    "price_premium": -0.11348296593186369
+  },
+  {
+    "year": 2011,
+    "neighborhood": "East Boston",
+    "investor_share": 0.30303030303030304,
+    "flip_rate": 0.10606060606060606,
+    "price_premium": -0.028964367576578498
+  },
+  {
+    "year": 2012,
+    "neighborhood": "East Boston",
+    "investor_share": 0.36082474226804123,
+    "flip_rate": 0.10996563573883161,
+    "price_premium": -0.10767400356930401
+  },
+  {
+    "year": 2013,
+    "neighborhood": "East Boston",
+    "investor_share": 0.37337662337662336,
+    "flip_rate": 0.10714285714285714,
+    "price_premium": 0.09523809523809534
+  },
+  {
+    "year": 2014,
+    "neighborhood": "East Boston",
+    "investor_share": 0.4026666666666667,
+    "flip_rate": 0.088,
+    "price_premium": 0.3524096385542168
+  },
+  {
+    "year": 2015,
+    "neighborhood": "East Boston",
+    "investor_share": 0.3953488372093023,
+    "flip_rate": 0.09302325581395349,
+    "price_premium": 0.5251989389920424
+  },
+  {
+    "year": 2016,
+    "neighborhood": "East Boston",
+    "investor_share": 0.337468982630273,
+    "flip_rate": 0.09429280397022333,
+    "price_premium": 0.2594654788418709
+  },
+  {
+    "year": 2017,
+    "neighborhood": "East Boston",
+    "investor_share": 0.37681159420289856,
+    "flip_rate": 0.07246376811594203,
+    "price_premium": 0.5206521739130434
+  },
+  {
+    "year": 2018,
+    "neighborhood": "East Boston",
+    "investor_share": 0.3893805309734513,
+    "flip_rate": 0.10029498525073746,
+    "price_premium": 0.3936255924170615
+  },
+  {
+    "year": 2019,
+    "neighborhood": "East Boston",
+    "investor_share": 0.4830508474576271,
+    "flip_rate": 0.11016949152542373,
+    "price_premium": 0.5
+  },
+  {
+    "year": 2020,
+    "neighborhood": "East Boston",
+    "investor_share": 0.410828025477707,
+    "flip_rate": 0.07006369426751592,
+    "price_premium": 0.4608749999999999
+  },
+  {
+    "year": 2021,
+    "neighborhood": "East Boston",
+    "investor_share": 0.3741339491916859,
+    "flip_rate": 0.07159353348729793,
+    "price_premium": 0.5573770491803278
+  },
+  {
+    "year": 2022,
+    "neighborhood": "East Boston",
+    "investor_share": 0.367816091954023,
+    "flip_rate": 0.059770114942528735,
+    "price_premium": 0.6112698412698412
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Fenway",
+    "investor_share": 0.15064102564102563,
+    "flip_rate": 0.04807692307692308,
+    "price_premium": -0.09644670050761417
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Fenway",
+    "investor_share": 0.16733067729083664,
+    "flip_rate": 0.13147410358565736,
+    "price_premium": 0.039354187689202735
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Fenway",
+    "investor_share": 0.17073170731707318,
+    "flip_rate": 0.14092140921409213,
+    "price_premium": 0.043636363636363695
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Fenway",
+    "investor_share": 0.15161290322580645,
+    "flip_rate": 0.13548387096774195,
+    "price_premium": -0.0017667844522968323
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Fenway",
+    "investor_share": 0.16341463414634147,
+    "flip_rate": 0.14878048780487804,
+    "price_premium": 0.023474178403755763
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Fenway",
+    "investor_share": 0.23387096774193547,
+    "flip_rate": 0.13709677419354838,
+    "price_premium": -0.041297935103244865
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Fenway",
+    "investor_share": 0.20797720797720798,
+    "flip_rate": 0.1282051282051282,
+    "price_premium": -0.010244286840031536
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Fenway",
+    "investor_share": 0.1676829268292683,
+    "flip_rate": 0.11585365853658537,
+    "price_premium": 0.24574358974358979
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Fenway",
+    "investor_share": 0.175,
+    "flip_rate": 0.10416666666666667,
+    "price_premium": 0.30176741077590274
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Fenway",
+    "investor_share": 0.18877551020408162,
+    "flip_rate": 0.08163265306122448,
+    "price_premium": 0.180883578771881
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Fenway",
+    "investor_share": 0.22797927461139897,
+    "flip_rate": 0.04145077720207254,
+    "price_premium": -0.03091397849462363
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Fenway",
+    "investor_share": 0.20772946859903382,
+    "flip_rate": 0.05314009661835749,
+    "price_premium": -0.04344744744744744
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Fenway",
+    "investor_share": 0.2788844621513944,
+    "flip_rate": 0.055776892430278883,
+    "price_premium": -0.09605263157894739
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Fenway",
+    "investor_share": 0.4339622641509434,
+    "flip_rate": 0.059748427672955975,
+    "price_premium": -0.31174089068825916
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Fenway",
+    "investor_share": 0.3193717277486911,
+    "flip_rate": 0.06282722513089005,
+    "price_premium": -0.024390243902439046
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Fenway",
+    "investor_share": 0.36416184971098264,
+    "flip_rate": 0.06358381502890173,
+    "price_premium": 0.08108108108108114
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Fenway",
+    "investor_share": 0.3602150537634409,
+    "flip_rate": 0.07526881720430108,
+    "price_premium": 0.07079646017699126
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Fenway",
+    "investor_share": 0.36787564766839376,
+    "flip_rate": 0.07253886010362694,
+    "price_premium": 0.07679324894514772
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Fenway",
+    "investor_share": 0.36875,
+    "flip_rate": 0.08125,
+    "price_premium": -0.12408759124087587
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Fenway",
+    "investor_share": 0.5252100840336135,
+    "flip_rate": 0.05042016806722689,
+    "price_premium": 3.7709432387312187
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Fenway",
+    "investor_share": 0.3157894736842105,
+    "flip_rate": 0.06140350877192982,
+    "price_premium": 0.14685792349726778
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Fenway",
+    "investor_share": 0.3907563025210084,
+    "flip_rate": 0.025210084033613446,
+    "price_premium": 0.3600000000000001
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Fenway",
+    "investor_share": 0.3468208092485549,
+    "flip_rate": 0.06358381502890173,
+    "price_premium": 0.85859375
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.14555256064690028,
+    "flip_rate": 0.03773584905660377,
+    "price_premium": 0.08979695431472079
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.11461318051575932,
+    "flip_rate": 0.08882521489971347,
+    "price_premium": -0.16386554621848737
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.13520408163265307,
+    "flip_rate": 0.09693877551020408,
+    "price_premium": 0.1632270168855534
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.125,
+    "flip_rate": 0.11989795918367346,
+    "price_premium": 0.22033898305084754
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.12643678160919541,
+    "flip_rate": 0.09961685823754789,
+    "price_premium": 0.09411764705882364
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.12105263157894737,
+    "flip_rate": 0.10877192982456141,
+    "price_premium": -0.02506963788300831
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.18255578093306288,
+    "flip_rate": 0.12373225152129817,
+    "price_premium": 0.0
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.27906976744186046,
+    "flip_rate": 0.1325581395348837,
+    "price_premium": 0.024035129740519023
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.33163265306122447,
+    "flip_rate": 0.08673469387755102,
+    "price_premium": -0.10344827586206895
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.3142857142857143,
+    "flip_rate": 0.10285714285714286,
+    "price_premium": -0.16174129353233835
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.3855072463768116,
+    "flip_rate": 0.1072463768115942,
+    "price_premium": -0.18518518518518523
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.32362459546925565,
+    "flip_rate": 0.10679611650485436,
+    "price_premium": -0.11741000000000001
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.2978723404255319,
+    "flip_rate": 0.11246200607902736,
+    "price_premium": -0.12757414448669202
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.22712933753943218,
+    "flip_rate": 0.15141955835962145,
+    "price_premium": -0.2833333333333333
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.21323529411764705,
+    "flip_rate": 0.10661764705882353,
+    "price_premium": -0.03479576399394857
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.1962025316455696,
+    "flip_rate": 0.07911392405063292,
+    "price_premium": -0.23682008368200835
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.24383561643835616,
+    "flip_rate": 0.07945205479452055,
+    "price_premium": -0.1497975708502024
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.22388059701492538,
+    "flip_rate": 0.11044776119402985,
+    "price_premium": -0.12379521842533481
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.22629969418960244,
+    "flip_rate": 0.12232415902140673,
+    "price_premium": -0.08334276978824595
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.20921985815602837,
+    "flip_rate": 0.10283687943262411,
+    "price_premium": 0.11111111111111116
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.20833333333333334,
+    "flip_rate": 0.12878787878787878,
+    "price_premium": 0.0390832540950663
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.17391304347826086,
+    "flip_rate": 0.09006211180124224,
+    "price_premium": 0.21608484312859044
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Hyde Park",
+    "investor_share": 0.23443223443223443,
+    "flip_rate": 0.047619047619047616,
+    "price_premium": 0.21943089430894314
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.091324200913242,
+    "flip_rate": 0.0273972602739726,
+    "price_premium": 0.0
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.09123434704830054,
+    "flip_rate": 0.10554561717352415,
+    "price_premium": 0.05210918114143914
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.10497237569060773,
+    "flip_rate": 0.1252302025782689,
+    "price_premium": -0.18781725888324874
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.0734094616639478,
+    "flip_rate": 0.09135399673735727,
+    "price_premium": 0.15806451612903216
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.08401084010840108,
+    "flip_rate": 0.07181571815718157,
+    "price_premium": 0.07514880952380953
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.10175438596491228,
+    "flip_rate": 0.09941520467836257,
+    "price_premium": 0.03916914661622428
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.08545727136431784,
+    "flip_rate": 0.09745127436281859,
+    "price_premium": 0.29323308270676685
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.12042682926829268,
+    "flip_rate": 0.07164634146341463,
+    "price_premium": 0.10294117647058831
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.14343434343434344,
+    "flip_rate": 0.0707070707070707,
+    "price_premium": -0.20986929064473492
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.12326043737574553,
+    "flip_rate": 0.0636182902584493,
+    "price_premium": -0.08769230769230774
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.14512922465208747,
+    "flip_rate": 0.05765407554671968,
+    "price_premium": -0.21764705882352942
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.1742627345844504,
+    "flip_rate": 0.05361930294906166,
+    "price_premium": -0.009440813362382006
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.15353535353535352,
+    "flip_rate": 0.050505050505050504,
+    "price_premium": 0.11881805555555558
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.14312267657992564,
+    "flip_rate": 0.055762081784386616,
+    "price_premium": 0.3005050505050506
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.18618042226487524,
+    "flip_rate": 0.05566218809980806,
+    "price_premium": 0.48235294117647065
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.1302250803858521,
+    "flip_rate": 0.05144694533762058,
+    "price_premium": 0.4247020585048753
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.17826825127334464,
+    "flip_rate": 0.06621392190152801,
+    "price_premium": 0.32380952380952377
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.17679558011049723,
+    "flip_rate": 0.05156537753222836,
+    "price_premium": 0.21100917431192667
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.17049808429118773,
+    "flip_rate": 0.05363984674329502,
+    "price_premium": 0.3520000000000001
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.13501144164759726,
+    "flip_rate": 0.05034324942791762,
+    "price_premium": 0.6235772357723577
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.14168377823408623,
+    "flip_rate": 0.03285420944558522,
+    "price_premium": 0.2559569561875481
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.15345699831365936,
+    "flip_rate": 0.05733558178752108,
+    "price_premium": 0.46478873239436624
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Jamaica Plain",
+    "investor_share": 0.1801980198019802,
+    "flip_rate": 0.04950495049504951,
+    "price_premium": 0.6877637130801688
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Longwood",
+    "investor_share": 0.29545454545454547,
+    "flip_rate": 0.06818181818181818,
+    "price_premium": 0.38020833333333326
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Longwood",
+    "investor_share": 0.37209302325581395,
+    "flip_rate": 0.3023255813953488,
+    "price_premium": 1.4163179916317992
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Longwood",
+    "investor_share": 0.1,
+    "flip_rate": 0.125,
+    "price_premium": null
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Longwood",
+    "investor_share": 0.21568627450980393,
+    "flip_rate": 0.11764705882352941,
+    "price_premium": 1.117465224111283
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Longwood",
+    "investor_share": 0.35,
+    "flip_rate": 0.15,
+    "price_premium": 0.6189768335676589
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Longwood",
+    "investor_share": 0.17647058823529413,
+    "flip_rate": 0.058823529411764705,
+    "price_premium": null
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Longwood",
+    "investor_share": 0.5,
+    "flip_rate": 0.05263157894736842,
+    "price_premium": null
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Longwood",
+    "investor_share": 0.5263157894736842,
+    "flip_rate": 0.07894736842105263,
+    "price_premium": null
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Longwood",
+    "investor_share": 0.6666666666666666,
+    "flip_rate": 0.03333333333333333,
+    "price_premium": null
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.16990291262135923,
+    "flip_rate": 0.038834951456310676,
+    "price_premium": 0.3157894736842106
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.13368983957219252,
+    "flip_rate": 0.11764705882352941,
+    "price_premium": -0.03273809523809523
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.1595744680851064,
+    "flip_rate": 0.19680851063829788,
+    "price_premium": 0.10869565217391308
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.19138755980861244,
+    "flip_rate": 0.12440191387559808,
+    "price_premium": 0.05620689655172417
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.15625,
+    "flip_rate": 0.14453125,
+    "price_premium": -0.05820105820105825
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.16176470588235295,
+    "flip_rate": 0.14705882352941177,
+    "price_premium": 0.38537271448663857
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.2361111111111111,
+    "flip_rate": 0.14930555555555555,
+    "price_premium": 0.032127967016841286
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.3486238532110092,
+    "flip_rate": 0.0871559633027523,
+    "price_premium": -0.009363327674023814
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.4780701754385965,
+    "flip_rate": 0.15789473684210525,
+    "price_premium": -0.10753305785123968
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.5186915887850467,
+    "flip_rate": 0.14018691588785046,
+    "price_premium": -0.19499999999999995
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.4577114427860697,
+    "flip_rate": 0.15920398009950248,
+    "price_premium": -0.2163533333333333
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.5,
+    "flip_rate": 0.2,
+    "price_premium": -0.09441379310344833
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.475177304964539,
+    "flip_rate": 0.2624113475177305,
+    "price_premium": -0.17525773195876293
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.35374149659863946,
+    "flip_rate": 0.12244897959183673,
+    "price_premium": -0.20212165214585354
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.37341772151898733,
+    "flip_rate": 0.0949367088607595,
+    "price_premium": -0.09027777777777779
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.25675675675675674,
+    "flip_rate": 0.16891891891891891,
+    "price_premium": -0.27464788732394363
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.3497536945812808,
+    "flip_rate": 0.1724137931034483,
+    "price_premium": -0.16129032258064513
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.2918918918918919,
+    "flip_rate": 0.12972972972972974,
+    "price_premium": -0.1671316964285714
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.3236994219653179,
+    "flip_rate": 0.11560693641618497,
+    "price_premium": -0.10172222222222227
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.24277456647398843,
+    "flip_rate": 0.16184971098265896,
+    "price_premium": -0.12063571428571429
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.27,
+    "flip_rate": 0.16,
+    "price_premium": -0.1293103448275862
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.26875,
+    "flip_rate": 0.1375,
+    "price_premium": 0.29824561403508776
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Mattapan",
+    "investor_share": 0.319672131147541,
+    "flip_rate": 0.10655737704918032,
+    "price_premium": 0.3035714285714286
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.3611111111111111,
+    "flip_rate": 0.027777777777777776,
+    "price_premium": 1.2716535433070866
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.2878787878787879,
+    "flip_rate": 0.15151515151515152,
+    "price_premium": 1.3888888888888888
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.35555555555555557,
+    "flip_rate": 0.2,
+    "price_premium": 0.16901408450704225
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.28888888888888886,
+    "flip_rate": 0.2,
+    "price_premium": 0.6058394160583942
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.35106382978723405,
+    "flip_rate": 0.11702127659574468,
+    "price_premium": 1.0761245674740483
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.35135135135135137,
+    "flip_rate": 0.10810810810810811,
+    "price_premium": 1.0903010033444818
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.38,
+    "flip_rate": 0.06,
+    "price_premium": 1.3015873015873014
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.35135135135135137,
+    "flip_rate": 0.0945945945945946,
+    "price_premium": 0.8702290076335877
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.46774193548387094,
+    "flip_rate": 0.03225806451612903,
+    "price_premium": 1.4137931034482758
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.358974358974359,
+    "flip_rate": 0.10256410256410256,
+    "price_premium": 0.1166666666666667
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.24615384615384617,
+    "flip_rate": 0.06153846153846154,
+    "price_premium": 0.7553942857142857
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.4883720930232558,
+    "flip_rate": 0.09302325581395349,
+    "price_premium": 1.8448275862068964
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.4883720930232558,
+    "flip_rate": 0.16279069767441862,
+    "price_premium": 0.668584579976985
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.45454545454545453,
+    "flip_rate": 0.11363636363636363,
+    "price_premium": 1.9258675078864353
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.4,
+    "flip_rate": 0.08571428571428572,
+    "price_premium": 1.6194029850746268
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.45454545454545453,
+    "flip_rate": 0.06818181818181818,
+    "price_premium": 1.670103092783505
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.43478260869565216,
+    "flip_rate": 0.10869565217391304,
+    "price_premium": 1.3060884070058383
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.41025641025641024,
+    "flip_rate": 0.07692307692307693,
+    "price_premium": 0.900952380952381
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.5909090909090909,
+    "flip_rate": 0.022727272727272728,
+    "price_premium": null
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.5526315789473685,
+    "flip_rate": 0.02631578947368421,
+    "price_premium": null
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.35294117647058826,
+    "flip_rate": 0.0,
+    "price_premium": 1.7440944881889764
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Mission Hill",
+    "investor_share": 0.5526315789473685,
+    "flip_rate": 0.02631578947368421,
+    "price_premium": null
+  },
+  {
+    "year": 2000,
+    "neighborhood": "North End",
+    "investor_share": 0.1527777777777778,
+    "flip_rate": 0.027777777777777776,
+    "price_premium": 0.1787271142109852
+  },
+  {
+    "year": 2001,
+    "neighborhood": "North End",
+    "investor_share": 0.16296296296296298,
+    "flip_rate": 0.0962962962962963,
+    "price_premium": -0.10737386804657179
+  },
+  {
+    "year": 2002,
+    "neighborhood": "North End",
+    "investor_share": 0.14619883040935672,
+    "flip_rate": 0.1286549707602339,
+    "price_premium": 0.3990007137758744
+  },
+  {
+    "year": 2003,
+    "neighborhood": "North End",
+    "investor_share": 0.1375,
+    "flip_rate": 0.09375,
+    "price_premium": 0.5714285714285714
+  },
+  {
+    "year": 2004,
+    "neighborhood": "North End",
+    "investor_share": 0.1440677966101695,
+    "flip_rate": 0.09322033898305085,
+    "price_premium": 0.6513761467889909
+  },
+  {
+    "year": 2005,
+    "neighborhood": "North End",
+    "investor_share": 0.1541501976284585,
+    "flip_rate": 0.09881422924901186,
+    "price_premium": 0.5254237288135593
+  },
+  {
+    "year": 2006,
+    "neighborhood": "North End",
+    "investor_share": 0.18067226890756302,
+    "flip_rate": 0.07563025210084033,
+    "price_premium": 0.1911021233569261
+  },
+  {
+    "year": 2007,
+    "neighborhood": "North End",
+    "investor_share": 0.20361990950226244,
+    "flip_rate": 0.1085972850678733,
+    "price_premium": 0.24412393162393164
+  },
+  {
+    "year": 2008,
+    "neighborhood": "North End",
+    "investor_share": 0.22099447513812154,
+    "flip_rate": 0.11049723756906077,
+    "price_premium": 0.5739979079497908
+  },
+  {
+    "year": 2009,
+    "neighborhood": "North End",
+    "investor_share": 0.16296296296296298,
+    "flip_rate": 0.08148148148148149,
+    "price_premium": 0.38421052631578956
+  },
+  {
+    "year": 2010,
+    "neighborhood": "North End",
+    "investor_share": 0.2789115646258503,
+    "flip_rate": 0.034013605442176874,
+    "price_premium": 1.3113207547169812
+  },
+  {
+    "year": 2011,
+    "neighborhood": "North End",
+    "investor_share": 0.2824427480916031,
+    "flip_rate": 0.03816793893129771,
+    "price_premium": 0.8415178571428572
+  },
+  {
+    "year": 2012,
+    "neighborhood": "North End",
+    "investor_share": 0.33668341708542715,
+    "flip_rate": 0.06030150753768844,
+    "price_premium": 0.9616390584132519
+  },
+  {
+    "year": 2013,
+    "neighborhood": "North End",
+    "investor_share": 0.27411167512690354,
+    "flip_rate": 0.05583756345177665,
+    "price_premium": 0.6317872149471708
+  },
+  {
+    "year": 2014,
+    "neighborhood": "North End",
+    "investor_share": 0.29347826086956524,
+    "flip_rate": 0.08695652173913043,
+    "price_premium": 1.1947224749772523
+  },
+  {
+    "year": 2015,
+    "neighborhood": "North End",
+    "investor_share": 0.2934131736526946,
+    "flip_rate": 0.08383233532934131,
+    "price_premium": 0.45999999999999996
+  },
+  {
+    "year": 2016,
+    "neighborhood": "North End",
+    "investor_share": 0.2978723404255319,
+    "flip_rate": 0.11170212765957446,
+    "price_premium": 1.6113360323886639
+  },
+  {
+    "year": 2017,
+    "neighborhood": "North End",
+    "investor_share": 0.2838709677419355,
+    "flip_rate": 0.05161290322580645,
+    "price_premium": 2.316
+  },
+  {
+    "year": 2018,
+    "neighborhood": "North End",
+    "investor_share": 0.2582781456953642,
+    "flip_rate": 0.06622516556291391,
+    "price_premium": 0.7556071152358856
+  },
+  {
+    "year": 2019,
+    "neighborhood": "North End",
+    "investor_share": 0.2692307692307692,
+    "flip_rate": 0.06153846153846154,
+    "price_premium": 2.8785714285714286
+  },
+  {
+    "year": 2020,
+    "neighborhood": "North End",
+    "investor_share": 0.16901408450704225,
+    "flip_rate": 0.056338028169014086,
+    "price_premium": 0.7746478873239437
+  },
+  {
+    "year": 2021,
+    "neighborhood": "North End",
+    "investor_share": 0.21608040201005024,
+    "flip_rate": 0.06030150753768844,
+    "price_premium": 1.8943560057887119
+  },
+  {
+    "year": 2022,
+    "neighborhood": "North End",
+    "investor_share": 0.3732394366197183,
+    "flip_rate": 0.09154929577464789,
+    "price_premium": 1.7777777777777777
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.12544802867383512,
+    "flip_rate": 0.035842293906810034,
+    "price_premium": 0.020224719101123556
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.09731543624161074,
+    "flip_rate": 0.09731543624161074,
+    "price_premium": 0.15702479338842967
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.10204081632653061,
+    "flip_rate": 0.09863945578231292,
+    "price_premium": 0.038994800693240794
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.0914826498422713,
+    "flip_rate": 0.07255520504731862,
+    "price_premium": 0.04554703396462667
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.0883054892601432,
+    "flip_rate": 0.1026252983293556,
+    "price_premium": 0.21265249470377667
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.10552763819095477,
+    "flip_rate": 0.0829145728643216,
+    "price_premium": -0.004982206405693912
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.13972602739726028,
+    "flip_rate": 0.1178082191780822,
+    "price_premium": 0.030303030303030276
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.17933130699088146,
+    "flip_rate": 0.08814589665653495,
+    "price_premium": 0.0017172295363481194
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.30111524163568776,
+    "flip_rate": 0.07806691449814127,
+    "price_premium": -0.284637037037037
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.18571428571428572,
+    "flip_rate": 0.07857142857142857,
+    "price_premium": -0.33074098360655735
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.2792452830188679,
+    "flip_rate": 0.06415094339622641,
+    "price_premium": -0.37205651491365777
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.251063829787234,
+    "flip_rate": 0.08085106382978724,
+    "price_premium": -0.09076175040518641
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.2248062015503876,
+    "flip_rate": 0.08914728682170543,
+    "price_premium": -0.17692307692307696
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.15894039735099338,
+    "flip_rate": 0.09271523178807947,
+    "price_premium": 0.02052142857142858
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.14098360655737704,
+    "flip_rate": 0.06557377049180328,
+    "price_premium": 0.12299465240641716
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.18181818181818182,
+    "flip_rate": 0.10658307210031348,
+    "price_premium": 0.09810874704491734
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.13190184049079753,
+    "flip_rate": 0.09815950920245399,
+    "price_premium": -0.14954484304932736
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.17549668874172186,
+    "flip_rate": 0.056291390728476824,
+    "price_premium": -0.301980198019802
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.1936619718309859,
+    "flip_rate": 0.10211267605633803,
+    "price_premium": 0.009615384615384581
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.12,
+    "flip_rate": 0.08,
+    "price_premium": -0.034168564920273314
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.13167259786476868,
+    "flip_rate": 0.0498220640569395,
+    "price_premium": -0.001361779391738538
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.18356164383561643,
+    "flip_rate": 0.0684931506849315,
+    "price_premium": 0.054657428791377916
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Roslindale",
+    "investor_share": 0.13653136531365315,
+    "flip_rate": 0.09225092250922509,
+    "price_premium": 0.07011070110701101
+  },
+  {
+    "year": 2000,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.2530487804878049,
+    "flip_rate": 0.07621951219512195,
+    "price_premium": 0.25
+  },
+  {
+    "year": 2001,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.25862068965517243,
+    "flip_rate": 0.1482758620689655,
+    "price_premium": 0.4722222222222223
+  },
+  {
+    "year": 2002,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.26666666666666666,
+    "flip_rate": 0.13333333333333333,
+    "price_premium": 0.12777251184834126
+  },
+  {
+    "year": 2003,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.23208191126279865,
+    "flip_rate": 0.14334470989761092,
+    "price_premium": 0.16095238095238096
+  },
+  {
+    "year": 2004,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.25586854460093894,
+    "flip_rate": 0.1643192488262911,
+    "price_premium": 0.058122205663189375
+  },
+  {
+    "year": 2005,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.21729957805907174,
+    "flip_rate": 0.1160337552742616,
+    "price_premium": 0.2650602409638554
+  },
+  {
+    "year": 2006,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.25555555555555554,
+    "flip_rate": 0.08666666666666667,
+    "price_premium": 0.15151410658307207
+  },
+  {
+    "year": 2007,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.3919239904988123,
+    "flip_rate": 0.0831353919239905,
+    "price_premium": 0.15666666666666673
+  },
+  {
+    "year": 2008,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.567032967032967,
+    "flip_rate": 0.1010989010989011,
+    "price_premium": 0.01811320754716972
+  },
+  {
+    "year": 2009,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.5753768844221105,
+    "flip_rate": 0.15829145728643215,
+    "price_premium": -0.15621986499517837
+  },
+  {
+    "year": 2010,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.507537688442211,
+    "flip_rate": 0.16834170854271358,
+    "price_premium": -0.06862745098039214
+  },
+  {
+    "year": 2011,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.45907473309608543,
+    "flip_rate": 0.1423487544483986,
+    "price_premium": -0.08874709112316181
+  },
+  {
+    "year": 2012,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.5209125475285171,
+    "flip_rate": 0.12927756653992395,
+    "price_premium": -0.2471910112359551
+  },
+  {
+    "year": 2013,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.5337423312883436,
+    "flip_rate": 0.10736196319018405,
+    "price_premium": -0.19667802385008515
+  },
+  {
+    "year": 2014,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.5364963503649635,
+    "flip_rate": 0.16058394160583941,
+    "price_premium": 0.187071240105541
+  },
+  {
+    "year": 2015,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.5555555555555556,
+    "flip_rate": 0.10802469135802469,
+    "price_premium": 0.5654205607476634
+  },
+  {
+    "year": 2016,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.42657342657342656,
+    "flip_rate": 0.05944055944055944,
+    "price_premium": 0.16433308769344146
+  },
+  {
+    "year": 2017,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.4878048780487805,
+    "flip_rate": 0.0975609756097561,
+    "price_premium": 0.3130252100840336
+  },
+  {
+    "year": 2018,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.4911660777385159,
+    "flip_rate": 0.10247349823321555,
+    "price_premium": 0.43646408839779016
+  },
+  {
+    "year": 2019,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.49624060150375937,
+    "flip_rate": 0.11654135338345864,
+    "price_premium": 0.10256410256410264
+  },
+  {
+    "year": 2020,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.4434782608695652,
+    "flip_rate": 0.11739130434782609,
+    "price_premium": 0.5942622950819672
+  },
+  {
+    "year": 2021,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.41767068273092367,
+    "flip_rate": 0.07630522088353414,
+    "price_premium": 0.7954545454545454
+  },
+  {
+    "year": 2022,
+    "neighborhood": "Roxbury",
+    "investor_share": 0.39705882352941174,
+    "flip_rate": 0.08333333333333333,
+    "price_premium": 0.5384615384615385
+  },
+  {
+    "year": 2000,
+    "neighborhood": "South Boston",
+    "investor_share": 0.1593625498007968,
+    "flip_rate": 0.029880478087649404,
+    "price_premium": 0.08951965065502177
+  },
+  {
+    "year": 2001,
+    "neighborhood": "South Boston",
+    "investor_share": 0.14699792960662525,
+    "flip_rate": 0.12629399585921325,
+    "price_premium": 0.30833333333333335
+  },
+  {
+    "year": 2002,
+    "neighborhood": "South Boston",
+    "investor_share": 0.15,
+    "flip_rate": 0.11964285714285715,
+    "price_premium": 0.1709090909090909
+  },
+  {
+    "year": 2003,
+    "neighborhood": "South Boston",
+    "investor_share": 0.11826086956521739,
+    "flip_rate": 0.12347826086956522,
+    "price_premium": 0.01755786113328006
+  },
+  {
+    "year": 2004,
+    "neighborhood": "South Boston",
+    "investor_share": 0.12836185819070906,
+    "flip_rate": 0.097799511002445,
+    "price_premium": 0.15488721804511285
+  },
+  {
+    "year": 2005,
+    "neighborhood": "South Boston",
+    "investor_share": 0.1375166889185581,
+    "flip_rate": 0.09879839786381843,
+    "price_premium": 0.13180515759312317
+  },
+  {
+    "year": 2006,
+    "neighborhood": "South Boston",
+    "investor_share": 0.1386271870794078,
+    "flip_rate": 0.06729475100942127,
+    "price_premium": 0.07114285714285717
+  },
+  {
+    "year": 2007,
+    "neighborhood": "South Boston",
+    "investor_share": 0.11757719714964371,
+    "flip_rate": 0.08432304038004751,
+    "price_premium": 0.09589041095890405
+  },
+  {
+    "year": 2008,
+    "neighborhood": "South Boston",
+    "investor_share": 0.1488,
+    "flip_rate": 0.0752,
+    "price_premium": -0.12158469945355188
+  },
+  {
+    "year": 2009,
+    "neighborhood": "South Boston",
+    "investor_share": 0.13615023474178403,
+    "flip_rate": 0.08450704225352113,
+    "price_premium": -0.2706053975200583
+  },
+  {
+    "year": 2010,
+    "neighborhood": "South Boston",
+    "investor_share": 0.17410714285714285,
+    "flip_rate": 0.06696428571428571,
+    "price_premium": -0.1192411924119241
+  },
+  {
+    "year": 2011,
+    "neighborhood": "South Boston",
+    "investor_share": 0.17156105100463678,
+    "flip_rate": 0.0571870170015456,
+    "price_premium": -0.06258322237017311
+  },
+  {
+    "year": 2012,
+    "neighborhood": "South Boston",
+    "investor_share": 0.19951040391676866,
+    "flip_rate": 0.0587515299877601,
+    "price_premium": 0.08749999999999991
+  },
+  {
+    "year": 2013,
+    "neighborhood": "South Boston",
+    "investor_share": 0.16097560975609757,
+    "flip_rate": 0.06463414634146342,
+    "price_premium": 0.08905275099262622
+  },
+  {
+    "year": 2014,
+    "neighborhood": "South Boston",
+    "investor_share": 0.22744128553770088,
+    "flip_rate": 0.0754017305315204,
+    "price_premium": 0.17160872528970694
+  },
+  {
+    "year": 2015,
+    "neighborhood": "South Boston",
+    "investor_share": 0.21098626716604243,
+    "flip_rate": 0.07365792759051186,
+    "price_premium": 0.2844036697247707
+  },
+  {
+    "year": 2016,
+    "neighborhood": "South Boston",
+    "investor_share": 0.22249690976514216,
+    "flip_rate": 0.06798516687268233,
+    "price_premium": 0.1319999999999999
+  },
+  {
+    "year": 2017,
+    "neighborhood": "South Boston",
+    "investor_share": 0.2112845138055222,
+    "flip_rate": 0.06362545018007203,
+    "price_premium": 0.2632175226586102
+  },
+  {
+    "year": 2018,
+    "neighborhood": "South Boston",
+    "investor_share": 0.27088948787061995,
+    "flip_rate": 0.10646900269541779,
+    "price_premium": 0.34857142857142853
+  },
+  {
+    "year": 2019,
+    "neighborhood": "South Boston",
+    "investor_share": 0.264919941775837,
+    "flip_rate": 0.09170305676855896,
+    "price_premium": 0.465034965034965
+  },
+  {
+    "year": 2020,
+    "neighborhood": "South Boston",
+    "investor_share": 0.21395348837209302,
+    "flip_rate": 0.07286821705426356,
+    "price_premium": 0.5068493150684932
+  },
+  {
+    "year": 2021,
+    "neighborhood": "South Boston",
+    "investor_share": 0.23068309070548712,
+    "flip_rate": 0.06494960806270997,
+    "price_premium": 0.5020026702269693
+  },
+  {
+    "year": 2022,
+    "neighborhood": "South Boston",
+    "investor_share": 0.28175182481751826,
+    "flip_rate": 0.06423357664233577,
+    "price_premium": 0.4258555133079849
+  },
+  {
+    "year": 2000,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.2647058823529412,
+    "flip_rate": 0.049019607843137254,
+    "price_premium": -0.04334365325077394
+  },
+  {
+    "year": 2001,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.14,
+    "flip_rate": 0.28,
+    "price_premium": null
+  },
+  {
+    "year": 2003,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.14285714285714285,
+    "flip_rate": 0.11428571428571428,
+    "price_premium": null
+  },
+  {
+    "year": 2004,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.21212121212121213,
+    "flip_rate": 0.04040404040404041,
+    "price_premium": 0.25904761904761897
+  },
+  {
+    "year": 2005,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.2621359223300971,
+    "flip_rate": 0.04854368932038835,
+    "price_premium": 167.9623507805326
+  },
+  {
+    "year": 2006,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.36,
+    "flip_rate": 0.24,
+    "price_premium": 1.0416253716551043
+  },
+  {
+    "year": 2007,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.36764705882352944,
+    "flip_rate": 0.14705882352941177,
+    "price_premium": 35.134453781512605
+  },
+  {
+    "year": 2008,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.24242424242424243,
+    "flip_rate": 0.18181818181818182,
+    "price_premium": null
+  },
+  {
+    "year": 2010,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.2826086956521739,
+    "flip_rate": 0.0,
+    "price_premium": 0.10091743119266061
+  },
+  {
+    "year": 2011,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.2982456140350877,
+    "flip_rate": 0.08771929824561403,
+    "price_premium": 0.3977566867989646
+  },
+  {
+    "year": 2012,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.3088235294117647,
+    "flip_rate": 0.058823529411764705,
+    "price_premium": 7.040201005025125
+  },
+  {
+    "year": 2013,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.30434782608695654,
+    "flip_rate": 0.13043478260869565,
+    "price_premium": 9.374988944723619
+  },
+  {
+    "year": 2014,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.22388059701492538,
+    "flip_rate": 0.07462686567164178,
+    "price_premium": 0.4043887147335423
+  },
+  {
+    "year": 2015,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.3220338983050847,
+    "flip_rate": 0.1016949152542373,
+    "price_premium": 31.79252090032154
+  },
+  {
+    "year": 2016,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.21568627450980393,
+    "flip_rate": 0.0392156862745098,
+    "price_premium": 2.355569540591567
+  },
+  {
+    "year": 2017,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.23170731707317074,
+    "flip_rate": 0.10975609756097561,
+    "price_premium": 0.30000000000000004
+  },
+  {
+    "year": 2018,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.08955223880597014,
+    "flip_rate": 0.04477611940298507,
+    "price_premium": null
+  },
+  {
+    "year": 2019,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.26153846153846155,
+    "flip_rate": 0.03076923076923077,
+    "price_premium": 1.5484276729559747
+  },
+  {
+    "year": 2020,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.15384615384615385,
+    "flip_rate": 0.057692307692307696,
+    "price_premium": null
+  },
+  {
+    "year": 2021,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.2638888888888889,
+    "flip_rate": 0.041666666666666664,
+    "price_premium": 1.5171759747102214
+  },
+  {
+    "year": 2022,
+    "neighborhood": "South Boston Waterfront",
+    "investor_share": 0.14035087719298245,
+    "flip_rate": 0.08771929824561403,
+    "price_premium": null
+  },
+  {
+    "year": 2000,
+    "neighborhood": "South End",
+    "investor_share": 0.11885245901639344,
+    "flip_rate": 0.03825136612021858,
+    "price_premium": 0.20180722891566272
+  },
+  {
+    "year": 2001,
+    "neighborhood": "South End",
+    "investor_share": 0.155668358714044,
+    "flip_rate": 0.11505922165820642,
+    "price_premium": 0.38235294117647056
+  },
+  {
+    "year": 2002,
+    "neighborhood": "South End",
+    "investor_share": 0.13149847094801223,
+    "flip_rate": 0.15749235474006115,
+    "price_premium": 0.008227848101265867
+  },
+  {
+    "year": 2003,
+    "neighborhood": "South End",
+    "investor_share": 0.10512483574244415,
+    "flip_rate": 0.13534822601839686,
+    "price_premium": 0.12590361445783138
+  },
+  {
+    "year": 2004,
+    "neighborhood": "South End",
+    "investor_share": 0.13540510543840178,
+    "flip_rate": 0.10099889012208657,
+    "price_premium": 0.4190476190476191
+  },
+  {
+    "year": 2005,
+    "neighborhood": "South End",
+    "investor_share": 0.15782828282828282,
+    "flip_rate": 0.15782828282828282,
+    "price_premium": 0.5300546448087431
+  },
+  {
+    "year": 2006,
+    "neighborhood": "South End",
+    "investor_share": 0.147008547008547,
+    "flip_rate": 0.10598290598290598,
+    "price_premium": 1.3317307692307692
+  },
+  {
+    "year": 2007,
+    "neighborhood": "South End",
+    "investor_share": 0.135,
+    "flip_rate": 0.07833333333333334,
+    "price_premium": 0.1454545454545455
+  },
+  {
+    "year": 2008,
+    "neighborhood": "South End",
+    "investor_share": 0.1482758620689655,
+    "flip_rate": 0.0896551724137931,
+    "price_premium": 0.4919390459363957
+  },
+  {
+    "year": 2009,
+    "neighborhood": "South End",
+    "investor_share": 0.11842105263157894,
+    "flip_rate": 0.06578947368421052,
+    "price_premium": 0.5207581227436824
+  },
+  {
+    "year": 2010,
+    "neighborhood": "South End",
+    "investor_share": 0.14168377823408623,
+    "flip_rate": 0.04106776180698152,
+    "price_premium": 0.40638481449525443
+  },
+  {
+    "year": 2011,
+    "neighborhood": "South End",
+    "investor_share": 0.16043956043956045,
+    "flip_rate": 0.05934065934065934,
+    "price_premium": 0.420810697868784
+  },
+  {
+    "year": 2012,
+    "neighborhood": "South End",
+    "investor_share": 0.2,
+    "flip_rate": 0.06666666666666667,
+    "price_premium": 0.6116035455278002
+  },
+  {
+    "year": 2013,
+    "neighborhood": "South End",
+    "investor_share": 0.22493224932249323,
+    "flip_rate": 0.05962059620596206,
+    "price_premium": 0.5407407407407407
+  },
+  {
+    "year": 2014,
+    "neighborhood": "South End",
+    "investor_share": 0.2012779552715655,
+    "flip_rate": 0.09744408945686901,
+    "price_premium": 0.4764285714285714
+  },
+  {
+    "year": 2015,
+    "neighborhood": "South End",
+    "investor_share": 0.2134646962233169,
+    "flip_rate": 0.07881773399014778,
+    "price_premium": 0.11214374225526647
+  },
+  {
+    "year": 2016,
+    "neighborhood": "South End",
+    "investor_share": 0.24444444444444444,
+    "flip_rate": 0.08034188034188035,
+    "price_premium": 0.5272078501338091
+  },
+  {
+    "year": 2017,
+    "neighborhood": "South End",
+    "investor_share": 0.25504587155963304,
+    "flip_rate": 0.08990825688073395,
+    "price_premium": 0.4204545454545454
+  },
+  {
+    "year": 2018,
+    "neighborhood": "South End",
+    "investor_share": 0.25,
+    "flip_rate": 0.05536912751677853,
+    "price_premium": 1.127659574468085
+  },
+  {
+    "year": 2019,
+    "neighborhood": "South End",
+    "investor_share": 0.23735408560311283,
+    "flip_rate": 0.09533073929961089,
+    "price_premium": 1.3228346456692912
+  },
+  {
+    "year": 2020,
+    "neighborhood": "South End",
+    "investor_share": 0.18008474576271186,
+    "flip_rate": 0.06567796610169492,
+    "price_premium": 0.8095238095238095
+  },
+  {
+    "year": 2021,
+    "neighborhood": "South End",
+    "investor_share": 0.19788519637462235,
+    "flip_rate": 0.0513595166163142,
+    "price_premium": 0.7282051282051283
+  },
+  {
+    "year": 2022,
+    "neighborhood": "South End",
+    "investor_share": 0.1918819188191882,
+    "flip_rate": 0.055350553505535055,
+    "price_premium": 1.2976190476190474
+  },
+  {
+    "year": 2000,
+    "neighborhood": "West End",
+    "investor_share": 0.13043478260869565,
+    "flip_rate": 0.014492753623188406,
+    "price_premium": null
+  },
+  {
+    "year": 2001,
+    "neighborhood": "West End",
+    "investor_share": 0.07272727272727272,
+    "flip_rate": 0.05454545454545454,
+    "price_premium": null
+  },
+  {
+    "year": 2002,
+    "neighborhood": "West End",
+    "investor_share": 0.08139534883720931,
+    "flip_rate": 0.11627906976744186,
+    "price_premium": null
+  },
+  {
+    "year": 2003,
+    "neighborhood": "West End",
+    "investor_share": 0.2,
+    "flip_rate": 0.05,
+    "price_premium": -0.06844247132815395
+  },
+  {
+    "year": 2004,
+    "neighborhood": "West End",
+    "investor_share": 0.152317880794702,
+    "flip_rate": 0.08609271523178808,
+    "price_premium": 0.1619718309859155
+  },
+  {
+    "year": 2005,
+    "neighborhood": "West End",
+    "investor_share": 0.1791044776119403,
+    "flip_rate": 0.22388059701492538,
+    "price_premium": -0.12098765432098768
+  },
+  {
+    "year": 2006,
+    "neighborhood": "West End",
+    "investor_share": 0.13043478260869565,
+    "flip_rate": 0.14492753623188406,
+    "price_premium": null
+  },
+  {
+    "year": 2007,
+    "neighborhood": "West End",
+    "investor_share": 0.18461538461538463,
+    "flip_rate": 0.046153846153846156,
+    "price_premium": 0.052000000000000046
+  },
+  {
+    "year": 2008,
+    "neighborhood": "West End",
+    "investor_share": 0.19753086419753085,
+    "flip_rate": 0.1111111111111111,
+    "price_premium": -0.21232876712328763
+  },
+  {
+    "year": 2009,
+    "neighborhood": "West End",
+    "investor_share": 0.12903225806451613,
+    "flip_rate": 0.04838709677419355,
+    "price_premium": null
+  },
+  {
+    "year": 2010,
+    "neighborhood": "West End",
+    "investor_share": 0.0,
+    "flip_rate": 0.027777777777777776,
+    "price_premium": null
+  },
+  {
+    "year": 2011,
+    "neighborhood": "West End",
+    "investor_share": 0.2711864406779661,
+    "flip_rate": 0.01694915254237288,
+    "price_premium": -0.14983333333333337
+  },
+  {
+    "year": 2012,
+    "neighborhood": "West End",
+    "investor_share": 0.203125,
+    "flip_rate": 0.0625,
+    "price_premium": -0.06172839506172845
+  },
+  {
+    "year": 2013,
+    "neighborhood": "West End",
+    "investor_share": 0.08771929824561403,
+    "flip_rate": 0.05263157894736842,
+    "price_premium": null
+  },
+  {
+    "year": 2014,
+    "neighborhood": "West End",
+    "investor_share": 0.22916666666666666,
+    "flip_rate": 0.020833333333333332,
+    "price_premium": -0.0888888888888889
+  },
+  {
+    "year": 2015,
+    "neighborhood": "West End",
+    "investor_share": 0.15789473684210525,
+    "flip_rate": 0.12280701754385964,
+    "price_premium": null
+  },
+  {
+    "year": 2016,
+    "neighborhood": "West End",
+    "investor_share": 0.19230769230769232,
+    "flip_rate": 0.11538461538461539,
+    "price_premium": null
+  },
+  {
+    "year": 2017,
+    "neighborhood": "West End",
+    "investor_share": 0.25,
+    "flip_rate": 0.020833333333333332,
+    "price_premium": -0.3298929663608563
+  },
+  {
+    "year": 2018,
+    "neighborhood": "West End",
+    "investor_share": 0.13333333333333333,
+    "flip_rate": 0.08888888888888889,
+    "price_premium": null
+  },
+  {
+    "year": 2019,
+    "neighborhood": "West End",
+    "investor_share": 0.09523809523809523,
+    "flip_rate": 0.023809523809523808,
+    "price_premium": null
+  },
+  {
+    "year": 2020,
+    "neighborhood": "West End",
+    "investor_share": 0.08333333333333333,
+    "flip_rate": 0.08333333333333333,
+    "price_premium": null
+  },
+  {
+    "year": 2021,
+    "neighborhood": "West End",
+    "investor_share": 0.17307692307692307,
+    "flip_rate": 0.057692307692307696,
+    "price_premium": null
+  },
+  {
+    "year": 2022,
+    "neighborhood": "West End",
+    "investor_share": 0.16279069767441862,
+    "flip_rate": 0.11627906976744186,
+    "price_premium": null
+  },
+  {
+    "year": 2000,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.10653753026634383,
+    "flip_rate": 0.029055690072639227,
+    "price_premium": 0.050000000000000044
+  },
+  {
+    "year": 2001,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.09200968523002422,
+    "flip_rate": 0.0774818401937046,
+    "price_premium": 0.02946428571428572
+  },
+  {
+    "year": 2002,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.07399103139013453,
+    "flip_rate": 0.11434977578475336,
+    "price_premium": 0.07494774559570017
+  },
+  {
+    "year": 2003,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.10864197530864197,
+    "flip_rate": 0.10123456790123457,
+    "price_premium": -0.03471830985915492
+  },
+  {
+    "year": 2004,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.10408163265306122,
+    "flip_rate": 0.08163265306122448,
+    "price_premium": 0.006329113924050667
+  },
+  {
+    "year": 2005,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.11135371179039301,
+    "flip_rate": 0.08296943231441048,
+    "price_premium": 0.17710843373493979
+  },
+  {
+    "year": 2006,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.11547911547911548,
+    "flip_rate": 0.06633906633906633,
+    "price_premium": 0.05943152454780365
+  },
+  {
+    "year": 2007,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.10093896713615023,
+    "flip_rate": 0.08685446009389672,
+    "price_premium": -0.08521303258145363
+  },
+  {
+    "year": 2008,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.12883435582822086,
+    "flip_rate": 0.08282208588957055,
+    "price_premium": -0.07253521126760565
+  },
+  {
+    "year": 2009,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.11271676300578035,
+    "flip_rate": 0.06358381502890173,
+    "price_premium": 0.07428571428571429
+  },
+  {
+    "year": 2010,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.14285714285714285,
+    "flip_rate": 0.0486322188449848,
+    "price_premium": -0.07868020304568524
+  },
+  {
+    "year": 2011,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.15483870967741936,
+    "flip_rate": 0.07741935483870968,
+    "price_premium": -0.1578947368421053
+  },
+  {
+    "year": 2012,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.15306122448979592,
+    "flip_rate": 0.06887755102040816,
+    "price_premium": -0.13697330984961387
+  },
+  {
+    "year": 2013,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.14918414918414918,
+    "flip_rate": 0.07925407925407925,
+    "price_premium": -0.36632
+  },
+  {
+    "year": 2014,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.15204678362573099,
+    "flip_rate": 0.07017543859649122,
+    "price_premium": -0.05232558139534882
+  },
+  {
+    "year": 2015,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.1783132530120482,
+    "flip_rate": 0.08433734939759036,
+    "price_premium": -0.10659340659340655
+  },
+  {
+    "year": 2016,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.17995444191343962,
+    "flip_rate": 0.10478359908883828,
+    "price_premium": -0.05102040816326525
+  },
+  {
+    "year": 2017,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.17954545454545454,
+    "flip_rate": 0.11363636363636363,
+    "price_premium": -0.031481481481481444
+  },
+  {
+    "year": 2018,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.12928759894459102,
+    "flip_rate": 0.13720316622691292,
+    "price_premium": -0.0625
+  },
+  {
+    "year": 2019,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.14705882352941177,
+    "flip_rate": 0.07941176470588235,
+    "price_premium": 0.05613126079447328
+  },
+  {
+    "year": 2020,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.14124293785310735,
+    "flip_rate": 0.0847457627118644,
+    "price_premium": 0.03875671527244817
+  },
+  {
+    "year": 2021,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.15789473684210525,
+    "flip_rate": 0.09610983981693363,
+    "price_premium": -0.08435472242249464
+  },
+  {
+    "year": 2022,
+    "neighborhood": "West Roxbury",
+    "investor_share": 0.16574585635359115,
+    "flip_rate": 0.09392265193370165,
+    "price_premium": 0.046428571428571486
+  }
+]
