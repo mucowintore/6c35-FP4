@@ -188,6 +188,8 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
+
+
   /* Section 6: Explorer */
   {
     id: 'explorer',
@@ -201,6 +203,25 @@ export const NARRATIVE_SECTIONS = [
         profile. Click to lock a selection. Use the filter buttons
         to isolate holding or flipping zones, or jump to a specific
         neighborhood.</p>
+    `
+  },
+
+  /* Section 7: Neighborhood graph */
+  {
+    id: 'neighborhood-trajectories',
+    layout: 'split',
+    viz: 'timeline',
+    mapState: null,
+    content: `
+      <h2 class="scroll-section-title">The same city, different paths</h2>
+
+      <p>The map shows where these patterns exist today. But it does not show how they formed.</p>
+
+      <p>Each neighborhood followed its own trajectory into this housing market. In some places, investor activity rose steadily over two decades. In others, it surged after the 2008 crisis. In some neighborhoods, flipping intensified over time. In others, it appeared briefly during moments of distress and then faded.</p>
+
+      <p>What looks like a single market at the city level is, in reality, a set of diverging paths.</p>
+
+      <p>Select one or more neighborhoods to compare how investor share, flipping activity, and pricing behavior evolved over time. Watch where their trajectories align—and where they split apart.</p>
     `
   }
 ];
