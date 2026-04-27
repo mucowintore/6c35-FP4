@@ -73,7 +73,7 @@
    * The choreography fades .opening-thesis at 1400 ms; we start the
    * counters at 1700 ms so the tween runs while the element is fully
    * visible, never during a fade. */
-  const OPENING_COUNTERS_FIRE_MS = 1700;
+  const OPENING_COUNTERS_FIRE_MS = 1350;
 
   let geoData = null;
   let ranges = {};

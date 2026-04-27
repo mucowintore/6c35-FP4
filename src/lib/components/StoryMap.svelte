@@ -106,7 +106,7 @@
    * underlying gradient to feel of the map, not pasted on it. */
   .story-map-legend {
     position: absolute;
-    left: 18px; bottom: 18px;
+    right: 18px; bottom: 18px;
     width: 216px;
     padding: 13px 15px;
     border-radius: 10px;
@@ -132,6 +132,6 @@
 
   @media (max-width: 760px) {
     .story-map { min-height: 320px; }
-    .story-map-legend { width: 196px; left: 12px; bottom: 12px; padding: 11px 13px; }
+    .story-map-legend { width: 196px; right: 12px; bottom: 12px; padding: 11px 13px; }
   }
 </style>

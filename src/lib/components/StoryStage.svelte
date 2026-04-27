@@ -177,38 +177,18 @@
   /* Persistent stacked layers. Active fades in, others fade out.
    * Inactive layers stay mounted so their internal state survives
    * a return visit. */
-  .layer {
+    .layer {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
-                mask-position 540ms cubic-bezier(0.4, 0, 0.2, 1),
-                -webkit-mask-position 540ms cubic-bezier(0.4, 0, 0.2, 1);
+    transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1);
   }
   .layer.active {
     opacity: 1;
     pointer-events: auto;
-  }
-
-  /* Directional crossfade. The incoming layer wipes from one edge
-   * via a soft gradient mask. Browsers that do not support
-   * mask-image fall back to plain opacity, which still works. */
-  .layer-from-right {
-    -webkit-mask-image: linear-gradient(to left, #000 60%, transparent 100%);
-            mask-image: linear-gradient(to left, #000 60%, transparent 100%);
-    -webkit-mask-size: 220% 100%;
-            mask-size: 220% 100%;
-    -webkit-mask-position: 100% 0;
-            mask-position: 100% 0;
-    -webkit-mask-repeat: no-repeat;
-            mask-repeat: no-repeat;
-  }
-  .layer-from-right.active {
-    -webkit-mask-position: 0% 0;
-            mask-position: 0% 0;
   }
   .layer-from-left {
     -webkit-mask-image: linear-gradient(to right, #000 60%, transparent 100%);
@@ -293,12 +273,4 @@
     .bloom-caption { font-size: 9.5px; }
   }
 
-  /* Reduced motion strips the directional mask to a plain crossfade. */
-  @media (prefers-reduced-motion: reduce) {
-    .layer-from-left,
-    .layer-from-right {
-      -webkit-mask-image: none;
-              mask-image: none;
-    }
-  }
 </style>

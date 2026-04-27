@@ -1157,3 +1157,23 @@ body {
 .strategy-nav.strategy-active-mixed {
   background: rgba(120, 115, 105, 0.06);
 }
+
+/* ===================================================
+   Legend repositioning. Both the explorer's
+   .map-legend and the story map's .story-map-legend
+   move from bottom-left to bottom-right. The story
+   map version is overridden inside its own scoped
+   style block; this block handles the explorer.
+   =================================================== */
+
+.map-legend {
+  left: auto;
+  right: 10px;
+}
+
+@media (max-width: 900px) {
+  .map-legend {
+    left: auto;
+    right: 8px;
+  }
+}

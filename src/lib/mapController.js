@@ -49,11 +49,13 @@ const BLOOM_ORIGIN_LAT = 42.3554;
 const BUILD_MAX_RETRY_FRAMES = 4;
 
 /* Minimum delta in container size, in pixels, before a ResizeObserver
- * tick triggers a rebuild. Prevents thrash on subpixel layout shifts. */
-const RESIZE_THRESHOLD_PX = 8;
+ * tick triggers a rebuild. One pixel catches every real change while
+ * still ignoring the subpixel layout flicker that fires during a
+ * transition. */
+const RESIZE_THRESHOLD_PX = 1;
 
 /* Debounce window for resize rebuilds. */
-const RESIZE_DEBOUNCE_MS = 120;
+const RESIZE_DEBOUNCE_MS = 60;
 
 /* Nudge a hex color toward white by amt (0..1). Each tract briefly
  * overshoots toward this lighter version of its target color during
@@ -703,11 +705,10 @@ export function createMapController(callbacks = {}) {
    * collapse every projection path to the origin and the map would
    * appear empty with no recoverable error.
    *
-   * The SVG itself is sized fluidly: width and height attributes are
-   * 100%, and the viewBox carries the pixel dimensions at build time.
-   * preserveAspectRatio centers the projection if the container ever
-   * grows past the build dimensions before the next ResizeObserver
-   * tick fires. */
+   * The SVG is sized in real pixels at build time. A ResizeObserver
+   * watches the container and triggers a full rebuild whenever the
+   * size changes, so the map always renders at the exact dimensions
+   * the layout has settled on. */
   function buildMap(retryCount) {
     retryCount = retryCount || 0;
     if (!container || !geoData || !ranges) return;
@@ -745,10 +746,8 @@ export function createMapController(callbacks = {}) {
     svgElement = d3
       .select(container)
       .append('svg')
-      .attr('width', '100%')
-      .attr('height', '100%')
-      .attr('viewBox', '0 0 ' + width + ' ' + height)
-      .attr('preserveAspectRatio', 'xMidYMid meet')
+      .attr('width', width)
+      .attr('height', height)
       .attr('role', 'img')
       .attr('aria-label', 'Map of Boston census tracts colored by dominant investor strategy')
       .attr('aria-describedby', 'map-legend');
@@ -763,15 +762,13 @@ export function createMapController(callbacks = {}) {
 
     mapGroup = svgElement.append('g').attr('clip-path', 'url(#map-clip)');
 
-    /* Fit the projection to the full viewBox with a small margin so
-     * tract edges never sit flush against the SVG boundary. */
-    const innerW = Math.max(1, width * 0.96);
-    const innerH = Math.max(1, height * 0.96);
-    const projection = d3.geoMercator().fitSize([innerW, innerH], geoData);
+    /* Fit the projection to the canvas with a small margin so tract
+     * edges never sit flush against the SVG boundary. */
+    const projection = d3.geoMercator().fitSize([width * 0.98, height * 0.98], geoData);
     const projectionTranslate = projection.translate();
     projection.translate([
-      projectionTranslate[0] + (width - innerW) / 2,
-      projectionTranslate[1] + (height - innerH) / 2
+      projectionTranslate[0] + width * 0.01,
+      projectionTranslate[1] + height * 0.01
     ]);
 
     pathGenerator = d3.geoPath().projection(projection);

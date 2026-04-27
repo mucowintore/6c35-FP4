@@ -43,8 +43,8 @@
   let hoverLayer = null;
 
   /* Palette tuned for the dark Section 01 background. */
-  const COLOR_NAVY = '#8AAEC8';
-  const COLOR_PRE = 'rgba(138, 174, 200, 0.55)';
+  const COLOR_NAVY = '#A8C5DD';
+  const COLOR_PRE = 'rgba(168, 197, 221, 0.55)';
   const COLOR_FILL = '#5A88AE';
   const COLOR_END = '#F2F0EA';
   const AXIS_TEXT = 'rgba(242, 240, 234, 0.55)';
@@ -114,13 +114,13 @@
     }
 
     /* Post-2008 full weight segment, the body of the story. */
-    pathPost.transition('draw-post').delay(1400)
+    pathPost.transition('draw-post').delay(1350)
       .duration(2100).ease(d3.easeCubicInOut)
       .attr('stroke-dashoffset', 0);
     if (areaPost) {
-      areaPost.transition('fade-post').delay(1400)
+      areaPost.transition('fade-post').delay(1350)
         .duration(2100).ease(d3.easeCubicOut)
-        .attr('opacity', 0.18);
+        .attr('opacity', 0.24);
     }
     if (pathTopPost) {
       pathTopPost.transition('draw-top-post').delay(1800)
@@ -331,7 +331,7 @@
     /* Primary line, post-crisis full weight. The body of the story. */
     pathPost = g.append('path').datum(post)
       .attr('fill', 'none')
-      .attr('stroke', COLOR_NAVY).attr('stroke-width', 3)
+      .attr('stroke', COLOR_NAVY).attr('stroke-width', 3.6)
       .attr('stroke-linecap', 'round')
       .attr('d', lineGen);
     lenPost = pathPost.node().getTotalLength();

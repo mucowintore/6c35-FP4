@@ -37,20 +37,18 @@ export const NARRATIVE_SECTIONS = [
       <div class="opening-thesis" aria-label="Headline finding">
         <span class="thesis-lead">Investors overpay by</span>
         <span class="thesis-num thesis-num-hold">
-          <span class="thesis-sign">+</span><span
-            class="thesis-digits"
+          <span class="thesis-digits"
             data-count-target="49"
             data-count-prefix="+"
-            data-count-duration="1500"
-            data-count-delay="2000"
-            data-count-keep-prefix="false">0</span><span class="thesis-pct">%</span>
+            data-count-duration="1100"
+            data-count-delay="200">0</span><span class="thesis-pct">%</span>
         </span>
         <span class="thesis-bridge">in white neighborhoods, and pay</span>
         <span class="thesis-num thesis-num-flip">
           <span class="thesis-digits"
             data-count-target="25"
-            data-count-duration="1500"
-            data-count-delay="2400">0</span><span class="thesis-pct">%</span>
+            data-count-duration="1100"
+            data-count-delay="500">0</span><span class="thesis-pct">%</span>
           <span class="thesis-bridge thesis-bridge-tight">less</span>
         </span>
         <span class="thesis-tail">in communities of color.</span>
@@ -343,8 +341,8 @@ export const FOOTER_CONTENT = `
         recorded sales each.</div>
     </div>
     <div class="footer-access">Keyboard navigable. Screen reader
-      descriptions on every chart and map. Honors
-      prefers-reduced-motion.</div>
+      descriptions on every chart and map. Animations slow or stop
+      when system motion is reduced.</div>
     <div class="footer-team">Joseph Firmansyah · Jessica Shoemaker
       · Jean-Michel Mucowintore<br>
       6.C85 Interactive Data Visualization and Society, Spring 2026</div>
