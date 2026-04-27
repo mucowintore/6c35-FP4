@@ -12,17 +12,18 @@
   $: viz = activeSection?.viz ?? 'timeseries';
   $: mapState = activeSection?.mapState ?? 'classified';
   $: stageKey = `${viz}-${mapState}-${activeSection?.id ?? 'none'}`;
+  $: isLineChart = viz === 'timeseries' || viz === 'pricewedge';
 </script>
 
-<div class="story-stage">
+<div class="story-stage" class:story-stage-line={isLineChart}>
   {#if loadError}
     <div class="stage-message">{loadError}</div>
   {:else}
     {#key stageKey}
       {#if viz === 'timeseries'}
-        <div class="chart-stage slide-in">
+        <div class="chart-stage chart-stage-timeseries slide-in">
           <div class="stage-kicker">Investor share of Boston purchases</div>
-          <TimeSeriesChart width={640} height={390} />
+          <TimeSeriesChart width={660} height={420} />
         </div>
       {:else if viz === 'pricewedge'}
         <div class="chart-stage slide-in">
@@ -45,6 +46,11 @@
     width: 100%;
     height: min(78vh, 700px);
     min-height: 460px;
+  }
+
+  .story-stage.story-stage-line {
+    height: min(64vh, 560px);
+    min-height: 390px;
   }
 
   .chart-stage,
@@ -72,11 +78,16 @@
 
   .stage-kicker {
     margin: 0 0 16px 22px;
-    color: var(--sub);
-    font-size: 11px;
+    color: #3f3b34;
+    font-size: 14px;
     font-weight: 700;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
+    letter-spacing: 0.01em;
+    text-transform: none;
+    line-height: 1.25;
+  }
+
+  .chart-stage-timeseries .stage-kicker {
+    font-size: 16px;
   }
 
   .stage-message {
@@ -93,13 +104,13 @@
   }
 
   .slide-in {
-    animation: stage-slide-in 520ms cubic-bezier(0.22, 1, 0.36, 1);
+    animation: stage-slide-in 640ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
   @keyframes stage-slide-in {
     from {
       opacity: 0;
-      transform: translateX(22px);
+      transform: translateX(10px);
     }
     to {
       opacity: 1;

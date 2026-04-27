@@ -35,7 +35,7 @@ export const NARRATIVE_SECTIONS = [
     mapState: null,
     content: `
       <h1 class="scroll-headline">When Boston says "speculation,"
-        whose neighborhood does it mean?</h1>
+        whose <em>neighborhood</em> does it mean?</h1>
       <p class="scroll-subline">180,000 residential transactions.
         23 years. One city, two opposite markets.</p>
       <p class="scroll-byline">Joseph Firmansyah, Jessica Shoemaker,
@@ -109,19 +109,16 @@ export const NARRATIVE_SECTIONS = [
         flipping zones. Investors here buy multi-family homes, renovate
         or convert them, and resell within months. Darker amber means
         more flipping.</p>
-      <p>We measured three signals of each strategy. For holding: median
-        sale price, condominium share, and top-decile investor concentration.
-        For flipping: flip rate, buy-side flip rate, and 2-3 family
-        property share.</p>
-      <p>Can a condo be flipped? Of course. Can a cheap home be held?
-        Sure. But across 180,000 transactions, the patterns cluster. The
-        tracts where investors overwhelmingly buy expensive condos and sit
-        on them are simply not the same tracts where investors buy
-        multi-family homes and flip them fast. We set a threshold requiring
-        one score to exceed the other by at least 0.75 standard deviations.
-        K-Means clustering, which knows nothing about our threshold,
-        independently sorted tracts into the same two groups 85.5% of the
-        time.</p>
+      <p>We measured three signals of each strategy:</p>
+      <ul>
+        <li><strong>Holding:</strong> median sale price, condominium share, and top-decile investor concentration.</li>
+        <li><strong>Flipping:</strong> flip rate, buy-side flip rate, and 2-3 family property share.</li>
+      </ul>
+      <p>Can a condo be flipped? Yes. Can a lower-priced home be held? Also
+        yes. But across 180,000 transactions, the dominant patterns separate
+        clearly. We classify a tract when one score exceeds the other by at
+        least 0.75 standard deviations, and an independent K-Means check
+        reproduces that same split 85.5% of the time.</p>
     `
   },
 

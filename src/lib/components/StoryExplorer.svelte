@@ -160,8 +160,9 @@
 
 <style>
   .story-explorer-app {
-    height: min(92vh, 860px);
-    min-height: 660px;
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 24vw);
+    height: min(96vh, 980px);
+    min-height: 740px;
     overflow: hidden;
     border: 1px solid var(--rule);
     border-radius: 8px;
