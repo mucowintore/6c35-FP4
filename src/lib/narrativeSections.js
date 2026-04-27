@@ -1,3 +1,12 @@
+/* Story content. Each split section renders one StoryStepBody copy
+ * inside the text column. The viz, mapState, and theme fields drive
+ * the persistent stage on the right and the page chrome on the left.
+ *
+ * Numbers tagged data-count-target are tweened from zero by the
+ * counter system in StoryScroller. The opening uses a delay aligned
+ * with the entrance choreography; Section 04 fires on first scroll
+ * into view. */
+
 export const NARRATIVE_SECTIONS = [
 
   {
@@ -10,34 +19,45 @@ export const NARRATIVE_SECTIONS = [
     viz: null,
     mapState: null,
     content: `
-      <div class="hero-above">When Boston says</div>
-      <div class="hero-word">"speculation,"</div>
-      <div class="hero-below">whose neighborhood does it mean?</div>
-      <div class="opening-stats">
-        <div class="opening-stat">
-          <span class="stat-num" style="color: #6BA3D6">+49</span><span class="stat-pct" style="color: #6BA3D6">%</span>
-          <span class="opening-stat-label">What investors overpay in
-            wealthy, white neighborhoods</span>
+      <div class="hero-stack">
+        <div class="hero-above">When Boston says</div>
+        <div class="hero-row">
+          <span class="hero-quote hero-quote-l" aria-hidden="true">&ldquo;</span><span class="hero-word">speculation</span><span class="hero-quote hero-quote-r" aria-hidden="true">&rdquo;</span>
         </div>
-        <div class="opening-stat">
-          <span class="stat-num" style="color: var(--amber)">25</span><span class="stat-pct" style="color: var(--amber)">%</span>
-          <span class="opening-stat-label">The discount they took in
-            communities of color during the crisis</span>
+        <div class="hero-below">whose neighborhood does it mean?</div>
+        <div class="opening-stats">
+          <div class="opening-stat">
+            <span class="stat-figure">
+              <span class="stat-num" style="color: #6BA3D6"
+                data-count-target="49" data-count-prefix="+"
+                data-count-delay="1400">+0</span><span class="stat-pct" style="color: #6BA3D6">%</span>
+            </span>
+            <span class="opening-stat-label">What investors overpay in
+              wealthy, white neighborhoods</span>
+          </div>
+          <div class="opening-stat">
+            <span class="stat-figure">
+              <span class="stat-num" style="color: var(--amber)"
+                data-count-target="25" data-count-delay="1400">0</span><span class="stat-pct" style="color: var(--amber)">%</span>
+            </span>
+            <span class="opening-stat-label">The discount they took in
+              communities of color during the crisis</span>
+          </div>
         </div>
-      </div>
-      <div class="opening-rule"></div>
-      <p class="scroll-subline">180,000 residential transactions.
-        23 years. One city, pulled apart.</p>
-      <p class="scroll-byline">Joseph Firmansyah \u00b7 Jessica Shoemaker
-        \u00b7 Jean-Michel Mucowintore</p>
-      <div class="scroll-cue-wrap">
-        <span class="scroll-cue-text">Scroll to begin</span>
-        <svg class="scroll-cue-chevron" width="16" height="10"
-          viewBox="0 0 16 10" fill="none">
-          <path d="M1 1L8 8L15 1" stroke="currentColor"
-            stroke-width="2" stroke-linecap="round"
-            stroke-linejoin="round"/>
-        </svg>
+        <div class="opening-rule"></div>
+        <p class="scroll-subline">180,000 sales. Two decades. One city
+          that split in half and never came back together.</p>
+        <p class="scroll-byline">Joseph Firmansyah · Jessica Shoemaker
+          · Jean-Michel Mucowintore</p>
+        <div class="scroll-cue-wrap">
+          <span class="scroll-cue-text">Scroll to begin</span>
+          <svg class="scroll-cue-chevron" width="16" height="10"
+            viewBox="0 0 16 10" fill="none">
+            <path d="M1 1L8 8L15 1" stroke="currentColor"
+              stroke-width="2" stroke-linecap="round"
+              stroke-linejoin="round"/>
+          </svg>
+        </div>
       </div>
     `
   },
@@ -51,6 +71,7 @@ export const NARRATIVE_SECTIONS = [
     layout: 'split',
     viz: 'timeseries',
     mapState: null,
+    background: 'dark',
     content: `
       <h2>After 2008, investors never left</h2>
       <p>Before the financial crisis, roughly one in six Boston home
@@ -122,6 +143,7 @@ export const NARRATIVE_SECTIONS = [
     layout: 'split',
     viz: 'pricewedge',
     mapState: null,
+    background: 'dark',
     content: `
       <h2>Investors pay differently in each market</h2>
       <p>In holding zones, investors consistently pay well above what
@@ -148,22 +170,29 @@ export const NARRATIVE_SECTIONS = [
     layout: 'split',
     viz: 'map',
     mapState: 'holdingDimmed',
+    background: 'amber',
     content: `
       <h2>The burden falls unevenly</h2>
       <p>The geography of flipping is not random. It maps almost
         perfectly onto the geography of race and income in Boston.</p>
       <div class="equity-stats">
         <div class="equity-stat">
-          <span class="eq-num" style="color: var(--amber)">87</span><span class="eq-pct" style="color: var(--amber)">%</span>
+          <span class="eq-num" style="color: var(--amber)"
+            data-count-target="87">0</span><span class="eq-pct" style="color: var(--amber)">%</span>
           <span class="equity-label">non-white in flipping tracts</span>
         </div>
         <div class="equity-stat">
-          <span class="eq-num" style="color: var(--navy)">34</span><span class="eq-pct" style="color: var(--navy)">%</span>
+          <span class="eq-num" style="color: var(--navy)"
+            data-count-target="34">0</span><span class="eq-pct" style="color: var(--navy)">%</span>
           <span class="equity-label">non-white in holding tracts</span>
         </div>
       </div>
       <p>Median renter household income in flipping tracts is $40,625.
         In holding tracts it is $85,390.</p>
+      <p class="human-sentence">A family renting in Dorchester faces a
+        market where every third home sale is a speculator's flip. A
+        family renting in Back Bay faces a market where investors sit
+        on empty condos that will never become anyone's home.</p>
       <p class="section-takeaway">The communities least equipped to
         absorb speculative pressure are the ones absorbing the most
         of it.</p>
@@ -199,6 +228,7 @@ export const NARRATIVE_SECTIONS = [
     layout: 'split',
     viz: 'map',
     mapState: 'fullViewAnnotated',
+    background: 'white',
     content: `
       <h2>Different markets need different tools</h2>
       <p>A blanket anti-speculation policy will be too weak for
@@ -214,9 +244,11 @@ export const NARRATIVE_SECTIONS = [
         <span>Gives tenants first right to buy their building
           before it can be sold to an investor in flipping zones</span>
       </div>
-      <p class="section-takeaway">The data does not prescribe a single
-        solution. But it does insist on precision. A policy that treats
-        Back Bay and Dorchester as the same market will fail both.</p>
+      <p>A policy that treats Back Bay and Dorchester as the same
+        market will fail both.</p>
+      <p class="section-takeaway">This data is public. These tracts
+        are named. The question is whether the policy will be as
+        specific as the problem.</p>
     `
   },
 
@@ -255,8 +287,8 @@ export const FOOTER_CONTENT = `
     </div>
     <div class="footer-access">Keyboard navigable. Screen reader
       descriptions on all charts and maps.</div>
-    <div class="footer-team">Joseph Firmansyah \u00b7 Jessica Shoemaker
-      \u00b7 Jean-Michel Mucowintore<br>
+    <div class="footer-team">Joseph Firmansyah · Jessica Shoemaker
+      · Jean-Michel Mucowintore<br>
       6.C85 Interactive Data Visualization and Society, Spring 2026</div>
   </div>
 `;

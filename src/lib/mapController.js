@@ -38,6 +38,25 @@ const SHORT_NAMES = {
 const HOVER_STROKE_WIDTH = 1.8;
 const SELECTED_STROKE = '#ffffff';
 
+/* Boston Common, the geographic origin of the radial bloom. Tracts
+ * near here color first; the wave travels outward. */
+const BLOOM_ORIGIN_LON = -71.0655;
+const BLOOM_ORIGIN_LAT = 42.3554;
+
+/* Nudge a hex color toward white by amt (0..1). Used for the brightness
+ * overshoot during the bloom transition: each tract briefly flashes
+ * 18% lighter than its target color, then settles. The standard
+ * animation principle of follow-through. */
+function lighten(hex, amt) {
+  var c = d3.color(hex);
+  if (!c) return hex;
+  var rgb = c.rgb();
+  rgb.r = rgb.r + (255 - rgb.r) * amt;
+  rgb.g = rgb.g + (255 - rgb.g) * amt;
+  rgb.b = rgb.b + (255 - rgb.b) * amt;
+  return rgb.formatHex();
+}
+
 export function createMapController(callbacks = {}) {
   let container = null;
   let geoData = null;
@@ -63,6 +82,7 @@ export function createMapController(callbacks = {}) {
   let previousPresentationState = 'interactive';
   let allowInteraction = true;
   let bloomMaxDist = 1;
+  let pulseTimer = null;
 
   const holdColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(HOLD_RAMP));
   const flipColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(FLIP_RAMP));
@@ -128,6 +148,23 @@ export function createMapController(callbacks = {}) {
     return 1;
   }
 
+  /* The flip-pulse breath. Applied while the map sits in holdingDimmed
+   * state; only flipping tracts receive the class. The CSS keyframe
+   * lives in app.css and runs an opacity 1 to 0.92 cycle every 3.2s. */
+  function applyFlipPulseClass(active) {
+    if (!tractPaths) return;
+    tractPaths.classed('flip-pulse', function (f) {
+      return active && f.properties.dominant === 'flipping' && !isLowDataTract(f.properties);
+    });
+  }
+
+  function clearFlipPulseTimer() {
+    if (pulseTimer) {
+      clearTimeout(pulseTimer);
+      pulseTimer = null;
+    }
+  }
+
   function applyPresentationState(options) {
     options = options || {};
     if (!tractPaths) return;
@@ -139,50 +176,72 @@ export function createMapController(callbacks = {}) {
 
     var pointerVal = allowInteraction ? 'auto' : 'none';
 
-    /* remove policy annotations unless entering the annotated state */
+    /* Remove policy annotations unless entering the annotated state. */
     if (presentationState !== 'fullViewAnnotated') {
       removePolicyAnnotations();
     }
 
-    /*
-     * Geographic radial bloom: tracts near the center of Boston (the Common)
-     * appear first and color radiates outward, like watching ink spread across
-     * paper. Holding tracts lead, flipping tracts follow 600ms later.
-     */
+    /* Clear any in-flight pulse so transitions do not collide. */
+    clearFlipPulseTimer();
+    if (presentationState !== 'holdingDimmed') {
+      applyFlipPulseClass(false);
+    }
+
+    /* Geographic radial bloom with brightness overshoot.
+     *
+     * Tracts near Boston Common color first; the wave radiates outward.
+     * Each tract first transitions to a brighter version of its target
+     * color (520ms), then settles to the correct value (320ms). This
+     * follow-through gives the bloom an organic, almost living quality.
+     * Holding leads, mixed follows, flipping last. */
     if (animate && previousPresentationState === 'gray' && presentationState === 'classified') {
       var md = bloomMaxDist || 1;
+      var overshootMs = 520;
+      var settleMs = 320;
 
-      tractPaths.filter(function(f) {
-        return f.properties.dominant === 'holding' && !isLowDataTract(f.properties);
-      })
-        .transition()
-        .delay(function(f) { return ((f._bloomDist || 0) / md) * 1400; })
-        .duration(800).ease(d3.easeCubicInOut)
-        .attr('fill', tractFill).attr('opacity', tractOpacity)
-        .attr('pointer-events', pointerVal);
+      function bloomTract(filterFn, baseDelay, fanout) {
+        var sel = tractPaths.filter(filterFn);
 
-      tractPaths.filter(function(f) {
-        var d = f.properties.dominant;
-        return d !== 'holding' && d !== 'flipping' && !isLowDataTract(f.properties);
-      })
-        .transition()
-        .delay(function(f) { return 400 + ((f._bloomDist || 0) / md) * 1200; })
-        .duration(700).ease(d3.easeCubicInOut)
-        .attr('fill', tractFill).attr('opacity', tractOpacity)
-        .attr('pointer-events', pointerVal);
+        sel.transition('bloom-overshoot')
+          .delay(function (f) { return baseDelay + ((f._bloomDist || 0) / md) * fanout; })
+          .duration(overshootMs).ease(d3.easeCubicOut)
+          .attr('fill', function (f) { return lighten(tractFill(f), 0.18); })
+          .attr('opacity', tractOpacity)
+          .attr('pointer-events', pointerVal);
 
-      tractPaths.filter(function(f) {
-        return f.properties.dominant === 'flipping' && !isLowDataTract(f.properties);
-      })
-        .transition()
-        .delay(function(f) { return 600 + ((f._bloomDist || 0) / md) * 1400; })
-        .duration(800).ease(d3.easeCubicInOut)
-        .attr('fill', tractFill).attr('opacity', tractOpacity)
-        .attr('pointer-events', pointerVal);
+        sel.transition('bloom-settle')
+          .delay(function (f) {
+            return baseDelay + ((f._bloomDist || 0) / md) * fanout + overshootMs;
+          })
+          .duration(settleMs).ease(d3.easeCubicInOut)
+          .attr('fill', tractFill);
+      }
 
-      /* low data tracts fade in together at the end */
-      tractPaths.filter(function(f) { return isLowDataTract(f.properties); })
-        .transition().delay(1800).duration(600).ease(d3.easeCubicOut)
+      bloomTract(
+        function (f) {
+          return f.properties.dominant === 'holding' && !isLowDataTract(f.properties);
+        },
+        0, 1400
+      );
+
+      bloomTract(
+        function (f) {
+          var d = f.properties.dominant;
+          return d !== 'holding' && d !== 'flipping' && !isLowDataTract(f.properties);
+        },
+        400, 1200
+      );
+
+      bloomTract(
+        function (f) {
+          return f.properties.dominant === 'flipping' && !isLowDataTract(f.properties);
+        },
+        600, 1400
+      );
+
+      /* Low-data tracts fade in together at the end. */
+      tractPaths.filter(function (f) { return isLowDataTract(f.properties); })
+        .transition('bloom-low').delay(1800).duration(600).ease(d3.easeCubicOut)
         .attr('fill', tractFill).attr('opacity', tractOpacity)
         .attr('pointer-events', pointerVal);
 
@@ -190,9 +249,9 @@ export function createMapController(callbacks = {}) {
       return;
     }
 
-    /* standard transition for all other state changes */
+    /* Standard transition for all other state changes. */
     var target = animate
-      ? tractPaths.transition().duration(800).ease(d3.easeCubicInOut)
+      ? tractPaths.transition('state-change').duration(800).ease(d3.easeCubicInOut)
       : tractPaths;
 
     target
@@ -202,29 +261,39 @@ export function createMapController(callbacks = {}) {
 
     refreshPathStrokes();
 
-    /* show policy zone labels when entering the annotated state */
+    /* Show policy zone labels when entering the annotated state. */
     if (presentationState === 'fullViewAnnotated' && animate) {
       setTimeout(addPolicyAnnotations, 400);
     } else if (presentationState === 'fullViewAnnotated') {
       addPolicyAnnotations();
     }
+
+    /* Schedule the flip-pulse breath after the dim transition completes.
+     * Starting it earlier would compete with the opacity transition and
+     * the eye would read flicker rather than breath. */
+    if (presentationState === 'holdingDimmed') {
+      var pulseDelay = animate ? 850 : 0;
+      pulseTimer = setTimeout(function () {
+        if (presentationState === 'holdingDimmed') applyFlipPulseClass(true);
+      }, pulseDelay);
+    }
   }
 
-  /* policy zone labels placed at the centroid of each tract cluster */
+  /* Policy zone labels placed at the centroid of each tract cluster. */
   function addPolicyAnnotations() {
     if (!mapGroup || !geoData || !pathGenerator) return;
     removePolicyAnnotations();
 
-    var holdFeats = geoData.features.filter(function(f) {
+    var holdFeats = geoData.features.filter(function (f) {
       return f.properties.dominant === 'holding' && !isLowDataTract(f.properties);
     });
-    var flipFeats = geoData.features.filter(function(f) {
+    var flipFeats = geoData.features.filter(function (f) {
       return f.properties.dominant === 'flipping' && !isLowDataTract(f.properties);
     });
 
     function clusterCenter(feats) {
       var xs = [], ys = [];
-      feats.forEach(function(f) {
+      feats.forEach(function (f) {
         var c = pathGenerator.centroid(f);
         if (c && !isNaN(c[0])) { xs.push(c[0]); ys.push(c[1]); }
       });
@@ -240,7 +309,6 @@ export function createMapController(callbacks = {}) {
         .attr('class', 'policy-annotation')
         .attr('transform', 'translate(' + cx + ',' + cy + ')');
 
-      /* background pill for legibility */
       var t = g.append('text')
         .attr('text-anchor', 'middle').attr('dy', '0.35em')
         .attr('fill', color)
@@ -302,7 +370,6 @@ export function createMapController(callbacks = {}) {
 
       const dimByFilters = dimByNeighborhood || dimByFocus || dimByLowDataFocus;
 
-      // Keep selected tract visible during contextual hover dimming.
       if (isSelected && !dimByFilters) return false;
 
       return dimByFilters || dimByHoverContext;
@@ -507,8 +574,6 @@ export function createMapController(callbacks = {}) {
 
     const props = feature.properties;
 
-    // If user clicks a tract outside the active strategy filter,
-    // reset strategy filter so the click acts as an easy "exit filter" action.
     if (!matchesCurrentStrategyFilter(props)) {
       currentFocus = 'all';
       callbacks.onFocusChange?.({ mode: 'all' });
@@ -576,6 +641,7 @@ export function createMapController(callbacks = {}) {
       clearTimeout(leaveTimer);
       leaveTimer = null;
     }
+    clearFlipPulseTimer();
 
     svgElement = d3
       .select(container)
@@ -613,10 +679,10 @@ export function createMapController(callbacks = {}) {
       .attr('stroke-width', 0.5)
       .attr('pointer-events', allowInteraction ? 'auto' : 'none');
 
-    /* pre-compute radial distances from Boston Common for the geographic bloom */
-    var commonXY = projection([-71.0655, 42.3554]);
+    /* Pre-compute radial distances from Boston Common for the bloom. */
+    var commonXY = projection([BLOOM_ORIGIN_LON, BLOOM_ORIGIN_LAT]);
     if (commonXY && !isNaN(commonXY[0])) {
-      tractPaths.each(function(feature) {
+      tractPaths.each(function (feature) {
         var c = pathGenerator.centroid(feature);
         if (c && !isNaN(c[0])) {
           feature._bloomDist = Math.hypot(c[0] - commonXY[0], c[1] - commonXY[1]);
@@ -624,7 +690,7 @@ export function createMapController(callbacks = {}) {
           feature._bloomDist = 999;
         }
       });
-      bloomMaxDist = d3.max(tractPaths.data(), function(f) { return f._bloomDist || 0; }) || 1;
+      bloomMaxDist = d3.max(tractPaths.data(), function (f) { return f._bloomDist || 0; }) || 1;
     }
 
     if (allowInteraction) {
@@ -751,8 +817,12 @@ export function createMapController(callbacks = {}) {
   }
 
   function setPresentationState(state, options = {}) {
+    var nextState = state || 'interactive';
+    /* No-op short-circuit. Same state arriving back-to-back used to
+     * cancel in-flight transitions and produce visible flicker. */
+    if (nextState === presentationState && options.animate !== false) return;
     previousPresentationState = presentationState;
-    presentationState = state || 'interactive';
+    presentationState = nextState;
     applyPresentationState(options);
   }
 
@@ -813,12 +883,16 @@ export function createMapController(callbacks = {}) {
     ranges = metricRanges;
     allowInteraction = interactive;
     presentationState = initialPresentationState;
+    /* Both states set so the bloom branch sees a stable previous state
+     * on the first user-driven transition rather than a stale default. */
+    previousPresentationState = initialPresentationState;
     buildMap();
   }
 
   function destroy() {
     if (leaveTimer) clearTimeout(leaveTimer);
     leaveTimer = null;
+    clearFlipPulseTimer();
     pendingPointerDown = null;
     removePolicyAnnotations();
 

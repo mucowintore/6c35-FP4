@@ -44,6 +44,9 @@ body {
   font-family: "Plus Jakarta Sans", system-ui, sans-serif;
   background: var(--bg);
   color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
 
@@ -194,7 +197,6 @@ body {
   color: var(--amber);
 }
 
-/* Focus controls: made prominent so users know to click them */
 .focus-controls {
   display: flex;
   gap: 5px;
@@ -234,7 +236,6 @@ body {
   border-color: var(--ink);
 }
 
-/* Give the hold and flip buttons a color hint even when inactive */
 .focus-btn.hold-btn {
   border-color: var(--navy-light);
   color: var(--navy);
@@ -309,14 +310,35 @@ body {
   height: 100%;
 }
 
-/* Census tract polygons */
+/* Census tract polygons.
+ *
+ * Each tract has a base transition on opacity for the smooth dim and
+ * glow interaction. Hover lifts the tract a millimeter off the surface
+ * via brightness and a soft drop shadow. The flip-pulse class adds a
+ * slow breath that runs only while the section asks for it (Section
+ * 04 holdingDimmed). will-change promotes the tract to its own layer
+ * and keeps the animation at 60fps. */
 .tract {
   cursor: pointer;
-  transition: opacity 0.25s;
   stroke-linejoin: round;
+  transition: opacity 280ms cubic-bezier(0.4, 0, 0.2, 1),
+              filter 220ms cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: opacity, filter;
 }
 
 .tract.dimmed { opacity: 0.08; }
+
+.tract:hover {
+  filter: brightness(1.06) drop-shadow(0 0 4px rgba(0, 0, 0, 0.16));
+}
+
+@keyframes tract-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.92; }
+}
+.tract.flip-pulse {
+  animation: tract-pulse 3.2s ease-in-out infinite;
+}
 
 
 /* ===================================================
@@ -335,6 +357,7 @@ body {
   font-weight: 600;
   line-height: 1.4;
   max-width: 280px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
 }
 
 .hover-tooltip.tip-hold { background: var(--navy); color: #fff; }
@@ -784,7 +807,6 @@ body {
   transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* thin tick mark showing the city average on each metric bar */
 .metric-avg-tick {
   position: absolute;
   top: -2px;
@@ -854,7 +876,7 @@ body {
   line-height: 1.55;
 }
 
-/* ── Diverging bar chart (replaces radar) ── */
+/* Diverging bar chart (replaces radar) */
 .profile-chart-container {
   margin: 0 auto 6px;
   text-align: center;
@@ -868,11 +890,26 @@ body {
   margin-bottom: 8px;
 }
 
-/* ── Metric explanation lines ── */
+/* Metric explanation lines */
 .metric-explanation {
   font-size: 9px;
   color: var(--faint);
   line-height: 1.3;
   margin-top: 1px;
   opacity: 0.75;
+}
+
+
+/* ===================================================
+   Reduced motion. Every
+   animation collapses to an instant transition.
+   =================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
