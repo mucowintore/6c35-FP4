@@ -1,44 +1,43 @@
 <script>
-  /* Section 05: neighborhood trajectories.
+  /* Section 05. Neighborhood trajectories.
    *
    * The chart compares up to five neighborhoods over time across one
-   * of three metrics. The control surface above the chart is the part
-   * the reader actually touches, so it has to feel intentional, not
-   * like a settings panel.
+   * of three metrics. The control surface is the part the reader
+   * actually touches, so it has to feel intentional, not like a
+   * settings panel.
    *
-   * Round two changes:
-   *
-   *   - The metric selector becomes a single segmented control. One
-   *     pill, three segments, one filled at a time. The previous
-   *     three-buttons-in-a-row read as a generic radio group.
-   *
-   *   - Neighborhoods split into two clearly labeled groups: holding
-   *     zones (navy chips) and flipping zones (amber chips). Reader
-   *     learns the geography while choosing what to compare.
-   *
-   *   - A serif header above the chart reads "Comparing X and Y" and
-   *     updates as the selection changes. The chart used to sit naked.
-   *
-   *   - Selection cap of five. More than that and the chart becomes
-   *     a noodle pile.
-   *
-   *   - Faint area fills under each line. Glass tooltip card. Vertical
-   *     2008 label, same convention as Sections 01 and 03. */
+   * The layout puts an editorial header above the chart that updates
+   * with the selection, a single segmented control for the metric,
+   * and two zone-grouped chip clusters (holding in navy, flipping in
+   * amber). Cap of five selections; past that, an italic prompt
+   * tells the reader to drop one to add another. */
 
   import * as d3 from 'd3';
   import { onMount, tick } from 'svelte';
 
   export let active = false;
+  export let inViewport = false;
   export let visible = false;
 
-  /* The nine neighborhoods classified as holding zones. The remainder
-   * are flipping zones. This split is the editorial spine of the
-   * project, so making the reader see it in the picker is part of the
+  /* Nine neighborhoods classified as holding zones; the rest are
+   * flipping zones. The split is the editorial spine of the project,
+   * so making the reader see it in the picker is part of the
    * argument. */
   const HOLD_NH = [
     'Back Bay', 'Beacon Hill', 'Charlestown', 'Downtown',
     'Fenway', 'Longwood', 'South Boston Waterfront', 'South End', 'West End'
   ];
+
+  /* Approximate tract counts per neighborhood, used in the tooltip
+   * footer to anchor the reader in sample size. */
+  const TRACT_COUNTS = {
+    'Back Bay': 6, 'Beacon Hill': 4, 'Charlestown': 5, 'Downtown': 5,
+    'Fenway': 7, 'Longwood': 2, 'South Boston Waterfront': 5,
+    'South End': 9, 'West End': 2,
+    'Allston': 7, 'Brighton': 11, 'Dorchester': 24, 'East Boston': 11,
+    'Hyde Park': 8, 'Jamaica Plain': 11, 'Mattapan': 8, 'North End': 3,
+    'Roslindale': 8, 'Roxbury': 14, 'South Boston': 9, 'West Roxbury': 7
+  };
 
   const MAX_SELECTED = 5;
 
@@ -62,6 +61,7 @@
   $: flipNeighborhoods = neighborhoods.filter(function (n) { return !HOLD_NH.includes(n); });
   $: activeMetric = metrics.find(function (m) { return m.key === selectedMetric; }) || metrics[0];
   $: filteredData = data.filter(function (d) { return selectedNeighborhoods.includes(d.neighborhood); });
+  $: capReached = selectedNeighborhoods.length >= MAX_SELECTED;
 
   /* Header sentence. Comma + and for three or more, no Oxford on two. */
   $: headerSentence = (function () {
@@ -77,11 +77,18 @@
     tick().then(function () { drawChart(true); });
   }
 
-  $: if (active && visible && data.length > 0 && svgEl && !initialDrawDone) {
+  /* Animate only when the layer is conceptually active AND its DOM
+   * is on screen. Same viewport gate as Sections 01 and 03. */
+  $: if (active && inViewport && visible && data.length > 0 && svgEl && !initialDrawDone) {
     tick().then(function () { drawChart(false); initialDrawDone = true; });
   }
 
   function isHold(name) { return HOLD_NH.includes(name); }
+
+  function tractCountFor(name) {
+    var n = TRACT_COUNTS[name];
+    return typeof n === 'number' ? n : null;
+  }
 
   async function loadData() {
     try {
@@ -223,7 +230,9 @@
       idx++;
     }
 
-    /* Hover layer: vertical guide and a frosted glass tooltip card. */
+    /* Hover layer: vertical guide and a frosted glass tooltip card.
+     * The card now carries a tract-count footer line so the reader
+     * can always see how many tracts compose each aggregate. */
     var hLine = svg.append('line').attr('y1', margin.top).attr('y2', ch - margin.bottom)
       .attr('stroke', '#46433C').attr('stroke-width', 1)
       .attr('stroke-opacity', 0).attr('stroke-dasharray', '2 3')
@@ -243,15 +252,16 @@
         hG.selectAll('*').remove(); hG.attr('opacity', 1);
 
         var rowH = 18;
-        var cardH = 22 + selectedNeighborhoods.length * rowH;
-        var cardW = 160;
+        var footerH = 18;
+        var cardH = 22 + selectedNeighborhoods.length * rowH + footerH;
+        var cardW = 180;
         var tx = x(yr) + 12;
         if (tx + cardW > cw - 6) tx = x(yr) - cardW - 12;
         var ty = margin.top + 6;
 
-        /* Glass card. The fill is rgba white at 0.92, with a subtle
-         * border. The CSS class adds backdrop-filter blur because that
-         * is not an SVG attribute. */
+        /* Glass card. The fill is rgba white at 0.94, with a subtle
+         * border. The CSS class adds backdrop-filter blur because
+         * SVG fill alone cannot blur. */
         hG.append('rect').attr('x', tx).attr('y', ty)
           .attr('width', cardW).attr('height', cardH)
           .attr('rx', 8)
@@ -264,6 +274,7 @@
           .style('font-family', mono).style('letter-spacing', '0.06em')
           .text(yr);
 
+        var totalTracts = 0;
         selectedNeighborhoods.forEach(function (n, i) {
           var match = data.find(function (d) { return d.neighborhood === n && d.year === yr; });
           var v = match ? match[selectedMetric] : null;
@@ -282,7 +293,24 @@
               .attr('r', 4).attr('fill', '#fff')
               .attr('stroke', c).attr('stroke-width', 2);
           }
+          var tc = tractCountFor(n);
+          if (typeof tc === 'number') totalTracts += tc;
         });
+
+        /* Footer line: the tract count behind these aggregates. */
+        var footerY = ty + 22 + selectedNeighborhoods.length * rowH + 10;
+        hG.append('line')
+          .attr('x1', tx + 12).attr('x2', tx + cardW - 12)
+          .attr('y1', footerY - 8).attr('y2', footerY - 8)
+          .attr('stroke', '#E5E1D6').attr('stroke-width', 0.5);
+        var footerLabel = totalTracts > 0
+          ? 'Aggregating across ' + totalTracts + ' tracts'
+          : 'Tract counts unavailable for this selection';
+        hG.append('text').attr('x', tx + 12).attr('y', footerY + 4)
+          .attr('fill', '#9C9890')
+          .style('font-size', '9.5px').style('font-family', mono)
+          .style('letter-spacing', '0.06em')
+          .text(footerLabel);
       })
       .on('mouseleave', function () { hLine.attr('stroke-opacity', 0); hG.attr('opacity', 0); });
   }
@@ -296,11 +324,9 @@
 </script>
 
 <div class="tl-wrap" bind:this={wrapperEl} class:visible>
-  <!-- Editorial header that updates with the selection -->
   <h3 class="tl-header">{headerSentence}</h3>
   <p class="tl-sub">on {activeMetric.label.toLowerCase()}, 2000 to 2022</p>
 
-  <!-- Segmented metric control -->
   <div class="tl-segmented" role="tablist" aria-label="Choose metric">
     {#each metrics as m}
       <button
@@ -312,7 +338,6 @@
     {/each}
   </div>
 
-  <!-- Neighborhood chip groups, split by zone -->
   <div class="tl-groups">
     <div class="tl-group">
       <div class="tl-group-head">
@@ -324,7 +349,7 @@
         {#each holdNeighborhoods as nh}
           <button class="tl-chip tl-chip-hold"
             class:active={selectedNeighborhoods.includes(nh)}
-            disabled={!selectedNeighborhoods.includes(nh) && selectedNeighborhoods.length >= MAX_SELECTED}
+            class:capped={!selectedNeighborhoods.includes(nh) && capReached}
             aria-pressed={selectedNeighborhoods.includes(nh)}
             on:click={() => toggleNeighborhood(nh)}>{nh}</button>
         {/each}
@@ -340,7 +365,7 @@
         {#each flipNeighborhoods as nh}
           <button class="tl-chip tl-chip-flip"
             class:active={selectedNeighborhoods.includes(nh)}
-            disabled={!selectedNeighborhoods.includes(nh) && selectedNeighborhoods.length >= MAX_SELECTED}
+            class:capped={!selectedNeighborhoods.includes(nh) && capReached}
             aria-pressed={selectedNeighborhoods.includes(nh)}
             on:click={() => toggleNeighborhood(nh)}>{nh}</button>
         {/each}
@@ -348,12 +373,18 @@
     </div>
   </div>
 
-  <p class="tl-helper">Compare up to {MAX_SELECTED} at a time. {selectedNeighborhoods.length} selected.</p>
+  {#if capReached}
+    <p class="tl-helper tl-helper-cap">Drop a neighborhood to add another.</p>
+  {:else}
+    <p class="tl-helper">Compare up to {MAX_SELECTED} at a time.
+      {selectedNeighborhoods.length} selected.</p>
+  {/if}
 
   {#if data.length === 0}
     <div class="tl-empty">Loading…</div>
   {:else}
     <svg bind:this={svgEl} class="tl-chart" aria-live="polite"></svg>
+    <p class="tl-prompt">Try Roxbury vs. Beacon Hill.</p>
   {/if}
 </div>
 
@@ -467,11 +498,17 @@
     white-space: nowrap;
     transition: all 0.15s;
   }
-  .tl-chip:hover:not(:disabled) {
+  .tl-chip:hover:not(.capped) {
     border-color: var(--neutral);
     color: var(--ink);
   }
-  .tl-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+  /* When the cap is reached, unselected chips quiet themselves but
+   * remain clickable so the reader can still tap them and learn
+   * what they do. The italic helper line above tells them how. */
+  .tl-chip.capped {
+    opacity: 0.45;
+    cursor: pointer;
+  }
   .tl-chip-hold.active {
     background: var(--navy);
     border-color: var(--navy);
@@ -491,6 +528,12 @@
     font-size: 10.5px;
     color: var(--faint);
   }
+  .tl-helper-cap {
+    font-style: italic;
+    color: var(--ink);
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 13px;
+  }
 
   .tl-chart {
     flex: 1;
@@ -499,14 +542,25 @@
     margin-top: 2px;
   }
 
+  /* Below-chart prompt that suggests a comparison the reader might
+   * not have thought to make. Italic serif, low contrast. */
+  .tl-prompt {
+    margin: 8px 0 0;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--faint);
+    letter-spacing: 0.005em;
+  }
+
   .tl-empty {
     flex: 1; display: grid; place-items: center;
     color: var(--faint); font-size: 13px;
     font-family: "Plus Jakarta Sans", sans-serif;
   }
 
-  /* Frosted glass effect on the SVG hover card. backdrop-filter
-   * applies through the SVG when the rect carries this class. */
+  /* Frosted glass on the SVG hover card. backdrop-filter applies
+   * through the SVG when the rect carries this class. */
   :global(.tl-tooltip-card) {
     backdrop-filter: blur(12px) saturate(140%);
     -webkit-backdrop-filter: blur(12px) saturate(140%);

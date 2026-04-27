@@ -23,68 +23,57 @@ function fmtForKey(key) {
   return key === 'median_price' ? formatDollars : formatPercent;
 }
 
+/* Right panel content for the explorer.
+ *
+ * The reader has already walked the entire scrolly to get here, so
+ * the overview tab is intentionally short. One sentence of welcome,
+ * then four small tiles that double as a quick reference and as a
+ * map preview affordance. Hovering a tile dims the map to highlight
+ * that subset; this is wired in SidePanel via data-preview-kind. */
 export function buildOverviewSections({ holdCount, flipCount }) {
   const overview = `
-    <div class="overview-title">Two markets, one crisis</div>
-
-    <div class="overview-text">
-      Every colored shape on this map is a census tract in the City of Boston.
-      We analyzed <b>180,000 residential sale transactions</b> recorded by the
-      Metropolitan Area Planning Council (MAPC) between 2000 and 2022 to
-      understand what the word "speculation" actually means in practice.
-    </div>
-
-    <div class="overview-text">
-      What we found is that investors pursue <b>two fundamentally different
-      strategies</b>, and those strategies concentrate in <b>two fundamentally
-      different communities</b>.
+    <div class="explorer-welcome">
+      Now it is your turn. Hover any tract to read its full investor
+      profile. Click to lock the panel on that tract. The metrics
+      below are how every tract earned its color.
     </div>
 
     <div class="overview-section-divider"></div>
-    <div class="overview-title overview-section-title">How to read this map</div>
 
-    <div class="overview-text">
-      <b style="color: var(--navy)">Navy tracts</b> are <b>holding zones</b>.
-      Investors here buy expensive condominiums and keep them as long-term
-      financial assets. They pay a median of <b>49% more</b> than non-investors
-      for comparable properties. Darker navy means more intense holding activity.
+    <div class="explorer-tile-grid" role="group"
+         aria-label="Quick reference. Hover to preview each subset on the map.">
+      <button class="explorer-tile explorer-tile-hold"
+              data-preview-kind="hold"
+              type="button">
+        <span class="explorer-tile-num">${holdCount}</span>
+        <span class="explorer-tile-label">Holding-dominant tracts.
+          Investors overpay by +49%.</span>
+      </button>
+      <button class="explorer-tile explorer-tile-flip"
+              data-preview-kind="flip"
+              type="button">
+        <span class="explorer-tile-num">${flipCount}</span>
+        <span class="explorer-tile-label">Flipping-dominant tracts.
+          During the crisis, they bought at 25% discounts.</span>
+      </button>
+      <button class="explorer-tile explorer-tile-flip"
+              data-preview-kind="flip"
+              type="button">
+        <span class="explorer-tile-num">87<span class="explorer-tile-pct">%</span></span>
+        <span class="explorer-tile-label">Flipping tracts that are
+          non-white. The harm is racially concentrated.</span>
+      </button>
+      <button class="explorer-tile explorer-tile-flip"
+              data-preview-kind="flip"
+              type="button">
+        <span class="explorer-tile-num">$40<span class="explorer-tile-pct">K</span></span>
+        <span class="explorer-tile-label">Median renter income in
+          flipping tracts. Half the citywide average.</span>
+      </button>
     </div>
 
-    <div class="overview-text">
-      <b style="color: var(--amber)">Amber tracts</b> are <b>flipping zones</b>.
-      Investors here buy less expensive multi-family homes, renovate or convert
-      them, and resell within months. They pay a much smaller premium than in
-      holding zones. During the 2008 crisis they bought at discounts of up to
-      25%. Darker amber means more flipping.
-    </div>
-
-    <div class="overview-text">
-      <b>Gray tracts</b> are <b>mixed</b>, meaning neither strategy clearly
-      dominates (the score gap is less than 0.75 standard deviations).
-    </div>
-
-    <div class="stat-grid">
-      <div class="stat-box">
-        <div class="stat-value" style="color: var(--navy)">${holdCount}</div>
-        <div class="stat-label">Holding-dominant tracts.
-          Investors overpay by +49%.</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value" style="color: var(--amber)">${flipCount}</div>
-        <div class="stat-label">Flipping-dominant tracts.
-          During the crisis, investors bought
-          at 25% discounts.</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value">87%</div>
-        <div class="stat-label">Flipping tracts are non-white.
-          The harm is racially concentrated.</div>
-      </div>
-      <div class="stat-box">
-        <div class="stat-value">$40K</div>
-        <div class="stat-label">Median renter income in flipping
-          tracts. Half the citywide average.</div>
-      </div>
+    <div class="explorer-tile-hint" aria-hidden="true">
+      Hover a tile to preview that subset on the map.
     </div>`;
 
   const howToExplore = `
@@ -274,19 +263,19 @@ export function drawDivergingBars(container, props, ranges, cityAverages, accent
       .attr('width', barW).attr('height', barH)
       .attr('fill', '#ECEAE2').attr('rx', 2);
 
-    /* colored bar (no animation, just draw it) */
+    /* colored bar */
     svg.append('rect')
       .attr('x', ml + bx).attr('y', barY)
       .attr('width', Math.max(1, bw)).attr('height', barH)
       .attr('fill', accentCol).attr('opacity', 0.75).attr('rx', 2);
 
-    /* center line (city average) */
+    /* center line marks the city average */
     svg.append('line')
       .attr('x1', ml + cx).attr('x2', ml + cx)
       .attr('y1', barY - 4).attr('y2', barY + barH + 4)
       .attr('stroke', '#9C9890').attr('stroke-width', 1);
 
-    /* metric label */
+    /* metric label on the left */
     svg.append('text')
       .attr('x', ml - 8).attr('y', rowY + rowH / 2)
       .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
@@ -295,7 +284,7 @@ export function drawDivergingBars(container, props, ranges, cityAverages, accent
       .attr('font-weight', '600')
       .text(metric.label);
 
-    /* value label */
+    /* tract value on the right */
     svg.append('text')
       .attr('x', ml + barW + 6).attr('y', rowY + rowH / 2)
       .attr('text-anchor', 'start').attr('dominant-baseline', 'central')
@@ -306,7 +295,7 @@ export function drawDivergingBars(container, props, ranges, cityAverages, accent
   }
 }
 
-/* Paired diverging bars: holding avg vs flipping avg */
+/* Paired diverging bars: holding average vs flipping average */
 export function drawPairedDivergingBars(container, holdAvg, flipAvg, ranges, cityAverages) {
   if (!container) return;
   container.innerHTML = '';
@@ -340,13 +329,13 @@ export function drawPairedDivergingBars(container, holdAvg, flipAvg, ranges, cit
       .attr('width', barW).attr('height', blockH)
       .attr('fill', '#ECEAE2').attr('rx', 2);
 
-    /* center line */
+    /* center line marks the city average */
     svg.append('line')
       .attr('x1', ml + cx).attr('x2', ml + cx)
       .attr('y1', barY - 3).attr('y2', barY + blockH + 3)
       .attr('stroke', '#9C9890').attr('stroke-width', 1);
 
-    /* holding bar (navy) */
+    /* holding bar in navy */
     if (hVal != null) {
       var hx = scale(Math.max(rng.min, Math.min(rng.max, hVal)));
       svg.append('rect')
@@ -355,7 +344,7 @@ export function drawPairedDivergingBars(container, holdAvg, flipAvg, ranges, cit
         .attr('fill', COLORS.navy).attr('opacity', 0.8).attr('rx', 1);
     }
 
-    /* flipping bar (amber) */
+    /* flipping bar in amber */
     if (fVal != null) {
       var fx = scale(Math.max(rng.min, Math.min(rng.max, fVal)));
       svg.append('rect')
@@ -364,7 +353,7 @@ export function drawPairedDivergingBars(container, holdAvg, flipAvg, ranges, cit
         .attr('fill', COLORS.amber).attr('opacity', 0.8).attr('rx', 1);
     }
 
-    /* label */
+    /* metric label on the left */
     svg.append('text')
       .attr('x', ml - 8).attr('y', rowY + rowH / 2)
       .attr('text-anchor', 'end').attr('dominant-baseline', 'central')

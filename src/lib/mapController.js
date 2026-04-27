@@ -38,20 +38,26 @@ const SHORT_NAMES = {
 const HOVER_STROKE_WIDTH = 1.8;
 const SELECTED_STROKE = '#ffffff';
 
-/* Boston Common, the geographic origin of the radial bloom. Tracts
- * near here color first; the wave travels outward. */
+/* Boston Common is the geographic origin of the radial bloom.
+ * Tracts near here color first, the wave radiates outward. */
 const BLOOM_ORIGIN_LON = -71.0655;
 const BLOOM_ORIGIN_LAT = 42.3554;
 
-/* Maximum number of animation frames to wait for a non-zero container
- * size before giving up on a build attempt. Four frames at 60fps is
- * about 67ms, well under any threshold a user would notice. */
+/* Maximum frames to wait for a non-zero container size before
+ * abandoning a build attempt. Four frames at 60 fps is about 67 ms,
+ * well under any threshold a reader would notice. */
 const BUILD_MAX_RETRY_FRAMES = 4;
 
-/* Nudge a hex color toward white by amt (0..1). Used for the brightness
- * overshoot during the bloom transition: each tract briefly flashes
- * 18% lighter than its target color, then settles. The standard
- * animation principle of follow-through. */
+/* Minimum delta in container size, in pixels, before a ResizeObserver
+ * tick triggers a rebuild. Prevents thrash on subpixel layout shifts. */
+const RESIZE_THRESHOLD_PX = 8;
+
+/* Debounce window for resize rebuilds. */
+const RESIZE_DEBOUNCE_MS = 120;
+
+/* Nudge a hex color toward white by amt (0..1). Each tract briefly
+ * overshoots toward this lighter version of its target color during
+ * the bloom, then settles. */
 function lighten(hex, amt) {
   var c = d3.color(hex);
   if (!c) return hex;
@@ -89,6 +95,15 @@ export function createMapController(callbacks = {}) {
   let bloomMaxDist = 1;
   let pulseTimer = null;
   let pendingBuildFrame = null;
+  let lastBuildWidth = 0;
+  let lastBuildHeight = 0;
+  let resizeObserver = null;
+  let resizeTimer = null;
+
+  /* Preview state. When previewSubset is called, every tract not in
+   * the named subset dims while the preview is active. clearPreview
+   * restores the underlying state without disturbing user filters. */
+  let previewKind = null;
 
   const holdColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(HOLD_RAMP));
   const flipColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(FLIP_RAMP));
@@ -154,9 +169,8 @@ export function createMapController(callbacks = {}) {
     return 1;
   }
 
-  /* The flip-pulse breath. Applied while the map sits in holdingDimmed
-   * state; only flipping tracts receive the class. The CSS keyframe
-   * lives in app.css and runs an opacity 1 to 0.92 cycle every 3.2s. */
+  /* Slow breath on the flipping tracts while the map sits in
+   * holdingDimmed. Class is added in app.css as a keyframe animation. */
   function applyFlipPulseClass(active) {
     if (!tractPaths) return;
     tractPaths.classed('flip-pulse', function (f) {
@@ -182,24 +196,20 @@ export function createMapController(callbacks = {}) {
 
     var pointerVal = allowInteraction ? 'auto' : 'none';
 
-    /* Remove policy annotations unless entering the annotated state. */
     if (presentationState !== 'fullViewAnnotated') {
       removePolicyAnnotations();
     }
 
-    /* Clear any in-flight pulse so transitions do not collide. */
     clearFlipPulseTimer();
     if (presentationState !== 'holdingDimmed') {
       applyFlipPulseClass(false);
     }
 
-    /* Geographic radial bloom with brightness overshoot.
-     *
-     * Tracts near Boston Common color first; the wave radiates outward.
-     * Each tract first transitions to a brighter version of its target
-     * color (520ms), then settles to the correct value (320ms). The
-     * follow-through gives the bloom an organic, almost living quality.
-     * Holding leads, mixed follows, flipping last. */
+    /* Radial bloom from the cream gray state into the classified
+     * state. Each tract first transitions to a brighter version of
+     * its target color, then settles. Holding leads, mixed follows,
+     * flipping last. The cubic delay function fans out from Boston
+     * Common. */
     if (animate && previousPresentationState === 'gray' && presentationState === 'classified') {
       var md = bloomMaxDist || 1;
       var overshootMs = 520;
@@ -245,17 +255,16 @@ export function createMapController(callbacks = {}) {
         600, 1400
       );
 
-      /* Low-data tracts fade in together at the end. */
       tractPaths.filter(function (f) { return isLowDataTract(f.properties); })
         .transition('bloom-low').delay(1800).duration(600).ease(d3.easeCubicOut)
         .attr('fill', tractFill).attr('opacity', tractOpacity)
         .attr('pointer-events', pointerVal);
 
       refreshPathStrokes();
+      callbacks.onBloomComplete?.({ totalMs: 1800 + 600 });
       return;
     }
 
-    /* Standard transition for all other state changes. */
     var target = animate
       ? tractPaths.transition('state-change').duration(800).ease(d3.easeCubicInOut)
       : tractPaths;
@@ -267,16 +276,12 @@ export function createMapController(callbacks = {}) {
 
     refreshPathStrokes();
 
-    /* Show policy zone labels when entering the annotated state. */
     if (presentationState === 'fullViewAnnotated' && animate) {
       setTimeout(addPolicyAnnotations, 400);
     } else if (presentationState === 'fullViewAnnotated') {
       addPolicyAnnotations();
     }
 
-    /* Schedule the flip-pulse breath after the dim transition completes.
-     * Starting it earlier would compete with the opacity transition and
-     * the eye would read flicker rather than breath. */
     if (presentationState === 'holdingDimmed') {
       var pulseDelay = animate ? 850 : 0;
       pulseTimer = setTimeout(function () {
@@ -287,12 +292,9 @@ export function createMapController(callbacks = {}) {
 
   /* Policy zone labels.
    *
-   * Round two upgrade. Each label is now a small frosted-glass pill
-   * with a 4 px accent stripe, set in serif type, and connected to
-   * the tract cluster centroid by a thin leader line. The previous
-   * version used a flat colored pill with bold sans-serif. The new
-   * treatment reads as editorial annotation rather than as legend
-   * artifact, which is what this section needs. */
+   * One frosted-glass pill per cluster with a 4 px accent stripe and
+   * a thin dashed leader line back to the cluster centroid. Reads as
+   * editorial annotation rather than legend chrome. */
   function addPolicyAnnotations() {
     if (!mapGroup || !geoData || !pathGenerator) return;
     removePolicyAnnotations();
@@ -318,17 +320,12 @@ export function createMapController(callbacks = {}) {
     var serif = '"DM Serif Display", Georgia, serif';
     var mono = 'IBM Plex Mono, monospace';
 
-    /* Place a label group: a thin leader line from the cluster
-     * centroid to the label position, then the frosted pill with an
-     * accent stripe on its left edge, then the label text in serif
-     * with a small uppercased tag below. */
     function placeLabel(centroidXY, offsetX, offsetY, label, tag, accent) {
       var labelX = centroidXY[0] + offsetX;
       var labelY = centroidXY[1] + offsetY;
 
       var g = mapGroup.append('g').attr('class', 'policy-annotation');
 
-      /* Leader line from centroid to the label anchor point. */
       g.append('line')
         .attr('x1', centroidXY[0]).attr('y1', centroidXY[1])
         .attr('x2', labelX).attr('y2', labelY)
@@ -336,17 +333,14 @@ export function createMapController(callbacks = {}) {
         .attr('stroke-opacity', 0.65)
         .attr('stroke-dasharray', '2 2');
 
-      /* Small dot at the centroid end of the leader. */
       g.append('circle')
         .attr('cx', centroidXY[0]).attr('cy', centroidXY[1])
         .attr('r', 2.5).attr('fill', accent).attr('stroke', '#fff').attr('stroke-width', 1);
 
-      /* Build the label content first so we can size the pill to
-       * exactly fit the type. */
       var labelGroup = g.append('g').attr('transform', 'translate(' + labelX + ',' + labelY + ')');
 
       var tagText = labelGroup.append('text')
-        .attr('x', 14).attr('y', 14)
+        .attr('x', 13).attr('y', 13)
         .attr('fill', accent)
         .attr('font-family', mono)
         .attr('font-size', '9px')
@@ -355,48 +349,42 @@ export function createMapController(callbacks = {}) {
         .text(tag.toUpperCase());
 
       var nameText = labelGroup.append('text')
-        .attr('x', 14).attr('y', 30)
+        .attr('x', 13).attr('y', 28)
         .attr('fill', '#191816')
         .attr('font-family', serif)
-        .attr('font-size', '13px')
+        .attr('font-size', '12px')
         .text(label);
 
       var tagBBox = tagText.node().getBBox();
       var nameBBox = nameText.node().getBBox();
-      var pillW = Math.max(tagBBox.width, nameBBox.width) + 26;
-      var pillH = 40;
+      var pillW = Math.max(tagBBox.width, nameBBox.width) + 24;
+      var pillH = 36;
 
-      /* Insert the pill background behind the text. Frosted glass
-       * effect comes through the .policy-pill CSS class which sets
-       * backdrop-filter, since SVG fill alone cannot blur. */
+      /* Frosted glass needs CSS backdrop-filter, which only applies
+       * when the rect carries .policy-pill in app.css. */
       labelGroup.insert('rect', 'text')
         .attr('class', 'policy-pill')
         .attr('x', 0).attr('y', 0)
         .attr('width', pillW).attr('height', pillH)
-        .attr('rx', 6)
+        .attr('rx', 5)
         .attr('fill', 'rgba(255, 255, 255, 0.82)')
         .attr('stroke', 'rgba(0, 0, 0, 0.05)')
         .attr('stroke-width', 0.5);
 
-      /* Accent stripe on the left edge. */
       labelGroup.insert('rect', 'text')
         .attr('x', 0).attr('y', 0)
         .attr('width', 4).attr('height', pillH)
         .attr('rx', 1.5)
         .attr('fill', accent);
 
-      /* Subtle entry. */
       g.attr('opacity', 0)
         .transition().duration(500).ease(d3.easeCubicOut)
         .attr('opacity', 1);
     }
 
-    /* Offset the labels diagonally from each cluster so they don't
-     * occlude the tracts they describe. Holding cluster's label sits
-     * up and to the right; flipping cluster's label sits down and
-     * to the left. */
+    /* Offsets keep each label clear of the cluster it describes. */
     placeLabel(hc, 28, -54, 'Transfer fee zone', 'Holding', '#1B3A5C');
-    placeLabel(fc, -180, 36, 'TOPA zone', 'Flipping', '#7A5020');
+    placeLabel(fc, -170, 36, 'TOPA zone', 'Flipping', '#7A5020');
   }
 
   function removePolicyAnnotations() {
@@ -415,6 +403,7 @@ export function createMapController(callbacks = {}) {
       let dimByFocus = false;
       let dimByLowDataFocus = false;
       let dimByHoverContext = false;
+      let dimByPreview = false;
 
       if (selectedNeighborhood && props.neighborhood !== selectedNeighborhood) {
         dimByNeighborhood = true;
@@ -436,11 +425,22 @@ export function createMapController(callbacks = {}) {
         dimByHoverContext = thisClass !== hoveredClass;
       }
 
+      /* Preview overlay (from the explorer side panel tiles).
+       * Independent of the user's focus filter so the preview never
+       * disturbs their underlying selection state. */
+      if (previewKind === 'hold' && props.dominant !== 'holding') {
+        dimByPreview = true;
+      } else if (previewKind === 'flip' && props.dominant !== 'flipping') {
+        dimByPreview = true;
+      } else if (previewKind === 'mixed' && props.dominant !== 'mixed') {
+        dimByPreview = true;
+      }
+
       const dimByFilters = dimByNeighborhood || dimByFocus || dimByLowDataFocus;
 
-      if (isSelected && !dimByFilters) return false;
+      if (isSelected && !dimByFilters && !dimByPreview) return false;
 
-      return dimByFilters || dimByHoverContext;
+      return dimByFilters || dimByHoverContext || dimByPreview;
     });
   }
 
@@ -695,15 +695,19 @@ export function createMapController(callbacks = {}) {
     toggleSelection(this, feature);
   }
 
-  /* Defensive width-and-height guard.
+  /* Build the SVG.
    *
-   * If the container measures zero on either axis, defer the build and
-   * try again on the next animation frame, up to BUILD_MAX_RETRY_FRAMES
-   * frames. This handles the race where the explorer mounts during a
-   * page background transition or during a window resize, both of
-   * which can briefly zero out the layout. Without this guard, the
-   * map's projection collapses to the origin and every tract path
-   * becomes "M0,0Z", which is unrecoverable. */
+   * Container size can be zero on the first call when SvelteKit is
+   * still settling layout. If so, defer one frame at a time up to
+   * BUILD_MAX_RETRY_FRAMES. Without this guard, fitSize would silently
+   * collapse every projection path to the origin and the map would
+   * appear empty with no recoverable error.
+   *
+   * The SVG itself is sized fluidly: width and height attributes are
+   * 100%, and the viewBox carries the pixel dimensions at build time.
+   * preserveAspectRatio centers the projection if the container ever
+   * grows past the build dimensions before the next ResizeObserver
+   * tick fires. */
   function buildMap(retryCount) {
     retryCount = retryCount || 0;
     if (!container || !geoData || !ranges) return;
@@ -725,6 +729,9 @@ export function createMapController(callbacks = {}) {
       return;
     }
 
+    lastBuildWidth = width;
+    lastBuildHeight = height;
+
     d3.select(container).html('');
     hoveredPath = null;
     hoveredClass = null;
@@ -738,8 +745,10 @@ export function createMapController(callbacks = {}) {
     svgElement = d3
       .select(container)
       .append('svg')
-      .attr('width', width)
-      .attr('height', height)
+      .attr('width', '100%')
+      .attr('height', '100%')
+      .attr('viewBox', '0 0 ' + width + ' ' + height)
+      .attr('preserveAspectRatio', 'xMidYMid meet')
       .attr('role', 'img')
       .attr('aria-label', 'Map of Boston census tracts colored by dominant investor strategy')
       .attr('aria-describedby', 'map-legend');
@@ -754,9 +763,16 @@ export function createMapController(callbacks = {}) {
 
     mapGroup = svgElement.append('g').attr('clip-path', 'url(#map-clip)');
 
-    const projection = d3.geoMercator().fitSize([width * 0.98, height * 0.98], geoData);
+    /* Fit the projection to the full viewBox with a small margin so
+     * tract edges never sit flush against the SVG boundary. */
+    const innerW = Math.max(1, width * 0.96);
+    const innerH = Math.max(1, height * 0.96);
+    const projection = d3.geoMercator().fitSize([innerW, innerH], geoData);
     const projectionTranslate = projection.translate();
-    projection.translate([projectionTranslate[0] + width * 0.01, projectionTranslate[1] + height * 0.01]);
+    projection.translate([
+      projectionTranslate[0] + (width - innerW) / 2,
+      projectionTranslate[1] + (height - innerH) / 2
+    ]);
 
     pathGenerator = d3.geoPath().projection(projection);
 
@@ -911,23 +927,30 @@ export function createMapController(callbacks = {}) {
 
   function setPresentationState(state, options = {}) {
     var nextState = state || 'interactive';
-    /* No-op short-circuit. Same state arriving back-to-back used to
-     * cancel in-flight transitions and produce visible flicker. */
+    /* Identical state arriving back-to-back used to cancel the active
+     * transition and produce a flicker. Skip when nothing changed. */
     if (nextState === presentationState && options.animate !== false) return;
     previousPresentationState = presentationState;
     presentationState = nextState;
     applyPresentationState(options);
   }
 
+  function previewSubset(kind) {
+    if (kind !== 'hold' && kind !== 'flip' && kind !== 'mixed') return;
+    if (previewKind === kind) return;
+    previewKind = kind;
+    applyDimming();
+  }
+
+  function clearPreview() {
+    if (previewKind === null) return;
+    previewKind = null;
+    applyDimming();
+  }
+
   function jumpToNeighborhood(name) {
     if (!svgElement || !pathGenerator || !zoomBehavior || !geoData) return;
 
-    /* Same defensive width guard as buildMap. If the container is
-     * zero-width at the moment of the jump (which happens during page
-     * background transitions or rapid resize), the projection scale
-     * computation below would divide by zero and produce NaN, which
-     * d3.zoom silently swallows and which leaves the map empty with
-     * no obvious error. Bail out cleanly instead. */
     var width = container ? container.clientWidth : 0;
     var height = container ? container.clientHeight : 0;
     if (width === 0 || height === 0) {
@@ -980,16 +1003,52 @@ export function createMapController(callbacks = {}) {
     buildMap();
   }
 
+  /* Watch the container for size changes after the initial build.
+   * Only rebuild when the change exceeds the threshold, and debounce
+   * to avoid thrashing during a CSS transition. */
+  function attachResizeObserver() {
+    if (typeof ResizeObserver === 'undefined') return;
+    if (!container) return;
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
+    }
+
+    resizeObserver = new ResizeObserver(function (entries) {
+      if (!entries || entries.length === 0) return;
+      var entry = entries[0];
+      var w = entry.contentRect ? entry.contentRect.width : 0;
+      var h = entry.contentRect ? entry.contentRect.height : 0;
+      if (w === 0 || h === 0) return;
+      if (Math.abs(w - lastBuildWidth) < RESIZE_THRESHOLD_PX
+          && Math.abs(h - lastBuildHeight) < RESIZE_THRESHOLD_PX) {
+        return;
+      }
+
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(function () {
+        resizeTimer = null;
+        if (!container) return;
+        if (container.clientWidth === 0 || container.clientHeight === 0) return;
+        clearHoverState({ notify: false });
+        buildMap();
+      }, RESIZE_DEBOUNCE_MS);
+    });
+
+    resizeObserver.observe(container);
+  }
+
   function init({ containerEl, data, metricRanges, interactive = true, initialPresentationState = 'interactive' }) {
     container = containerEl;
     geoData = data;
     ranges = metricRanges;
     allowInteraction = interactive;
     presentationState = initialPresentationState;
-    /* Both states set so the bloom branch sees a stable previous state
-     * on the first user-driven transition rather than a stale default. */
+    /* Match previous state to current at init so the first user
+     * driven transition has a stable baseline. */
     previousPresentationState = initialPresentationState;
     buildMap();
+    attachResizeObserver();
   }
 
   function destroy() {
@@ -998,6 +1057,14 @@ export function createMapController(callbacks = {}) {
     if (pendingBuildFrame) {
       cancelAnimationFrame(pendingBuildFrame);
       pendingBuildFrame = null;
+    }
+    if (resizeTimer) {
+      clearTimeout(resizeTimer);
+      resizeTimer = null;
+    }
+    if (resizeObserver) {
+      resizeObserver.disconnect();
+      resizeObserver = null;
     }
     clearFlipPulseTimer();
     pendingPointerDown = null;
@@ -1022,6 +1089,7 @@ export function createMapController(callbacks = {}) {
     hoveredClass = null;
     selectedPath = null;
     selectedGeoid = null;
+    previewKind = null;
   }
 
   return {
@@ -1033,6 +1101,8 @@ export function createMapController(callbacks = {}) {
     resize,
     destroy,
     clearHover: clearHoverState,
-    setNeighborhoodFilter
+    setNeighborhoodFilter,
+    previewSubset,
+    clearPreview
   };
 }

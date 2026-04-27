@@ -20,6 +20,12 @@
   let lockedTract = null;
   let contextHtml = DEFAULT_CONTEXT;
 
+  /* Subset preview kind. Set when the reader hovers an overview tile.
+   * Forwarded as a prop to MapPane, which translates it into a call
+   * on the controller. Independent of focusMode so the preview never
+   * disturbs the underlying filter state. */
+  let previewKind = null;
+
   let tooltip = {
     visible: false,
     x: 0,
@@ -97,6 +103,17 @@
   function handleReset() {
     clearToOverview();
     hideTooltip();
+    previewKind = null;
+  }
+
+  function handlePreview(event) {
+    var kind = event?.detail?.kind;
+    if (kind !== 'hold' && kind !== 'flip' && kind !== 'mixed') return;
+    previewKind = kind;
+  }
+
+  function handlePreviewClear() {
+    previewKind = null;
   }
 </script>
 
@@ -108,6 +125,7 @@
     focusMode={focusMode}
     {contextHtml}
     {tooltip}
+    {previewKind}
     on:focusChange={(event) => (focusMode = event.detail.mode)}
     on:hover={handleHover}
     on:hoverClear={handleHoverClear}
@@ -127,6 +145,8 @@
     {cityAverages}
     {holdingAverages}
     {flippingAverages}
+    on:preview={handlePreview}
+    on:previewClear={handlePreviewClear}
   />
 </div>
 

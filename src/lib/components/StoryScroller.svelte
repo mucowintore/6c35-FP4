@@ -1,26 +1,23 @@
 <script>
   /* StoryScroller orchestrates the entire narrative.
    *
-   * Three new mechanisms layered on top of the existing wheel-snap
-   * machinery, all of which is preserved verbatim:
+   * Three things this component owns:
    *
-   *   1. The counter system. Any element with data-count-target tweens
-   *      from zero on first scroll into view, AND resets when scrolled
-   *      out of view, so a re-entry replays the count. The earlier
-   *      one-shot version made section 04 feel dead on a second visit.
+   *   1. Wheel-snap scrolling between sections, with a brief cooldown
+   *      after each transition so the browser does not chain a second
+   *      step into the same gesture.
    *
-   *   2. A skip-to-content anchor at the top of the article. Visually
-   *      hidden until focused, jumps the reader past the dark opening
-   *      straight into the first story section.
+   *   2. The counter system. Elements with data-count-target tween from
+   *      zero, and reset when the section scrolls out of view so a
+   *      re-entry plays the count again. Opening counters are fired on
+   *      a deterministic timer keyed to the entrance choreography;
+   *      everything else uses an IntersectionObserver.
    *
-   *   3. aria-current="step" on the active progress dot, so a screen
-   *      reader announces which section is active as the reader scrolls.
-   *
-   * The wheel-snap, IntersectionObserver, scroll-restoration, and
-   * page-background switching logic are unchanged from round one. */
+   *   3. Page background, progress sidebar, skip-to-content anchor,
+   *      and aria-current wiring. */
 
   import { onMount } from 'svelte';
-  import { NARRATIVE_SECTIONS, FOOTER_CONTENT } from '$lib/narrativeSections';
+  import { NARRATIVE_SECTIONS, FOOTER_CONTENT, STORY_OUTRO } from '$lib/narrativeSections';
   import { loadTractProfileData } from '$lib/mapData';
   import StoryStage from '$lib/components/StoryStage.svelte';
   import StoryExplorer from '$lib/components/StoryExplorer.svelte';
@@ -28,9 +25,9 @@
 
   const openingSection = NARRATIVE_SECTIONS.find((s) => s.layout === 'fullscreen');
   const storySteps = NARRATIVE_SECTIONS.filter((s) => s.layout === 'split');
-  /* map-classified shares its narrative slot with map-intro, so the
-   * rendered list of step cards skips it. The wheel handler still
-   * tracks it as a logical step. */
+  /* map-classified shares its narrative slot with map-intro. The
+   * rendered card list skips it; the wheel handler still tracks it
+   * as a logical step. */
   const renderedStorySteps = storySteps.filter((s) => s.id !== 'map-classified');
   const explorerSection = NARRATIVE_SECTIONS.find((s) => s.layout === 'explorer');
   const mapIntroStep = storySteps.find((s) => s.id === 'map-intro');
@@ -43,7 +40,11 @@
   const AMBER_SECTIONS = new Set(['equity']);
   const WHITE_SECTIONS = new Set(['policy']);
 
-  let activeId = storySteps[0]?.id ?? '';
+  /* activeId starts null on cold load. The observer only flips it
+   * once the reader has actually scrolled into a step. Until then,
+   * StoryStage's per-layer viewport observer is the source of truth
+   * for which chart, if any, is on screen. */
+  let activeId = null;
   let observer;
   let observedNodes = [];
   let openingSectionEl;
@@ -56,15 +57,23 @@
   let wheelGestureResetTimer;
   let previousScrollRestoration = null;
   let wheelGuardUntil = 0;
-  let stepCursorId = storySteps[0]?.id ?? '';
+  let stepCursorId = null;
   let activeLockUntil = 0;
   let chapter2NarrativeStepId = 'map-intro';
 
   const STEP_SCROLL_COOLDOWN_MS = 640;
   const WHEEL_GESTURE_IDLE_MS = 320;
-  const INITIAL_WHEEL_GUARD_MS = 700;
+  /* Cinematic pause after the opening choreography settles before
+   * scroll is allowed to move the reader off the title screen. */
+  const INITIAL_WHEEL_GUARD_MS = 1300;
   const ACTIVE_LOCK_MS = 950;
   const STORY_TOP_RAIL_PX = 28;
+
+  /* The opening counters are gated on the parent fade-in completing.
+   * The choreography fades .opening-thesis at 1400 ms; we start the
+   * counters at 1700 ms so the tween runs while the element is fully
+   * visible, never during a fade. */
+  const OPENING_COUNTERS_FIRE_MS = 1700;
 
   let geoData = null;
   let ranges = {};
@@ -74,9 +83,12 @@
   let counts = { holdCount: 0, flipCount: 0, mixedCount: 0, lowDataCount: 0 };
   let loadError = '';
 
-  $: activeSection = storySteps.find((s) => s.id === activeId) ?? storySteps[0];
-  $: activeChapter =
-    NARRATIVE_SECTIONS.find((s) => s.id === activeId)?.chapter ?? activeSection?.chapter;
+  $: activeSection = activeId
+    ? storySteps.find((s) => s.id === activeId)
+    : null;
+  $: activeChapter = activeId
+    ? NARRATIVE_SECTIONS.find((s) => s.id === activeId)?.chapter
+    : null;
   $: chapter2NarrativeContent =
     storySteps.find((s) => s.id === chapter2NarrativeStepId)?.content ??
     mapIntroStep?.content ?? '';
@@ -165,7 +177,7 @@
     if (event.deltaY === 0) return;
     var dir = event.deltaY > 0 ? 1 : -1;
     var ref = stepCursorId || activeId;
-    var idx = storySteps.findIndex((s) => s.id === ref);
+    var idx = ref ? storySteps.findIndex((s) => s.id === ref) : -1;
     var tEl = null, tId = '';
     if (dir > 0) {
       if (ov && !sm) {
@@ -214,19 +226,15 @@
     scrollToStep(tEl, tId);
   }
 
-  /* Counter system, round two.
+  /* Counter system.
    *
-   * Round one was one-shot: an IntersectionObserver fired on entry,
-   * set data-counted="true", and ignored the element forever after.
-   * Section 04 felt dead on a second visit because the 87% / 34%
-   * sat static.
-   *
-   * Round two listens for both directions. On entry, tween up. On
-   * exit, clear data-counted and reset the displayed text to the
-   * starting value (data-count-prefix + 0 + data-count-suffix), so
-   * the next entry plays fresh. Same logic benefits the opening
-   * counters, the equity counters, and any future counter wired up
-   * the same way. */
+   * Two paths share one tween. Opening counters fire on a single
+   * deterministic timer because the parent fade-in is a known
+   * duration; observing them with an IntersectionObserver fires too
+   * early and the count would tween while the element is still
+   * invisible. Non-opening counters use an observer with a higher
+   * threshold and a getComputedStyle opacity gate inside the first
+   * frame, so the tween cannot start while the element is faded out. */
   let counterObserver = null;
 
   function animateCount(el, target, opts) {
@@ -238,15 +246,29 @@
     var startAt = performance.now() + delay;
     var token = (el._countToken || 0) + 1;
     el._countToken = token;
+    var visibilityChecked = false;
 
     function frame(now) {
-      /* If a newer animation has started on this element, abandon. */
       if (el._countToken !== token) return;
 
       if (now < startAt) {
         requestAnimationFrame(frame);
         return;
       }
+
+      /* On the first eligible frame, verify the element is actually
+       * visible. If a parent is still fading, defer one frame. */
+      if (!visibilityChecked) {
+        try {
+          var op = parseFloat(getComputedStyle(el).opacity || '1');
+          if (op <= 0.05) {
+            requestAnimationFrame(frame);
+            return;
+          }
+        } catch (e) { /* getComputedStyle can throw on detached nodes */ }
+        visibilityChecked = true;
+      }
+
       var t = (now - startAt) / duration;
       if (t > 1) t = 1;
       var eased = 1 - Math.pow(1 - t, 3);
@@ -265,38 +287,54 @@
     delete el.dataset.counted;
   }
 
+  function fireCounter(el) {
+    if (el.dataset.counted === 'true') return;
+    el.dataset.counted = 'true';
+    var target = parseFloat(el.dataset.countTarget);
+    var prefix = el.dataset.countPrefix || '';
+    var suffix = el.dataset.countSuffix || '';
+    var duration = parseInt(el.dataset.countDuration, 10) || 1200;
+    var delay = parseInt(el.dataset.countDelay, 10) || 0;
+    animateCount(el, target, { prefix: prefix, suffix: suffix, duration: duration, delay: delay });
+  }
+
   function setupCounters() {
-    if (typeof window === 'undefined') return;
-    var els = document.querySelectorAll('[data-count-target]');
-    if (els.length === 0) return;
+    if (typeof window === 'undefined' || !openingSectionEl) return;
+
+    /* Opening counters: timer-driven. The element's data-count-delay
+     * is absolute, measured from now, so each opening counter fires
+     * on its own schedule once the entrance choreography settles. */
+    var openingCounters = openingSectionEl.querySelectorAll('[data-count-target]');
+    window.setTimeout(function () {
+      openingCounters.forEach(function (el) { fireCounter(el); });
+    }, OPENING_COUNTERS_FIRE_MS);
+
+    /* Non-opening counters: observer-driven. Threshold 0.6 and the
+     * opacity gate inside animateCount handle the rest. */
+    var allCounters = document.querySelectorAll('[data-count-target]');
+    var observed = [];
+    allCounters.forEach(function (el) {
+      if (openingSectionEl && openingSectionEl.contains(el)) return;
+      observed.push(el);
+    });
+    if (observed.length === 0) return;
 
     counterObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
         var el = entry.target;
-        if (entry.isIntersecting) {
-          if (el.dataset.counted === 'true') return;
-          el.dataset.counted = 'true';
-          var target = parseFloat(el.dataset.countTarget);
-          var prefix = el.dataset.countPrefix || '';
-          var suffix = el.dataset.countSuffix || '';
-          var duration = parseInt(el.dataset.countDuration, 10) || 1200;
-          var delay = parseInt(el.dataset.countDelay, 10) || 0;
-          animateCount(el, target, { prefix: prefix, suffix: suffix, duration: duration, delay: delay });
-        } else {
-          /* Exit. Clear flag and snap text back to zero so the next
-           * re-entry plays the count again. */
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.6) {
+          fireCounter(el);
+        } else if (!entry.isIntersecting) {
           if (el.dataset.counted === 'true') resetCounter(el);
         }
       });
-    }, { threshold: [0, 0.45] });
+    }, { threshold: [0, 0.6] });
 
-    els.forEach(function (el) { counterObserver.observe(el); });
+    observed.forEach(function (el) { counterObserver.observe(el); });
   }
 
-  /* Pre-load chart JSON files in parallel with the GeoJSON. By the
-   * time the reader scrolls past the opening, every dataset is already
-   * cached. The persistent chart components read the same URLs and
-   * find them instantly. */
+  /* Pre-load chart JSON so the persistent chart components find the
+   * data already cached when their layer enters the viewport. */
   function preloadChartData() {
     if (typeof fetch === 'undefined') return;
     fetch('data/investor_share_yearly.json').catch(function () {});
@@ -351,8 +389,7 @@
 
     window.addEventListener('wheel', handleWheel, { passive: false });
 
-    /* Defer counter setup until after the DOM has settled so that
-     * data-count-target nodes inside @html'd content are present. */
+    /* Defer counter setup until after @html'd content has rendered. */
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
         setupCounters();
@@ -374,10 +411,6 @@
 
 <svelte:head><title>Speculation Has a Geography</title></svelte:head>
 
-<!-- Skip-to-content link.
-     Visually hidden until focused. A keyboard or screen reader user
-     can hit Tab once on page load and jump past the cinematic opening
-     straight into the first story section. -->
 <a class="skip-link" href="#regime-shift">Skip to the story</a>
 
 <article class="story-page"
@@ -393,10 +426,6 @@
   <div class="dark-to-warm" aria-hidden="true"></div>
 
   <section class="story-scroll-region" bind:this={storyRegionEl} aria-label="Scrollytelling narrative">
-    <!-- Vertical timeline progress sidebar.
-         Thin rail with dots per section. The active dot grows and
-         takes the section theme color. The active link carries
-         aria-current="step" so a screen reader announces it. -->
     <nav class="story-progress" aria-label="Story sections">
       <span class="progress-rail" aria-hidden="true"></span>
       {#each progressSections as section}
@@ -409,8 +438,9 @@
           aria-label="{section.chapter} {section.label}"
           aria-current={activeChapter === section.chapter ? 'step' : undefined}
           title="{section.chapter} · {section.label}">
+          <span class="prog-num" aria-hidden="true">{section.chapter}</span>
           <span class="prog-dot" aria-hidden="true"></span>
-          <span class="prog-text">{section.chapter} · {section.label}</span>
+          <span class="prog-text">{section.label}</span>
         </a>
       {/each}
     </nav>
@@ -455,6 +485,10 @@
     <StoryExplorer {geoData} {ranges} {counts} {cityAverages} {holdingAverages} {flippingAverages} />
   </section>
 
+  <div class="story-outro" aria-hidden="true">
+    {@html STORY_OUTRO}
+  </div>
+
   <footer class="story-footer">{@html FOOTER_CONTENT}</footer>
 </article>
 
@@ -472,7 +506,7 @@
     overflow: visible !important;
   }
 
-  /* Skip link: invisible until keyboard focus lands on it. */
+  /* Skip link, invisible until keyboard focus lands on it. */
   .skip-link {
     position: absolute;
     top: -100px;
@@ -494,9 +528,9 @@
     outline-offset: 2px;
   }
 
-  /* The page background shifts between cream, dark, amber tinted, and
-   * a warm off-white based on the active section. Slow transition so
-   * each section feels like a new room rather than a slide. */
+  /* Page background shifts between cream, dark, amber-tinted, and a
+   * warm off-white based on the active section. The transition is
+   * slow enough that each section feels like a new room. */
   .story-page {
     min-height: 100vh;
     background: var(--bg);
@@ -528,15 +562,13 @@
   .story-page.bg-dark .chapter-label.theme-hold { color: #8AAEC8; }
   .story-page.bg-dark .chapter-label.theme-flip { color: var(--amber-mid); }
 
-  /* On the white policy section, ink-dark accent. */
+  /* Policy section: ink-dark accent on takeaway. */
   .story-page.bg-white :global(.section-takeaway) {
     color: var(--ink) !important;
     border-left-color: var(--ink) !important;
   }
 
-  /* ============================================================
-     Dark cinematic opening with ambient gradient drift
-     ============================================================ */
+  /* Dark cinematic opening. Ambient gradient drifts behind everything. */
   .story-opening {
     position: relative;
     display: grid;
@@ -604,6 +636,8 @@
   .story-opening :global(.hero-quote-l) { margin-right: 4px; }
   .story-opening :global(.hero-quote-r) { margin-left: 4px; }
 
+  /* Hero word: blur-in plus a 1.05 scale settle. The word lands the
+   * way a held breath does. */
   .story-opening :global(.hero-word) {
     font-family: "DM Serif Display", Georgia, serif;
     font-size: clamp(58px, 12vw, 112px);
@@ -611,11 +645,12 @@
     color: var(--amber);
     opacity: 0;
     transform: scale(1.05);
-    animation: open-word-in 900ms cubic-bezier(0.16, 1, 0.3, 1) 600ms forwards;
-    will-change: opacity, transform;
+    filter: blur(8px);
+    animation: open-word-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) 600ms forwards;
+    will-change: opacity, transform, filter;
   }
   @keyframes open-word-in {
-    to { opacity: 1; transform: scale(1); }
+    to { opacity: 1; transform: scale(1); filter: blur(0); }
   }
 
   .story-opening :global(.hero-below) {
@@ -629,41 +664,71 @@
     will-change: opacity;
   }
 
-  .story-opening :global(.opening-stats) {
-    display: flex; justify-content: center;
-    gap: clamp(24px, 6vw, 64px);
-    margin: 0 auto 32px; max-width: 580px;
+  /* Opening thesis sentence with two embedded display numbers. The
+   * sentence flows; the numbers are large and the bridge text is
+   * smaller, italicized in places, so the sentence reads as one
+   * thought rather than two specs. */
+  .story-opening :global(.opening-thesis) {
+    max-width: 820px;
+    margin: 0 auto 22px;
+    padding: 0 12px;
+    color: rgba(242, 240, 234, 0.85);
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: clamp(18px, 2.4vw, 26px);
+    line-height: 1.45;
+    text-align: center;
     opacity: 0;
     animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 1400ms forwards;
     will-change: opacity;
   }
-  .story-opening :global(.opening-stat) {
-    flex: 1; text-align: center;
+  .story-opening :global(.thesis-lead),
+  .story-opening :global(.thesis-bridge),
+  .story-opening :global(.thesis-tail) {
+    font-style: italic;
+    color: rgba(242, 240, 234, 0.65);
   }
-  .story-opening :global(.stat-figure) {
-    display: inline-flex; align-items: baseline; justify-content: center;
+  .story-opening :global(.thesis-bridge-tight) {
+    margin-left: 4px;
   }
-  .story-opening :global(.stat-num) {
+  .story-opening :global(.thesis-num) {
+    display: inline-flex;
+    align-items: baseline;
+    margin: 0 6px;
+    font-style: normal;
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(48px, 9vw, 76px);
-    font-weight: 400; line-height: 1;
+    font-weight: 400;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
   }
-  .story-opening :global(.stat-pct) {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(24px, 4.5vw, 38px);
-    font-weight: 400; opacity: 0.55;
-    margin-left: 2px;
+  .story-opening :global(.thesis-num-hold) {
+    color: #6BA3D6;
+  }
+  .story-opening :global(.thesis-num-flip) {
+    color: var(--amber);
+  }
+  .story-opening :global(.thesis-sign),
+  .story-opening :global(.thesis-digits) {
+    font-size: clamp(40px, 7vw, 64px);
+  }
+  .story-opening :global(.thesis-pct) {
+    font-size: clamp(20px, 3.6vw, 32px);
+    opacity: 0.65;
+    margin-left: 1px;
     align-self: flex-start;
   }
-  .story-opening :global(.opening-stat-label) {
-    display: block;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 13px; line-height: 1.55;
-    color: rgba(242, 240, 234, 0.45);
-    margin-top: 10px;
-    max-width: 220px;
-    margin-inline: auto;
+
+  /* Mono-caps attribution under the thesis sentence. Anchors the
+   * headline in the dataset. */
+  .story-opening :global(.opening-attribution) {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: rgba(242, 240, 234, 0.42);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin: 0 auto 22px;
+    opacity: 0;
+    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 1900ms forwards;
+    will-change: opacity;
   }
 
   .story-opening :global(.opening-rule) {
@@ -679,21 +744,41 @@
     to { transform: scaleX(1); }
   }
 
-  .story-opening :global(.scroll-subline) {
-    max-width: 520px; margin: 0 auto 22px;
-    color: rgba(242, 240, 234, 0.62);
-    font-size: clamp(15px, 2vw, 20px); line-height: 1.55;
+  /* Film credits. Reads as opening titles, not as a sub-byline. */
+  .story-opening :global(.film-credits) {
+    margin: 0 auto 18px;
+    max-width: 720px;
     opacity: 0;
-    animation: open-fade 800ms cubic-bezier(0.16, 1, 0.3, 1) 2600ms forwards;
+    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 2600ms forwards;
     will-change: opacity;
   }
-  .story-opening :global(.scroll-byline) {
+  .story-opening :global(.film-credit-row) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 14px 28px;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10.5px;
+    color: rgba(242, 240, 234, 0.46);
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+  .story-opening :global(.film-credit-tag) {
     color: rgba(242, 240, 234, 0.32);
-    font-size: 11px; letter-spacing: 0.06em;
-    opacity: 0;
-    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 2800ms forwards;
-    will-change: opacity;
   }
+  .story-opening :global(.film-credit-names) {
+    color: rgba(242, 240, 234, 0.6);
+    letter-spacing: 0.18em;
+  }
+  .story-opening :global(.film-credit-meta) {
+    margin-top: 8px;
+    font-size: 9.5px;
+    color: rgba(242, 240, 234, 0.32);
+    letter-spacing: 0.16em;
+  }
+
+  /* Scroll cue. Just the chevron now; words are gone. */
   .story-opening :global(.scroll-cue-wrap) {
     margin-top: 50px;
     display: flex; flex-direction: column;
@@ -701,12 +786,6 @@
     opacity: 0;
     animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 3000ms forwards;
     will-change: opacity;
-  }
-  .story-opening :global(.scroll-cue-text) {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 10px; color: rgba(242, 240, 234, 0.28);
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
   }
   .story-opening :global(.scroll-cue-chevron) {
     color: rgba(242, 240, 234, 0.32);
@@ -726,13 +805,11 @@
     background: linear-gradient(to bottom, #0F0F0E, #0F0F0E);
   }
 
-  /* ============================================================
-     Scrollytelling three-column grid
-     ============================================================ */
+  /* Three-column scrollytelling grid. */
   .story-scroll-region {
     --story-top-rail: 28px;
     display: grid;
-    grid-template-columns: minmax(80px, 0.16fr) minmax(300px, 0.84fr) minmax(540px, 1.6fr);
+    grid-template-columns: minmax(96px, 0.18fr) minmax(300px, 0.84fr) minmax(540px, 1.6fr);
     grid-template-areas: "progress text viz";
     align-items: start;
     gap: clamp(22px, 3vw, 60px);
@@ -754,7 +831,7 @@
 
   .story-progress .progress-rail {
     position: absolute;
-    left: 13px; top: 18%; bottom: 18%;
+    left: 28px; top: 18%; bottom: 18%;
     width: 1px;
     background: rgba(120, 115, 105, 0.22);
   }
@@ -762,12 +839,27 @@
     background: rgba(242, 240, 234, 0.16);
   }
 
+  /* Progress link layout: chapter number always visible in mono caps,
+   * dot in the middle, full label revealed on hover or active. */
   .progress-dot-link {
     position: relative;
-    display: flex; align-items: center; gap: 10px;
+    display: grid;
+    grid-template-columns: 18px 16px auto;
+    align-items: center;
+    gap: 6px;
     color: rgba(120, 115, 105, 0.75);
     font-size: 10px;
     text-decoration: none;
+    transition: color 0.25s;
+  }
+
+  .prog-num {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    font-weight: 700;
+    color: rgba(120, 115, 105, 0.5);
+    letter-spacing: 0.04em;
+    text-align: right;
     transition: color 0.25s;
   }
 
@@ -799,19 +891,23 @@
     transform: scale(1.45);
     background: var(--ink);
   }
+  .progress-dot-link.active .prog-num {
+    color: var(--ink);
+  }
   .progress-dot-link.active.t-hold .prog-dot { background: var(--navy); }
   .progress-dot-link.active.t-flip .prog-dot { background: var(--amber); }
   .progress-dot-link.active.t-policy .prog-dot { background: var(--ink); }
   .progress-dot-link.active { color: var(--ink); }
 
   .story-page.bg-dark .progress-dot-link { color: rgba(242, 240, 234, 0.45); }
+  .story-page.bg-dark .prog-num { color: rgba(242, 240, 234, 0.32); }
   .story-page.bg-dark .prog-dot { background: rgba(242, 240, 234, 0.32); }
   .story-page.bg-dark .progress-dot-link.active { color: rgba(242, 240, 234, 0.95); }
+  .story-page.bg-dark .progress-dot-link.active .prog-num { color: rgba(242, 240, 234, 0.95); }
   .story-page.bg-dark .progress-dot-link.active .prog-dot { background: #F2F0EA; }
   .story-page.bg-dark .progress-dot-link.active.t-hold .prog-dot { background: #8AAEC8; }
   .story-page.bg-dark .progress-dot-link.active.t-flip .prog-dot { background: var(--amber-mid); }
 
-  /* Text column */
   .story-text-column { grid-area: text; display: flex; flex-direction: column; }
 
   .story-step {
@@ -846,35 +942,100 @@
                 border-left-color 600ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
+  /* Hairline rule above the human sentence. Echoes the closing rule
+   * in Section 06. The two emotionally heaviest beats rhyme. */
+  .story-step :global(.human-rule) {
+    width: 36px;
+    height: 1px;
+    background: var(--neutral);
+    margin: 32px 0 16px;
+    opacity: 0.55;
+  }
   .story-step :global(.human-sentence) {
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: 17px;
-    line-height: 1.6;
+    font-size: 20px;
+    line-height: 1.55;
     color: var(--text);
-    margin: 22px 0 6px;
+    margin: 0 0 8px;
     padding: 0;
-    max-width: 540px;
+    max-width: 560px;
   }
 
-  .story-step :global(.equity-stats) {
-    display: flex; gap: 20px; margin: 12px 0 20px;
-  }
-  .story-step :global(.equity-stat) { flex: 1; text-align: center; }
-  .story-step :global(.eq-num) {
+  /* Section 04 inline equity sentence with two embedded numbers. */
+  .story-step :global(.equity-sentence) {
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: 56px; font-weight: 400; line-height: 1;
+    font-size: 20px;
+    line-height: 1.55;
+    color: var(--text);
+    margin: 14px 0 18px;
+    max-width: 560px;
+  }
+  .story-step :global(.eq-inline-num) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 30px;
+    font-weight: 400;
+    margin: 0 4px;
     font-variant-numeric: tabular-nums;
   }
-  .story-step :global(.eq-pct) {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: 28px; font-weight: 400; opacity: 0.5;
-    vertical-align: super;
+
+  /* Section 02 zone chips. Color-dotted strong tags in body copy. */
+  .story-step :global(.zone-chip) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 700;
   }
-  .story-step :global(.equity-label) {
-    display: block; font-size: 12px; color: var(--sub); margin-top: 6px;
+  .story-step :global(.zone-chip-dot) {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  .story-step :global(.zone-chip-hold) { color: var(--navy); }
+  .story-step :global(.zone-chip-hold) :global(.zone-chip-dot) { background: var(--navy); }
+  .story-step :global(.zone-chip-flip) { color: var(--amber-dark); }
+  .story-step :global(.zone-chip-flip) :global(.zone-chip-dot) { background: var(--amber-dark); }
+  .story-page.bg-dark .story-step :global(.zone-chip-hold) { color: #8AAEC8; }
+  .story-page.bg-dark .story-step :global(.zone-chip-hold) :global(.zone-chip-dot) { background: #8AAEC8; }
+  .story-page.bg-dark .story-step :global(.zone-chip-flip) { color: var(--amber-mid); }
+  .story-page.bg-dark .story-step :global(.zone-chip-flip) :global(.zone-chip-dot) { background: var(--amber-mid); }
+
+  /* Section 02 cue. One word, mono caps, low opacity. */
+  .story-step :global(.story-cue) {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 11px;
+    color: var(--faint);
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    margin: 22px 0 0;
   }
 
-  /* Sticky viz column */
+  /* Section 06 closing. Larger serif, wider rule, italic mono caps
+   * footnote. The reader should feel the page making room. */
+  .story-step :global(.closing-rule) {
+    width: 80px;
+    height: 1px;
+    background: var(--ink);
+    margin: 56px 0 22px;
+    opacity: 0.55;
+  }
+  .story-step :global(.closing-takeaway) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 28px;
+    line-height: 1.35;
+    color: var(--ink);
+    margin: 0 0 14px;
+    max-width: 600px;
+  }
+  .story-step :global(.closing-footnote) {
+    font-family: "IBM Plex Mono", monospace;
+    font-style: italic;
+    font-size: 10.5px;
+    color: var(--faint);
+    letter-spacing: 0.08em;
+    margin: 4px 0 0;
+    max-width: 560px;
+  }
+
   .story-viz-column {
     position: sticky; top: var(--story-top-rail);
     grid-area: viz; align-self: start;
@@ -883,14 +1044,14 @@
   }
   .sticky-stage { display: flex; width: 100%; height: 100%; align-items: center; }
 
-  /* Transition strip between story and explorer. */
+  /* Transition strip between the story and the explorer. */
   .story-transition-strip {
     background: #0F0F0E;
     color: rgba(242, 240, 234, 0.7);
     text-align: center;
-    min-height: 60vh;
+    min-height: 38vh;
     display: grid; place-items: center;
-    padding: clamp(60px, 12vh, 140px) 24px;
+    padding: clamp(48px, 8vh, 96px) 24px;
     font-family: "DM Serif Display", Georgia, serif;
     font-size: clamp(22px, 3.2vw, 32px);
     line-height: 1.45;
@@ -901,6 +1062,23 @@
 
   .story-explorer-section {
     width: 100%; margin: 0 auto;
+  }
+
+  /* Quiet outro band between the explorer and the footer. */
+  .story-outro {
+    background: #0F0F0E;
+    color: rgba(242, 240, 234, 0.62);
+    text-align: center;
+    padding: clamp(40px, 8vh, 84px) 24px;
+  }
+  .story-outro :global(.story-outro-line) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-style: italic;
+    font-size: clamp(17px, 2.2vw, 22px);
+    line-height: 1.5;
+    max-width: 640px;
+    margin: 0 auto;
+    color: rgba(242, 240, 234, 0.7);
   }
 
   .story-footer {
@@ -946,9 +1124,18 @@
     .sticky-stage { min-height: auto; }
     .story-step { min-height: 74vh; padding: 18vh 0; }
     .story-explorer-section { width: 100%; }
-    .story-transition-strip { font-size: 19px; padding: 60px 22px; min-height: 50vh; }
+    .story-transition-strip { font-size: 19px; padding: 60px 22px; min-height: 36vh; }
     .dark-to-warm { height: 80px; }
-    .story-step :global(.eq-num) { font-size: 40px; }
-    .story-step :global(.eq-pct) { font-size: 20px; }
+    .story-step :global(.eq-inline-num) { font-size: 24px; }
+    .story-step :global(.closing-takeaway) { font-size: 22px; }
+    .story-step :global(.human-sentence) { font-size: 17px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .story-opening :global(.hero-word) {
+      filter: none;
+    }
+    .story-opening::before { animation: none; }
+    .story-opening :global(.scroll-cue-chevron) { animation: none; }
   }
 </style>

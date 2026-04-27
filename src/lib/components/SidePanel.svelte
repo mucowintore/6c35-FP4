@@ -1,5 +1,5 @@
 <script>
-  import { afterUpdate, onDestroy } from 'svelte';
+  import { afterUpdate, createEventDispatcher, onDestroy } from 'svelte';
   import {
     buildOverviewSections,
     buildDetailModel,
@@ -18,6 +18,10 @@
   export let holdingAverages = {};
   export let flippingAverages = {};
 
+  const dispatch = createEventDispatcher();
+
+  let panelEl;
+  let overviewPanelEl;
   let barsContainer;
   let pairedBarsContainer;
 
@@ -33,6 +37,7 @@
 
   let lastDrawnGeoid = null;
   let pairedDrawn = false;
+  let lastBoundTiles = null;
 
   $: overviewSections = buildOverviewSections(counts);
   $: activeTract = hoveredTract;
@@ -56,6 +61,38 @@
     pairedDrawn = false;
   }
 
+  /* Bind hover and focus on the overview's preview tiles. The tiles
+   * are emitted as plain html by buildOverviewSections, so we have to
+   * find them after each update and attach listeners imperatively. */
+  function bindPreviewTiles() {
+    if (!overviewPanelEl) return;
+    var tiles = overviewPanelEl.querySelectorAll('[data-preview-kind]');
+    if (tiles.length === 0) {
+      lastBoundTiles = null;
+      return;
+    }
+    if (lastBoundTiles && tiles.length === lastBoundTiles.length
+        && Array.from(tiles).every(function (t, i) { return t === lastBoundTiles[i]; })) {
+      return;
+    }
+
+    tiles.forEach(function (tile) {
+      var kind = tile.getAttribute('data-preview-kind');
+      var onEnter = function () { dispatch('preview', { kind: kind }); };
+      var onLeave = function () { dispatch('previewClear'); };
+      tile.addEventListener('mouseenter', onEnter);
+      tile.addEventListener('focus', onEnter);
+      tile.addEventListener('mouseleave', onLeave);
+      tile.addEventListener('blur', onLeave);
+    });
+
+    lastBoundTiles = Array.from(tiles);
+  }
+
+  function handlePanelLeave() {
+    dispatch('previewClear');
+  }
+
   afterUpdate(() => {
     if (activeTract && detail && barsContainer) {
       var gid = activeTract.geoid;
@@ -70,10 +107,21 @@
       drawPairedDivergingBars(pairedBarsContainer, holdingAverages, flippingAverages, ranges, cityAverages);
       pairedDrawn = true;
     }
+
+    bindPreviewTiles();
+  });
+
+  onDestroy(() => {
+    lastBoundTiles = null;
   });
 </script>
 
-<aside class="detail-panel" id="detail-panel">
+<aside
+  class="detail-panel"
+  id="detail-panel"
+  bind:this={panelEl}
+  on:mouseleave={handlePanelLeave}>
+
   {#if !activeTract}
     <div class="overview-tabs">
       <button class:active={overviewTab === 'overview'} on:click={() => { overviewTab = 'overview'; pairedDrawn = false; }}>Overview</button>
@@ -83,16 +131,9 @@
       <button class:active={overviewTab === 'about'} on:click={() => (overviewTab = 'about')}>Methodology</button>
     </div>
 
-    <div class="overview-tab-panel">
+    <div class="overview-tab-panel" bind:this={overviewPanelEl}>
       {#if overviewTab === 'overview'}
         {@html overviewSections.overview}
-        <div class="section-heading" style="margin-top: 16px">Citywide comparison</div>
-        <div class="profile-chart-container" bind:this={pairedBarsContainer}></div>
-        <div class="profile-caption">
-          Average metric values for each tract type, relative to the city average (center line).
-          <span style="color: var(--navy)">\u25A0</span> Holding &ensp;
-          <span style="color: var(--amber)">\u25A0</span> Flipping
-        </div>
       {:else if overviewTab === 'howToExplore'}
         {@html overviewSections.howToExplore}
       {:else}

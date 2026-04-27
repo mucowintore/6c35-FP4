@@ -1,30 +1,19 @@
-/* Narrative spine of the entire scrollytelling experience.
+/* The narrative spine. Every section the reader passes through is
+ * defined here. The fields drive layout, the active visualization
+ * layer in StoryStage, and the state of the persistent map.
  *
- * Each entry is a section the reader will pass through. The id wires
- * to the IntersectionObserver; the chapter and label show in the
- * progress sidebar; the layout decides whether the section gets the
- * three-column scroll grid or a full-bleed treatment; the viz tag
- * tells StoryStage which visualization layer to bring forward; the
- * mapState tag drives the persistent map between gray, classified,
- * holdingDimmed, and fullViewAnnotated.
- *
- * The content fields are HTML strings rendered with @html. Real
- * unicode characters everywhere (no \u escapes). Keep that.
- *
- * Counters use data-count-target plus optional data-count-prefix and
- * data-count-suffix. The StoryScroller tweens any element with these
- * attributes from zero on first scroll into view, and resets them on
- * scroll out so subsequent visits replay. */
+ * Counter elements use data-count-target plus optional prefix, suffix,
+ * duration, and delay attributes. StoryScroller animates them. */
 
 export const NARRATIVE_SECTIONS = [
 
-  /* ============================================================
-     00 Opening
-     Dark cinematic full-bleed. Two large counters that animate up
-     from zero. Quotation marks set decorative and aria-hidden so the
-     screen reader reads "speculation" cleanly. The byline uses the
-     real middle-dot character.
-     ============================================================ */
+  /* 00 Opening. Dark cinematic full-bleed.
+   *
+   * The hero is one composed sentence with two embedded display
+   * numbers. Reading left to right forces the comparison: the +49 and
+   * the 25 sit inside one thought rather than in parallel cells. The
+   * counter delays are deliberately past the parent fade-in so the
+   * tween is never running while the element is invisible. */
   {
     id: 'opening',
     chapter: '00',
@@ -45,41 +34,45 @@ export const NARRATIVE_SECTIONS = [
         <div class="hero-below">whose neighborhood does it mean?</div>
       </div>
 
-      <div class="opening-stats" aria-label="Two headline statistics">
-        <div class="opening-stat">
-          <span class="stat-figure">
-            <span class="stat-num"
-                  data-count-target="49"
-                  data-count-prefix="+"
-                  data-count-duration="1500"
-                  data-count-delay="200"
-                  style="color: #6BA3D6">+0</span><span class="stat-pct" style="color: #6BA3D6">%</span>
-          </span>
-          <span class="opening-stat-label">What investors overpay in
-            wealthy, white neighborhoods</span>
-        </div>
-        <div class="opening-stat">
-          <span class="stat-figure">
-            <span class="stat-num"
-                  data-count-target="25"
-                  data-count-duration="1500"
-                  data-count-delay="500"
-                  style="color: var(--amber)">0</span><span class="stat-pct" style="color: var(--amber)">%</span>
-          </span>
-          <span class="opening-stat-label">The discount they took in
-            communities of color during the crisis</span>
-        </div>
+      <div class="opening-thesis" aria-label="Headline finding">
+        <span class="thesis-lead">Investors overpay by</span>
+        <span class="thesis-num thesis-num-hold">
+          <span class="thesis-sign">+</span><span
+            class="thesis-digits"
+            data-count-target="49"
+            data-count-prefix="+"
+            data-count-duration="1500"
+            data-count-delay="2000"
+            data-count-keep-prefix="false">0</span><span class="thesis-pct">%</span>
+        </span>
+        <span class="thesis-bridge">in white neighborhoods, and pay</span>
+        <span class="thesis-num thesis-num-flip">
+          <span class="thesis-digits"
+            data-count-target="25"
+            data-count-duration="1500"
+            data-count-delay="2400">0</span><span class="thesis-pct">%</span>
+          <span class="thesis-bridge thesis-bridge-tight">less</span>
+        </span>
+        <span class="thesis-tail">in communities of color.</span>
+      </div>
+
+      <div class="opening-attribution" aria-hidden="true">
+        180,000 transactions  ·  173 census tracts  ·  2000–2022
       </div>
 
       <div class="opening-rule" aria-hidden="true"></div>
 
-      <p class="scroll-subline">180,000 residential transactions.
-        23 years. One city, pulled apart.</p>
-      <p class="scroll-byline">Joseph Firmansyah · Jessica Shoemaker
-        · Jean-Michel Mucowintore</p>
+      <div class="film-credits">
+        <div class="film-credit-row">
+          <span class="film-credit-tag">A project by</span>
+          <span class="film-credit-names">Joseph Firmansyah   Jessica Shoemaker   Jean-Michel Mucowintore</span>
+        </div>
+        <div class="film-credit-row film-credit-meta">
+          6.C85 Interactive Data Visualization &amp; Society  ·  MIT  ·  Spring 2026
+        </div>
+      </div>
 
       <div class="scroll-cue-wrap" aria-hidden="true">
-        <span class="scroll-cue-text">Scroll to begin</span>
         <svg class="scroll-cue-chevron" width="16" height="10"
           viewBox="0 0 16 10" fill="none">
           <path d="M1 1L8 8L15 1" stroke="currentColor"
@@ -90,9 +83,7 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* ============================================================
-     01 The Shift
-     ============================================================ */
+  /* 01 The Shift */
   {
     id: 'regime-shift',
     chapter: '01',
@@ -116,9 +107,7 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* ============================================================
-     02 The Map (gray, then classified bloom on second scroll)
-     ============================================================ */
+  /* 02 The Map. Two states, gray then classified, on consecutive scrolls. */
   {
     id: 'map-intro',
     chapter: '02',
@@ -137,7 +126,7 @@ export const NARRATIVE_SECTIONS = [
         purchases. Each tract received two composite scores. One
         measures holding behavior. The other measures flipping
         behavior.</p>
-      <p class="story-cue">Keep scrolling to color the map.</p>
+      <p class="story-cue">Scroll.</p>
     `
   },
 
@@ -152,12 +141,14 @@ export const NARRATIVE_SECTIONS = [
     mapState: 'classified',
     content: `
       <p>The map splits in two.</p>
-      <p><strong style="color: var(--navy)">Navy tracts</strong> are
-        holding zones. Investors here buy expensive condominiums and
-        keep them as long-term financial assets.</p>
-      <p><strong style="color: var(--amber-dark)">Amber tracts</strong>
-        are flipping zones. Investors here buy multi-family homes,
-        renovate or convert them, and resell within months.</p>
+      <p><span class="zone-chip zone-chip-hold"><span class="zone-chip-dot" aria-hidden="true"></span>Navy tracts</span>
+        are <strong>holding zones</strong>. Investors here buy
+        expensive condominiums and keep them as long-term financial
+        assets.</p>
+      <p><span class="zone-chip zone-chip-flip"><span class="zone-chip-dot" aria-hidden="true"></span>Amber tracts</span>
+        are <strong>flipping zones</strong>. Investors here buy
+        multi-family homes, renovate or convert them, and resell
+        within months.</p>
       <p>Can a condo be flipped? Certainly. Can a cheaper home be
         held? Of course. But across 180,000 transactions, one pattern
         emerges with striking clarity: the tracts where investors
@@ -168,9 +159,7 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* ============================================================
-     03 The Wedge
-     ============================================================ */
+  /* 03 The Wedge */
   {
     id: 'price-wedge',
     chapter: '03',
@@ -197,14 +186,11 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* ============================================================
-     04 The Cost
-     Equity stats with separated percent sign for typographic finesse.
-     The big numbers are wired up as counters via data-count-target,
-     so they animate from zero on first scroll into view and reset on
-     scroll out for replay on subsequent visits. The human sentence at
-     the end grounds the statistics in lived experience.
-     ============================================================ */
+  /* 04 The Cost.
+   *
+   * The two equity figures are now embedded inside one Bloomberg-style
+   * sentence rather than two parallel cells. Reading the sentence is
+   * the comparison. */
   {
     id: 'equity',
     chapter: '04',
@@ -219,27 +205,26 @@ export const NARRATIVE_SECTIONS = [
       <p>The geography of flipping is not random. It maps almost
         perfectly onto the geography of race and income in Boston.</p>
 
-      <div class="equity-stats" aria-label="Demographic comparison">
-        <div class="equity-stat">
-          <span class="eq-num"
-                data-count-target="87"
-                data-count-duration="1600"
-                style="color: var(--amber-dark)">0</span><span class="eq-pct" style="color: var(--amber-dark)">%</span>
-          <span class="equity-label">non-white in flipping tracts</span>
-        </div>
-        <div class="equity-stat">
-          <span class="eq-num"
-                data-count-target="34"
-                data-count-duration="1600"
-                data-count-delay="200"
-                style="color: var(--navy)">0</span><span class="eq-pct" style="color: var(--navy)">%</span>
-          <span class="equity-label">non-white in holding tracts</span>
-        </div>
-      </div>
+      <p class="equity-sentence" aria-label="Demographic comparison">
+        <span class="eq-inline-num"
+              data-count-target="87"
+              data-count-suffix="%"
+              data-count-duration="1600"
+              style="color: var(--amber-dark)">0%</span>
+        non-white in flipping tracts, against
+        <span class="eq-inline-num"
+              data-count-target="34"
+              data-count-suffix="%"
+              data-count-duration="1600"
+              data-count-delay="200"
+              style="color: var(--navy)">0%</span>
+        in holding tracts.
+      </p>
 
       <p>Median renter household income in flipping tracts is $40,625.
         In holding tracts it is $85,390.</p>
 
+      <div class="human-rule" aria-hidden="true"></div>
       <p class="human-sentence">A family in Dorchester whose landlord
         flips their building before the lease ends, and a family in
         Back Bay whose investor neighbor never leaves, are both living
@@ -251,12 +236,7 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* ============================================================
-     05 The Paths
-     The chart below this section provides its own header
-     ("Comparing X and Y"), so the section copy is intentionally
-     short.
-     ============================================================ */
+  /* 05 The Paths */
   {
     id: 'neighborhood-trajectories',
     chapter: '05',
@@ -277,13 +257,7 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* ============================================================
-     06 The Policy
-     White section. Policy callouts get a refined treatment: 4 px
-     accent stripe, uppercased tracked-out caps for the label, body
-     14 px / 1.6, gentle shadow for lift. The closing takeaway gets
-     a hairline rule above it and a serif scale-up.
-     ============================================================ */
+  /* 06 The Policy */
   {
     id: 'policy',
     chapter: '06',
@@ -321,29 +295,37 @@ export const NARRATIVE_SECTIONS = [
       <p class="closing-takeaway">This data is public. These tracts
         are named. A policy that treats Back Bay and Dorchester as
         the same market will fail both.</p>
+      <p class="closing-footnote">A policy choice by the Commonwealth
+        of Massachusetts, not a forecast.</p>
     `
   },
 
-  /* ============================================================
-     07 Explorer
-     ============================================================ */
+  /* 07 Explorer.
+   *
+   * The reader has just walked the entire argument. The body copy
+   * here used to repeat it. One sentence is enough. */
   {
     id: 'explorer',
     chapter: '07',
     label: 'Explore',
-    title: 'Explore every tract',
+    title: 'Now it is your turn',
     theme: 'mixed',
     layout: 'explorer',
     viz: 'explorer',
     mapState: 'interactive',
     content: `
-      <h2>Explore every tract</h2>
-      <p>Hover to see any tract's investor profile. Click to lock
-        a selection. Use the filter buttons to isolate holding or
-        flipping zones, or jump to a specific neighborhood.</p>
+      <h2>Now it is your turn</h2>
+      <p>Hover any tract to read its full investor profile.</p>
     `
   }
 ];
+
+/* The closing band sits between the explorer and the formal footer.
+ * One italic line, then a quiet handoff. */
+export const STORY_OUTRO = `
+  <p class="story-outro-line">The data ends in 2022.
+    The story is still being written.</p>
+`;
 
 export const FOOTER_CONTENT = `
   <div class="project-footer">
@@ -361,7 +343,7 @@ export const FOOTER_CONTENT = `
         recorded sales each.</div>
     </div>
     <div class="footer-access">Keyboard navigable. Screen reader
-      descriptions on all charts and maps. Honors
+      descriptions on every chart and map. Honors
       prefers-reduced-motion.</div>
     <div class="footer-team">Joseph Firmansyah · Jessica Shoemaker
       · Jean-Michel Mucowintore<br>

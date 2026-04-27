@@ -10,6 +10,12 @@
   export let contextHtml = '';
   export let tooltip = { visible: false, x: 0, y: 0, className: '', html: '' };
 
+  /* Subset preview from the explorer side panel. The parent passes
+   * 'hold', 'flip', 'mixed', or null. Anything non-null dims every
+   * other tract. Independent of focusMode so previewing leaves the
+   * underlying filter alone. */
+  export let previewKind = null;
+
   const dispatch = createEventDispatcher();
 
   let mapCanvas;
@@ -69,6 +75,7 @@
 
     controller.init({ containerEl: mapCanvas, data: geoData, metricRanges: ranges });
     controller.setFocus(focusMode);
+    if (previewKind) controller.previewSubset(previewKind);
   }
 
   function handleFocusChange(mode) {
@@ -157,6 +164,17 @@
   $: if (controller) {
     controller.setFocus(focusMode);
   }
+
+  /* Forward the preview prop into the controller. Any change runs
+   * one of two methods, never both, so the controller's internal
+   * dim machinery handles the visual transition. */
+  $: if (controller) {
+    if (previewKind) {
+      controller.previewSubset(previewKind);
+    } else {
+      controller.clearPreview();
+    }
+  }
 </script>
 
 <header class="site-header">
@@ -186,7 +204,9 @@
       {/each}
     </div>
 
-    <div class="strategy-nav">
+    <div class="strategy-nav" class:strategy-active-hold={focusMode === 'hold'}
+                              class:strategy-active-flip={focusMode === 'flip'}
+                              class:strategy-active-mixed={focusMode === 'mixed'}>
       <div class="jump-nav-title">Filter by speculator strategy</div>
       <button class="jump-btn strategy-btn strategy-all" class:active={focusMode === 'all'} on:click={() => handleFocusChange('all')}>
         All tracts
