@@ -2,6 +2,7 @@
   import TimeSeriesChart from '$lib/components/TimeSeriesChart.svelte';
   import PriceWedgeChart from '$lib/components/PriceWedgeChart.svelte';
   import StoryMap from '$lib/components/StoryMap.svelte';
+  import NeighborhoodTimeline from '$lib/components/NeighborhoodTimeline.svelte';
 
   export let activeSection = null;
   export let geoData = null;
@@ -11,35 +12,68 @@
 
   $: viz = activeSection?.viz ?? 'timeseries';
   $: mapState = activeSection?.mapState ?? 'classified';
-  $: stageKey = `${viz}-${mapState}-${activeSection?.id ?? 'none'}`;
-  $: isLineChart = viz === 'timeseries' || viz === 'pricewedge';
+  $: sectionId = activeSection?.id ?? 'none';
+  $: stageKey = viz + '-' + mapState + '-' + sectionId;
+  $: isChart = viz === 'timeseries' || viz === 'pricewedge' || viz === 'timeline';
 
-  /* The kicker states the finding, not the data description */
+  /* kickers state the finding, not the data description */
   const KICKERS = {
-    'regime-shift': 'Before 2008, one in six. After, one in three.',
-    'price-wedge': 'In holding zones, investors overpay. In flipping zones, they bought the crisis.'
+    'regime-shift': {
+      text: 'Before 2008, one in six. After, one in three.',
+      accent: 'var(--navy)'
+    },
+    'price-wedge': {
+      text: 'In holding zones, investors overpay. In flipping zones, they bought the crisis.',
+      accent: 'linear-gradient(90deg, var(--navy), var(--amber))'
+    },
+    'neighborhood-trajectories': {
+      text: 'How each neighborhood arrived where it is today.',
+      accent: 'var(--neutral)'
+    }
   };
 
-  $: kicker = KICKERS[activeSection?.id] || '';
+  $: kicker = KICKERS[sectionId] || null;
 </script>
 
-<div class="story-stage" class:story-stage-line={isLineChart}>
+<div class="story-stage" class:story-stage-chart={isChart}>
   {#if loadError}
     <div class="stage-message">{loadError}</div>
   {:else}
     {#key stageKey}
       {#if viz === 'timeseries'}
-        <div class="chart-stage slide-in">
-          <div class="stage-kicker">{kicker}</div>
-          <TimeSeriesChart width={660} height={420} />
+        <div class="chart-stage entrance">
+          {#if kicker}
+            <div class="stage-kicker">
+              <span class="kicker-text">{kicker.text}</span>
+              <span class="kicker-accent" style="background: {kicker.accent}"></span>
+            </div>
+          {/if}
+          <TimeSeriesChart width={640} height={400} active={true} />
         </div>
       {:else if viz === 'pricewedge'}
-        <div class="chart-stage slide-in">
-          <div class="stage-kicker">{kicker}</div>
-          <PriceWedgeChart width={640} height={390} />
+        <div class="chart-stage entrance">
+          {#if kicker}
+            <div class="stage-kicker">
+              <span class="kicker-text">{kicker.text}</span>
+              <span class="kicker-accent" style="background: {kicker.accent}"></span>
+            </div>
+          {/if}
+          <PriceWedgeChart width={620} height={370} active={true} />
+        </div>
+      {:else if viz === 'timeline'}
+        <div class="chart-stage entrance">
+          {#if kicker}
+            <div class="stage-kicker">
+              <span class="kicker-text">{kicker.text}</span>
+              <span class="kicker-accent" style="background: {kicker.accent}"></span>
+            </div>
+          {/if}
+          <div class="timeline-stage-inner">
+            <NeighborhoodTimeline active={true} />
+          </div>
         </div>
       {:else if viz === 'map'}
-        <div class="map-stage slide-in">
+        <div class="map-stage entrance">
           <StoryMap {geoData} {ranges} {counts} {mapState} />
         </div>
       {:else}
@@ -56,13 +90,12 @@
     min-height: 460px;
   }
 
-  .story-stage.story-stage-line {
-    height: min(64vh, 560px);
-    min-height: 390px;
+  .story-stage.story-stage-chart {
+    height: min(68vh, 600px);
+    min-height: 400px;
   }
 
-  .chart-stage,
-  .map-stage {
+  .chart-stage, .map-stage {
     width: 100%;
     height: 100%;
   }
@@ -72,24 +105,40 @@
     flex-direction: column;
     justify-content: center;
     overflow: hidden;
-    padding: 28px 28px 24px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.4);
+    padding: 16px 12px 12px;
   }
 
   .chart-stage :global(svg) {
     width: 100%;
     height: auto;
-    max-height: calc(100% - 38px);
+    max-height: calc(100% - 48px);
+  }
+
+  .timeline-stage-inner {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
   }
 
   .stage-kicker {
-    margin: 0 0 18px 22px;
+    margin: 0 0 14px 12px;
+  }
+
+  .kicker-text {
+    display: block;
     color: var(--ink);
     font-family: "DM Serif Display", Georgia, serif;
     font-size: 20px;
     font-weight: 400;
     line-height: 1.25;
+    margin-bottom: 6px;
+  }
+
+  .kicker-accent {
+    display: block;
+    width: 40px;
+    height: 2px;
+    border-radius: 1px;
   }
 
   .stage-message {
@@ -97,25 +146,24 @@
     height: 100%;
     place-items: center;
     padding: 24px;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.4);
     color: var(--sub);
     font-size: 14px;
     text-align: center;
   }
 
-  .slide-in {
-    animation: stage-slide-in 640ms cubic-bezier(0.16, 1, 0.3, 1);
+  /* entrance: combined opacity and scale for a subtle "approaching" feel */
+  .entrance {
+    animation: stage-entrance 800ms cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  @keyframes stage-slide-in {
+  @keyframes stage-entrance {
     from {
       opacity: 0;
-      transform: translateX(10px);
+      transform: scale(0.97);
     }
     to {
       opacity: 1;
-      transform: translateX(0);
+      transform: scale(1);
     }
   }
 
@@ -126,13 +174,15 @@
     }
 
     .chart-stage {
-      padding: 18px 10px 14px;
-      border-radius: 0;
+      padding: 12px 6px 8px;
+    }
+
+    .kicker-text {
+      font-size: 16px;
     }
 
     .stage-kicker {
-      margin-left: 10px;
-      font-size: 16px;
+      margin-left: 6px;
     }
   }
 </style>

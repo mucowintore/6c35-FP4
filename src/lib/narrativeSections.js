@@ -1,9 +1,10 @@
 export const NARRATIVE_SECTIONS = [
 
+  /* opening: dark cinematic title card */
   {
     id: 'opening',
     chapter: '00',
-    title: 'When Boston says "speculation," whose neighborhood does it mean?',
+    title: '',
     theme: 'mixed',
     layout: 'fullscreen',
     viz: null,
@@ -14,18 +15,18 @@ export const NARRATIVE_SECTIONS = [
       <div class="opening-stats">
         <div class="opening-stat opening-stat-hold">
           <span class="opening-stat-number">+49%</span>
-          <span class="opening-stat-label">What investors overpay in
-            wealthy, white neighborhoods</span>
+          <span class="opening-stat-label">What investors overpay
+            in wealthy, white neighborhoods</span>
         </div>
         <div class="opening-stat opening-stat-flip">
-          <span class="opening-stat-number">\u221225%</span>
-          <span class="opening-stat-label">What they underpaid in
+          <span class="opening-stat-number">25%</span>
+          <span class="opening-stat-label">The discount they took in
             communities of color during the crisis</span>
         </div>
       </div>
       <div class="opening-rule"></div>
       <p class="scroll-subline">180,000 residential transactions.
-        23 years. One city, two opposite markets.</p>
+        23 years. One city, pulled apart.</p>
       <p class="scroll-byline">Joseph Firmansyah \u00b7 Jessica Shoemaker
         \u00b7 Jean-Michel Mucowintore</p>
       <div class="scroll-cue-wrap">
@@ -40,6 +41,7 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
+  /* 01: the permanent shift in investor participation */
   {
     id: 'regime-shift',
     chapter: '01',
@@ -65,16 +67,17 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
+  /* 02a: map appears in neutral gray */
   {
     id: 'map-intro',
     chapter: '02',
-    title: 'Speculation split into two markets',
+    title: 'Two markets hiding in plain sight',
     theme: 'mixed',
     layout: 'split',
     viz: 'map',
     mapState: 'gray',
     content: `
-      <h2 class="scroll-section-title">Speculation split into two markets</h2>
+      <h2 class="scroll-section-title">Two markets hiding in plain sight</h2>
       <p>But where is this happening? And what kind of investing
         are we actually talking about?</p>
       <p>We classified every census tract in Boston by the dominant
@@ -85,10 +88,11 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
+  /* 02b: the bloom, tracts color into navy and amber */
   {
     id: 'map-classified',
     chapter: '02',
-    title: 'Speculation split into two markets',
+    title: 'Two markets hiding in plain sight',
     theme: 'mixed',
     layout: 'split',
     viz: 'map',
@@ -118,6 +122,7 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
+  /* 03: the price wedge between holding and flipping */
   {
     id: 'price-wedge',
     chapter: '03',
@@ -147,6 +152,7 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
+  /* 04: the racial and economic geography of flipping */
   {
     id: 'equity',
     chapter: '04',
@@ -179,9 +185,35 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
+  /* 05: neighborhood trajectories over time (Jessica's chart) */
+  {
+    id: 'neighborhood-trajectories',
+    chapter: '05',
+    title: 'The same city, different paths',
+    theme: 'mixed',
+    layout: 'split',
+    viz: 'timeline',
+    mapState: null,
+    content: `
+      <h2 class="scroll-section-title">The same city, different paths</h2>
+      <p>The map shows where holding and flipping dominate today. But
+        it does not show how each neighborhood arrived there.</p>
+      <p>Some places saw investor activity rise steadily over two
+        decades. Others were transformed overnight by the 2008 crisis.
+        In some neighborhoods, flipping intensified year after year.
+        In others, it appeared briefly during moments of distress and
+        then receded.</p>
+      <p>Select neighborhoods in the chart to compare how investor
+        share, flipping activity, and pricing behavior evolved over
+        time. Watch where trajectories align and where they split
+        apart.</p>
+    `
+  },
+
+  /* 06: policy recommendations grounded in the data */
   {
     id: 'policy',
-    chapter: '05',
+    chapter: '06',
     title: 'Different markets need different tools',
     theme: 'policy',
     layout: 'split',
@@ -212,39 +244,22 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
+  /* 07: full interactive explorer, the culmination */
   {
     id: 'explorer',
-    chapter: '06',
-    title: 'Explore the tract-level story',
+    chapter: '07',
+    title: 'Explore every tract',
     theme: 'mixed',
     layout: 'explorer',
     viz: 'explorer',
     mapState: 'interactive',
     content: `
-      <h2 class="scroll-section-title">Explore the tract-level story</h2>
+      <h2 class="scroll-section-title">Explore every tract</h2>
       <p>The story above is the city's story. Now explore the story
         of any individual census tract. Hover to see its investor
         profile. Click to lock a selection. Use the filter buttons
         to isolate holding or flipping zones, or jump to a specific
         neighborhood.</p>
-    `
-  },
-
-  {
-    id: 'neighborhood-trajectories',
-    chapter: '07',
-    title: 'The same city, different paths',
-    theme: 'mixed',
-    layout: 'standalone',
-    viz: 'timeline',
-    mapState: null,
-    content: `
-      <h2 class="scroll-section-title">The same city, different paths</h2>
-      <p>The map shows where holding and flipping dominate today. But
-        it does not show how each neighborhood arrived there. Some
-        places saw investor activity rise steadily over two decades.
-        Others were transformed overnight by the 2008 crisis. Select
-        neighborhoods below to watch their trajectories diverge.</p>
     `
   }
 ];
@@ -264,6 +279,8 @@ export const FOOTER_CONTENT = `
       <div class="footer-note">173 census tracts with 250 or more
         recorded sales each.</div>
     </div>
+    <div class="footer-access">Keyboard navigable. Screen reader
+      descriptions on all charts and maps.</div>
     <div class="footer-team">Joseph Firmansyah \u00b7 Jessica Shoemaker
       \u00b7 Jean-Michel Mucowintore<br>
       6.C85 Interactive Data Visualization and Society, Spring 2026</div>

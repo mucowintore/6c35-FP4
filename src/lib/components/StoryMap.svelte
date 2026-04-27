@@ -31,10 +31,7 @@
 
   onMount(() => {
     window.addEventListener('resize', handleResize);
-
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
+    return () => window.removeEventListener('resize', handleResize);
   });
 
   onDestroy(() => {
@@ -56,11 +53,10 @@
 
   <div class="story-map-legend">
     <div class="legend-title">Investor strategy</div>
-    <div
-      class="legend-gradient"
+    <div class="legend-gradient"
       style="background: linear-gradient(to right,
-      {HOLD_RAMP[3]}, {HOLD_RAMP[1]}, #D4D0C6, {FLIP_RAMP[1]}, {FLIP_RAMP[3]})"
-    ></div>
+      {HOLD_RAMP[3]}, {HOLD_RAMP[1]}, #D4D0C6, {FLIP_RAMP[1]}, {FLIP_RAMP[3]})">
+    </div>
     <div class="legend-endpoints">
       <span style="color: var(--navy)">Holding</span>
       <span style="color: var(--amber)">Flipping</span>
@@ -79,9 +75,8 @@
     height: 100%;
     min-height: 420px;
     overflow: hidden;
-    border: 1px solid var(--rule);
-    border-radius: 8px;
-    /* subtle radial vignette draws the eye to the center of the geography */
+    border-radius: 6px;
+    border: 0.5px solid rgba(0, 0, 0, 0.06);
     background: radial-gradient(ellipse at 50% 48%, #E8E5DC, #D8D4CA);
   }
 
@@ -97,8 +92,10 @@
     width: 210px;
     padding: 12px 14px;
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.94);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    background: rgba(255, 255, 255, 0.78);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 1px 6px rgba(0, 0, 0, 0.06);
     font-size: 11px;
   }
 
@@ -117,8 +114,7 @@
     border-radius: 3px;
   }
 
-  .legend-endpoints,
-  .legend-row {
+  .legend-endpoints, .legend-row {
     display: flex;
     justify-content: space-between;
     gap: 12px;
@@ -129,9 +125,7 @@
     font-weight: 700;
   }
 
-  .legend-row {
-    color: var(--sub);
-  }
+  .legend-row { color: var(--sub); }
 
   @media (max-width: 760px) {
     .story-map {
