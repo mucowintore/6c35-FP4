@@ -16,7 +16,6 @@
   $: stageKey = viz + '-' + mapState + '-' + sectionId;
   $: isChart = viz === 'timeseries' || viz === 'pricewedge' || viz === 'timeline';
 
-  /* kickers state the finding, not the data description */
   const KICKERS = {
     'regime-shift': {
       text: 'Before 2008, one in six. After, one in three.',
@@ -68,7 +67,7 @@
               <span class="kicker-accent" style="background: {kicker.accent}"></span>
             </div>
           {/if}
-          <div class="timeline-stage-inner">
+          <div class="timeline-inner">
             <NeighborhoodTimeline active={true} />
           </div>
         </div>
@@ -84,105 +83,45 @@
 </div>
 
 <style>
-  .story-stage {
-    width: 100%;
-    height: min(78vh, 700px);
-    min-height: 460px;
-  }
-
-  .story-stage.story-stage-chart {
-    height: min(68vh, 600px);
-    min-height: 400px;
-  }
-
-  .chart-stage, .map-stage {
-    width: 100%;
-    height: 100%;
-  }
+  .story-stage { width: 100%; height: min(78vh, 700px); min-height: 460px; }
+  .story-stage.story-stage-chart { height: min(68vh, 600px); min-height: 400px; }
+  .chart-stage, .map-stage { width: 100%; height: 100%; }
 
   .chart-stage {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
-    padding: 16px 12px 12px;
+    display: flex; flex-direction: column; justify-content: center;
+    overflow: hidden; padding: 16px 12px 12px;
   }
 
-  .chart-stage :global(svg) {
-    width: 100%;
-    height: auto;
-    max-height: calc(100% - 48px);
-  }
+  .chart-stage :global(svg) { width: 100%; height: auto; max-height: calc(100% - 48px); }
+  .timeline-inner { flex: 1; min-height: 0; overflow: hidden; }
 
-  .timeline-stage-inner {
-    flex: 1;
-    min-height: 0;
-    overflow: hidden;
-  }
-
-  .stage-kicker {
-    margin: 0 0 14px 12px;
-  }
+  .stage-kicker { margin: 0 0 14px 12px; }
 
   .kicker-text {
-    display: block;
-    color: var(--ink);
+    display: block; color: var(--ink);
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 1.25;
+    font-size: 20px; font-weight: 400; line-height: 1.25;
     margin-bottom: 6px;
   }
 
-  .kicker-accent {
-    display: block;
-    width: 40px;
-    height: 2px;
-    border-radius: 1px;
-  }
+  .kicker-accent { display: block; width: 40px; height: 2px; border-radius: 1px; }
 
   .stage-message {
-    display: grid;
-    height: 100%;
-    place-items: center;
-    padding: 24px;
-    color: var(--sub);
-    font-size: 14px;
-    text-align: center;
+    display: grid; height: 100%; place-items: center;
+    padding: 24px; color: var(--sub); font-size: 14px; text-align: center;
   }
 
-  /* entrance: combined opacity and scale for a subtle "approaching" feel */
-  .entrance {
-    animation: stage-entrance 800ms cubic-bezier(0.16, 1, 0.3, 1);
-  }
+  .entrance { animation: stage-entrance 800ms cubic-bezier(0.16, 1, 0.3, 1); }
 
   @keyframes stage-entrance {
-    from {
-      opacity: 0;
-      transform: scale(0.97);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
+    from { opacity: 0; transform: scale(0.97); }
+    to { opacity: 1; transform: scale(1); }
   }
 
   @media (max-width: 760px) {
-    .story-stage {
-      height: 100%;
-      min-height: 0;
-    }
-
-    .chart-stage {
-      padding: 12px 6px 8px;
-    }
-
-    .kicker-text {
-      font-size: 16px;
-    }
-
-    .stage-kicker {
-      margin-left: 6px;
-    }
+    .story-stage { height: 100%; min-height: 0; }
+    .chart-stage { padding: 12px 6px 8px; }
+    .kicker-text { font-size: 16px; }
+    .stage-kicker { margin-left: 6px; }
   }
 </style>

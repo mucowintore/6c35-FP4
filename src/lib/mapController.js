@@ -62,6 +62,7 @@ export function createMapController(callbacks = {}) {
   let presentationState = 'interactive';
   let previousPresentationState = 'interactive';
   let allowInteraction = true;
+  let bloomMaxDist = 1;
 
   const holdColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(HOLD_RAMP));
   const flipColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(FLIP_RAMP));
@@ -104,7 +105,7 @@ export function createMapController(callbacks = {}) {
   }
 
   function tractFill(feature) {
-    const props = feature.properties;
+    var props = feature.properties;
 
     if (presentationState === 'gray') {
       return isLowDataTract(props) ? '#F5F3ED' : '#CFC9BC';
@@ -114,7 +115,7 @@ export function createMapController(callbacks = {}) {
   }
 
   function tractOpacity(feature) {
-    const props = feature.properties;
+    var props = feature.properties;
 
     if (presentationState === 'holdingDimmed') {
       return props.dominant === 'flipping' && !isLowDataTract(props) ? 1 : 0.12;
@@ -127,37 +128,61 @@ export function createMapController(callbacks = {}) {
     return 1;
   }
 
-  function applyPresentationState(options = {}) {
+  function applyPresentationState(options) {
+    options = options || {};
     if (!tractPaths) return;
 
-    const { animate = true } = options;
+    var animate = options.animate !== false;
     if (!allowInteraction || presentationState !== 'interactive') {
       tractPaths.classed('dimmed', false);
     }
 
     var pointerVal = allowInteraction ? 'auto' : 'none';
 
+    /* remove policy annotations unless entering the annotated state */
+    if (presentationState !== 'fullViewAnnotated') {
+      removePolicyAnnotations();
+    }
+
     /*
-     * Staggered bloom: when moving from gray to classified, holding
-     * tracts appear first, then mixed, then flipping. The two-beat
-     * reveal mirrors the narrative structure of the scroll.
+     * Geographic radial bloom: tracts near the center of Boston (the Common)
+     * appear first and color radiates outward, like watching ink spread across
+     * paper. Holding tracts lead, flipping tracts follow 600ms later.
      */
     if (animate && previousPresentationState === 'gray' && presentationState === 'classified') {
+      var md = bloomMaxDist || 1;
 
-      tractPaths.filter(function(f) { return f.properties.dominant === 'holding'; })
-        .transition().duration(1200).ease(d3.easeCubicInOut)
+      tractPaths.filter(function(f) {
+        return f.properties.dominant === 'holding' && !isLowDataTract(f.properties);
+      })
+        .transition()
+        .delay(function(f) { return ((f._bloomDist || 0) / md) * 1400; })
+        .duration(800).ease(d3.easeCubicInOut)
         .attr('fill', tractFill).attr('opacity', tractOpacity)
         .attr('pointer-events', pointerVal);
 
       tractPaths.filter(function(f) {
-        return f.properties.dominant !== 'holding' && f.properties.dominant !== 'flipping';
+        var d = f.properties.dominant;
+        return d !== 'holding' && d !== 'flipping' && !isLowDataTract(f.properties);
       })
-        .transition().delay(400).duration(1000).ease(d3.easeCubicInOut)
+        .transition()
+        .delay(function(f) { return 400 + ((f._bloomDist || 0) / md) * 1200; })
+        .duration(700).ease(d3.easeCubicInOut)
         .attr('fill', tractFill).attr('opacity', tractOpacity)
         .attr('pointer-events', pointerVal);
 
-      tractPaths.filter(function(f) { return f.properties.dominant === 'flipping'; })
-        .transition().delay(700).duration(1000).ease(d3.easeCubicInOut)
+      tractPaths.filter(function(f) {
+        return f.properties.dominant === 'flipping' && !isLowDataTract(f.properties);
+      })
+        .transition()
+        .delay(function(f) { return 600 + ((f._bloomDist || 0) / md) * 1400; })
+        .duration(800).ease(d3.easeCubicInOut)
+        .attr('fill', tractFill).attr('opacity', tractOpacity)
+        .attr('pointer-events', pointerVal);
+
+      /* low data tracts fade in together at the end */
+      tractPaths.filter(function(f) { return isLowDataTract(f.properties); })
+        .transition().delay(1800).duration(600).ease(d3.easeCubicOut)
         .attr('fill', tractFill).attr('opacity', tractOpacity)
         .attr('pointer-events', pointerVal);
 
@@ -165,6 +190,7 @@ export function createMapController(callbacks = {}) {
       return;
     }
 
+    /* standard transition for all other state changes */
     var target = animate
       ? tractPaths.transition().duration(800).ease(d3.easeCubicInOut)
       : tractPaths;
@@ -175,6 +201,70 @@ export function createMapController(callbacks = {}) {
       .attr('pointer-events', pointerVal);
 
     refreshPathStrokes();
+
+    /* show policy zone labels when entering the annotated state */
+    if (presentationState === 'fullViewAnnotated' && animate) {
+      setTimeout(addPolicyAnnotations, 400);
+    } else if (presentationState === 'fullViewAnnotated') {
+      addPolicyAnnotations();
+    }
+  }
+
+  /* policy zone labels placed at the centroid of each tract cluster */
+  function addPolicyAnnotations() {
+    if (!mapGroup || !geoData || !pathGenerator) return;
+    removePolicyAnnotations();
+
+    var holdFeats = geoData.features.filter(function(f) {
+      return f.properties.dominant === 'holding' && !isLowDataTract(f.properties);
+    });
+    var flipFeats = geoData.features.filter(function(f) {
+      return f.properties.dominant === 'flipping' && !isLowDataTract(f.properties);
+    });
+
+    function clusterCenter(feats) {
+      var xs = [], ys = [];
+      feats.forEach(function(f) {
+        var c = pathGenerator.centroid(f);
+        if (c && !isNaN(c[0])) { xs.push(c[0]); ys.push(c[1]); }
+      });
+      return [d3.mean(xs) || 0, d3.mean(ys) || 0];
+    }
+
+    var hc = clusterCenter(holdFeats);
+    var fc = clusterCenter(flipFeats);
+    var font = 'Plus Jakarta Sans, sans-serif';
+
+    function placeLabel(cx, cy, text, color, bgColor) {
+      var g = mapGroup.append('g')
+        .attr('class', 'policy-annotation')
+        .attr('transform', 'translate(' + cx + ',' + cy + ')');
+
+      /* background pill for legibility */
+      var t = g.append('text')
+        .attr('text-anchor', 'middle').attr('dy', '0.35em')
+        .attr('fill', color)
+        .attr('font-size', '11px').attr('font-weight', '700')
+        .attr('font-family', font)
+        .text(text);
+
+      var bbox = t.node().getBBox();
+      g.insert('rect', 'text')
+        .attr('x', bbox.x - 6).attr('y', bbox.y - 3)
+        .attr('width', bbox.width + 12).attr('height', bbox.height + 6)
+        .attr('rx', 4).attr('fill', bgColor).attr('opacity', 0.88);
+
+      g.attr('opacity', 0)
+        .transition().duration(500).ease(d3.easeCubicOut)
+        .attr('opacity', 1);
+    }
+
+    placeLabel(hc[0], hc[1], 'Transfer fee zone', '#1B3A5C', '#E2ECF4');
+    placeLabel(fc[0], fc[1], 'TOPA zone', '#7A5020', '#FDF4E6');
+  }
+
+  function removePolicyAnnotations() {
+    if (mapGroup) mapGroup.selectAll('.policy-annotation').remove();
   }
 
   function applyDimming() {
@@ -523,6 +613,20 @@ export function createMapController(callbacks = {}) {
       .attr('stroke-width', 0.5)
       .attr('pointer-events', allowInteraction ? 'auto' : 'none');
 
+    /* pre-compute radial distances from Boston Common for the geographic bloom */
+    var commonXY = projection([-71.0655, 42.3554]);
+    if (commonXY && !isNaN(commonXY[0])) {
+      tractPaths.each(function(feature) {
+        var c = pathGenerator.centroid(feature);
+        if (c && !isNaN(c[0])) {
+          feature._bloomDist = Math.hypot(c[0] - commonXY[0], c[1] - commonXY[1]);
+        } else {
+          feature._bloomDist = 999;
+        }
+      });
+      bloomMaxDist = d3.max(tractPaths.data(), function(f) { return f._bloomDist || 0; }) || 1;
+    }
+
     if (allowInteraction) {
       tractPaths
         .on('mouseenter', handleMouseEnter)
@@ -716,6 +820,7 @@ export function createMapController(callbacks = {}) {
     if (leaveTimer) clearTimeout(leaveTimer);
     leaveTimer = null;
     pendingPointerDown = null;
+    removePolicyAnnotations();
 
     if (svgElement) {
       svgElement.on('.zoom', null);

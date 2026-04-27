@@ -9,8 +9,8 @@
   export let outDuration = 200;
   export let inDelay = 70;
 
-  function sectionBody(content = '') {
-    return content.replace(/<h2[^>]*>[\s\S]*?<\/h2>/i, '').trim();
+  function sectionBody(content) {
+    return (content || '').replace(/<h2[^>]*>[\s\S]*?<\/h2>/i, '').trim();
   }
 
   $: bodyHtml = sectionBody(html);
@@ -22,11 +22,9 @@
       {@html bodyHtml}
     </div>
     {#key contentKey}
-      <div
-        class="story-copy story-copy-fade"
+      <div class="story-copy story-copy-fade"
         in:fade={{ duration: inDuration, delay: inDelay, easing: cubicOut }}
-        out:fade={{ duration: outDuration, easing: cubicOut }}
-      >
+        out:fade={{ duration: outDuration, easing: cubicOut }}>
         {@html bodyHtml}
       </div>
     {/key}
@@ -38,57 +36,34 @@
 {/if}
 
 <style>
-  .story-copy {
-    max-width: 500px;
-  }
-
-  .story-copy-fade {
-    position: absolute;
-    inset: 0;
-    will-change: opacity;
-  }
-
-  .story-copy-stack {
-    position: relative;
-  }
-
-  .story-copy-measure {
-    visibility: hidden;
-    pointer-events: none;
-    user-select: none;
-  }
+  .story-copy { max-width: 500px; }
+  .story-copy-fade { position: absolute; inset: 0; will-change: opacity; }
+  .story-copy-stack { position: relative; }
+  .story-copy-measure { visibility: hidden; pointer-events: none; user-select: none; }
 
   .story-copy :global(p) {
-    margin: 0 0 15px;
+    margin: 0 0 14px;
     color: var(--text);
     font-size: 15px;
-    line-height: 1.78;
+    line-height: 1.65;
   }
 
-  .story-copy :global(ul) {
-    margin: 0 0 15px;
-    padding: 0;
-    list-style: none;
-  }
+  .story-copy :global(ul) { margin: 0 0 14px; padding: 0; list-style: none; }
 
   .story-copy :global(li) {
-    position: relative;
-    margin: 0 0 8px;
-    padding-left: 16px;
-    color: var(--text);
-    font-size: 15px;
-    line-height: 1.78;
+    position: relative; margin: 0 0 8px; padding-left: 16px;
+    color: var(--text); font-size: 15px; line-height: 1.65;
   }
 
   .story-copy :global(li)::before {
-    content: "\2022";
-    position: absolute;
-    left: 0;
-    color: var(--text);
+    content: "\2022"; position: absolute; left: 0; color: var(--text);
   }
 
-  .story-copy :global(strong) {
-    color: var(--ink);
-    font-weight: 700;
+  .story-copy :global(strong) { color: var(--ink); font-weight: 700; }
+
+  .story-copy :global(h2) {
+    max-width: 520px; margin: 0 0 20px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: clamp(32px, 4vw, 50px); line-height: 1.06;
   }
 </style>

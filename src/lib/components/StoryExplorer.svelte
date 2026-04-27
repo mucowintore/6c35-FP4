@@ -120,92 +120,24 @@
     on:tooltipHide={hideTooltip}
   />
 
-  {#if activeTract}
-    <SidePanel
-      hoveredTract={activeTract}
-      {counts}
-      {ranges}
-      {cityAverages}
-      {holdingAverages}
-      {flippingAverages}
-    />
-  {:else}
-    <aside class="detail-panel story-explorer-intro">
-      <div class="overview-title">Explore every tract</div>
-      <p>
-        Hover a census tract to see its investor profile. Click a tract to keep it selected while
-        you compare the profile against citywide averages.
-      </p>
-      <div class="story-stat-grid">
-        <div>
-          <span style="color: var(--navy)">{counts.holdCount}</span>
-          <small>holding-dominant tracts</small>
-        </div>
-        <div>
-          <span style="color: var(--amber)">{counts.flipCount}</span>
-          <small>flipping-dominant tracts</small>
-        </div>
-        <div>
-          <span>{counts.mixedCount}</span>
-          <small>mixed tracts</small>
-        </div>
-      </div>
-      <p>
-        Use the map filters to isolate holding, flipping, or mixed tracts, or jump to a
-        neighborhood to inspect the local pattern.
-      </p>
-    </aside>
-  {/if}
+  <SidePanel
+    hoveredTract={activeTract}
+    {counts}
+    {ranges}
+    {cityAverages}
+    {holdingAverages}
+    {flippingAverages}
+  />
 </div>
 
 <style>
   .story-explorer-app {
     grid-template-columns: minmax(0, 1fr) minmax(320px, 24vw);
-    height: min(96vh, 980px);
+    height: min(100vh, 1000px);
     min-height: 740px;
     overflow: hidden;
-    border: 1px solid var(--rule);
-    border-radius: 8px;
+    border-radius: 0;
     background: #fff;
-  }
-
-  .story-explorer-intro {
-    padding: 24px 26px;
-  }
-
-  .story-explorer-intro p {
-    margin: 12px 0 0;
-    color: var(--sub);
-    font-size: 13px;
-    line-height: 1.72;
-  }
-
-  .story-stat-grid {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin: 18px 0;
-  }
-
-  .story-stat-grid div {
-    padding: 12px;
-    border-radius: 6px;
-    background: var(--surface);
-  }
-
-  .story-stat-grid span {
-    display: block;
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 26px;
-    font-weight: 500;
-  }
-
-  .story-stat-grid small {
-    display: block;
-    margin-top: 2px;
-    color: var(--sub);
-    font-size: 11px;
-    line-height: 1.4;
   }
 
   @media (max-width: 900px) {

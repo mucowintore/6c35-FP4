@@ -86,7 +86,7 @@
     <div class="overview-tab-panel">
       {#if overviewTab === 'overview'}
         {@html overviewSections.overview}
-        <div class="section-heading" style="margin-top: 16px">Holding vs. flipping profiles</div>
+        <div class="section-heading" style="margin-top: 16px">Citywide comparison</div>
         <div class="profile-chart-container" bind:this={pairedBarsContainer}></div>
         <div class="profile-caption">
           Average metric values for each tract type, relative to the city average (center line).
@@ -116,16 +116,6 @@
     <div class="profile-caption">
       Bar shows deviation from city average (center line).
       Right of center = above average.
-    </div>
-
-    <div class="section-heading">Key metrics</div>
-    <div class="metric-grid">
-      {@html metricsHtml.price}
-      {@html metricsHtml.investors}
-      {@html metricsHtml.flipRate}
-      {@html metricsHtml.condos}
-      {@html metricsHtml.multiFamily}
-      {@html metricsHtml.nonWhite}
     </div>
 
     <div class="section-heading">Intensity scores</div>

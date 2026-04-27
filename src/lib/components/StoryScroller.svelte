@@ -6,7 +6,6 @@
   import StoryExplorer from '$lib/components/StoryExplorer.svelte';
   import StoryStepBody from '$lib/components/StoryStepBody.svelte';
 
-  /* timeline is now section 05 inside the scroll flow, rendered by StoryStage */
   const openingSection = NARRATIVE_SECTIONS.find((s) => s.layout === 'fullscreen');
   const storySteps = NARRATIVE_SECTIONS.filter((s) => s.layout === 'split');
   const renderedStorySteps = storySteps.filter((s) => s.id !== 'map-classified');
@@ -54,43 +53,32 @@
     storySteps.find((s) => s.id === chapter2NarrativeStepId)?.content ??
     mapIntroStep?.content ?? '';
 
-  function themeOf(section) { return 'theme-' + (section?.theme ?? 'mixed'); }
+  function themeOf(s) { return 'theme-' + (s?.theme ?? 'mixed'); }
 
   function trackStep(node) {
     observedNodes = [...observedNodes, node];
-    const sectionId = node?.dataset?.sectionId;
-    if (sectionId) storyStepNodes = { ...storyStepNodes, [sectionId]: node };
+    var sid = node?.dataset?.sectionId;
+    if (sid) storyStepNodes = { ...storyStepNodes, [sid]: node };
     observer?.observe(node);
     return {
       destroy() {
         observer?.unobserve(node);
         observedNodes = observedNodes.filter((e) => e !== node);
-        if (sectionId && storyStepNodes[sectionId] === node) {
-          const next = { ...storyStepNodes };
-          delete next[sectionId];
-          storyStepNodes = next;
+        if (sid && storyStepNodes[sid] === node) {
+          var next = { ...storyStepNodes }; delete next[sid]; storyStepNodes = next;
         }
       }
     };
   }
 
   function isWide() { return typeof window !== 'undefined' && window.innerWidth > 760; }
-  function inView(el) {
-    if (!el) return false;
-    const r = el.getBoundingClientRect();
-    return r.bottom > 0 && r.top < window.innerHeight;
-  }
-  function storyStepMode() {
-    return storyRegionEl && storyRegionEl.getBoundingClientRect().top <= 28;
-  }
-  function explorerAtTop() {
-    return explorerSectionEl && explorerSectionEl.getBoundingClientRect().top >= -12;
-  }
+  function inView(el) { if (!el) return false; var r = el.getBoundingClientRect(); return r.bottom > 0 && r.top < window.innerHeight; }
+  function storyStepMode() { return storyRegionEl && storyRegionEl.getBoundingClientRect().top <= 28; }
+  function explorerAtTop() { return explorerSectionEl && explorerSectionEl.getBoundingClientRect().top >= -12; }
 
   function activateStep(id) {
     if (!id) return;
-    activeId = id;
-    stepCursorId = id;
+    activeId = id; stepCursorId = id;
     if (id === 'map-intro' || id === 'map-classified') chapter2NarrativeStepId = id;
     activeLockUntil = Date.now() + ACTIVE_LOCK_MS;
     isStepTransitioning = true;
@@ -98,50 +86,32 @@
     stepTransitionTimer = window.setTimeout(() => { isStepTransitioning = false; }, STEP_SCROLL_COOLDOWN_MS);
   }
 
-  function scrollToStep(targetEl, targetId) {
-    targetId = targetId || '';
-    if (!targetEl) return;
-    const isStep = targetId && storySteps.some((s) => s.id === targetId);
-    if (isStep) { activateStep(targetId); }
-    else {
-      isStepTransitioning = true;
-      window.clearTimeout(stepTransitionTimer);
-      stepTransitionTimer = window.setTimeout(() => { isStepTransitioning = false; }, STEP_SCROLL_COOLDOWN_MS);
-    }
-    if (isWide() && isStep) {
-      const top = window.scrollY + targetEl.getBoundingClientRect().top - STORY_TOP_RAIL_PX;
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-      return;
-    }
-    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  function scrollToStep(tEl, tId) {
+    tId = tId || '';
+    if (!tEl) return;
+    var isStep = tId && storySteps.some((s) => s.id === tId);
+    if (isStep) activateStep(tId);
+    else { isStepTransitioning = true; window.clearTimeout(stepTransitionTimer); stepTransitionTimer = window.setTimeout(() => { isStepTransitioning = false; }, STEP_SCROLL_COOLDOWN_MS); }
+    if (isWide() && isStep) { var top = window.scrollY + tEl.getBoundingClientRect().top - STORY_TOP_RAIL_PX; window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' }); return; }
+    tEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 
-  function queueWheelReset() {
-    window.clearTimeout(wheelGestureResetTimer);
-    wheelGestureResetTimer = window.setTimeout(() => { wheelGestureConsumed = false; }, WHEEL_GESTURE_IDLE_MS);
-  }
+  function queueWheelReset() { window.clearTimeout(wheelGestureResetTimer); wheelGestureResetTimer = window.setTimeout(() => { wheelGestureConsumed = false; }, WHEEL_GESTURE_IDLE_MS); }
 
   function handleWheel(event) {
     if (!isWide() || event.ctrlKey) return;
     if (Date.now() < wheelGuardUntil) return;
-    const ov = inView(openingSectionEl), sv = inView(storyRegionEl);
-    const sm = storyStepMode(), ev = inView(explorerSectionEl);
+    var ov = inView(openingSectionEl), sv = inView(storyRegionEl), sm = storyStepMode(), ev = inView(explorerSectionEl);
     if (!ov && !sv && !ev) return;
     if (isStepTransitioning || wheelGestureConsumed) { event.preventDefault(); queueWheelReset(); return; }
     if (event.deltaY === 0) return;
-    const dir = event.deltaY > 0 ? 1 : -1;
-    const ref = stepCursorId || activeId;
-    const idx = storySteps.findIndex((s) => s.id === ref);
-    let tEl = null, tId = '';
-
+    var dir = event.deltaY > 0 ? 1 : -1;
+    var ref = stepCursorId || activeId;
+    var idx = storySteps.findIndex((s) => s.id === ref);
+    var tEl = null, tId = '';
     if (dir > 0) {
       if (ov && !sm) { tEl = storyStepNodes[storySteps[0]?.id]; tId = storySteps[0]?.id ?? ''; }
-      else {
-        if (!sv || !sm) return;
-        if (ref === 'map-intro') { event.preventDefault(); wheelGestureConsumed = true; queueWheelReset(); activateStep('map-classified'); return; }
-        if (idx >= 0 && idx < storySteps.length - 1) { tId = storySteps[idx + 1]?.id ?? ''; tEl = storyStepNodes[tId]; }
-        else if (idx === storySteps.length - 1) { if (ev) return; tEl = explorerSectionEl; }
-      }
+      else { if (!sv || !sm) return; if (ref === 'map-intro') { event.preventDefault(); wheelGestureConsumed = true; queueWheelReset(); activateStep('map-classified'); return; } if (idx >= 0 && idx < storySteps.length - 1) { tId = storySteps[idx + 1]?.id ?? ''; tEl = storyStepNodes[tId]; } else if (idx === storySteps.length - 1) { if (ev) return; tEl = explorerSectionEl; } }
     } else {
       if (ev) { if (!explorerAtTop()) return; tId = storySteps[storySteps.length - 1]?.id ?? ''; tEl = storyStepNodes[tId]; }
       else if (ref === 'map-classified') { event.preventDefault(); wheelGestureConsumed = true; queueWheelReset(); activateStep('map-intro'); return; }
@@ -149,79 +119,54 @@
       else if (idx === 0) { tEl = openingSectionEl; }
     }
     if (!tEl) return;
-    event.preventDefault(); wheelGestureConsumed = true; queueWheelReset();
-    scrollToStep(tEl, tId);
+    event.preventDefault(); wheelGestureConsumed = true; queueWheelReset(); scrollToStep(tEl, tId);
   }
 
   async function loadData() {
     try {
-      const ld = await loadTractProfileData();
+      var ld = await loadTractProfileData();
       counts = ld.counts; ranges = ld.ranges; cityAverages = ld.cityAverages;
-      holdingAverages = ld.holdingAverages; flippingAverages = ld.flippingAverages;
-      geoData = ld.geoData;
-    } catch (e) {
-      console.error('Could not load story data:', e);
-      loadError = 'Could not load the tract profile data.';
-    }
+      holdingAverages = ld.holdingAverages; flippingAverages = ld.flippingAverages; geoData = ld.geoData;
+    } catch (e) { console.error('Could not load story data:', e); loadError = 'Could not load data.'; }
   }
 
   onMount(() => {
     loadData();
-    if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
-      previousScrollRestoration = history.scrollRestoration;
-      history.scrollRestoration = 'manual';
-    }
+    if (typeof history !== 'undefined' && 'scrollRestoration' in history) { previousScrollRestoration = history.scrollRestoration; history.scrollRestoration = 'manual'; }
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     requestAnimationFrame(() => { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
     wheelGuardUntil = Date.now() + INITIAL_WHEEL_GUARD_MS;
-
     observer = new IntersectionObserver((entries) => {
-      const vis = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+      var vis = entries.filter((e) => e.isIntersecting).sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
       if (vis?.target?.dataset?.sectionId) {
-        const oid = vis.target.dataset.sectionId;
+        var oid = vis.target.dataset.sectionId;
         if (Date.now() < activeLockUntil && oid !== stepCursorId) return;
         if (stepCursorId === 'map-classified' && oid === 'map-intro') return;
         activeId = oid;
-        if (storySteps.some((s) => s.id === oid)) {
-          stepCursorId = oid;
-          if (oid === 'map-intro') chapter2NarrativeStepId = 'map-intro';
-        }
+        if (storySteps.some((s) => s.id === oid)) { stepCursorId = oid; if (oid === 'map-intro') chapter2NarrativeStepId = 'map-intro'; }
       }
     }, { root: null, rootMargin: '-34% 0px -42% 0px', threshold: [0.1, 0.35, 0.6, 0.85] });
-
     observedNodes.forEach((n) => observer.observe(n));
     window.addEventListener('wheel', handleWheel, { passive: false });
-
     return () => {
-      observer?.disconnect();
-      window.removeEventListener('wheel', handleWheel);
-      window.clearTimeout(stepTransitionTimer);
-      window.clearTimeout(wheelGestureResetTimer);
-      if (typeof history !== 'undefined' && 'scrollRestoration' in history && previousScrollRestoration)
-        history.scrollRestoration = previousScrollRestoration;
+      observer?.disconnect(); window.removeEventListener('wheel', handleWheel);
+      window.clearTimeout(stepTransitionTimer); window.clearTimeout(wheelGestureResetTimer);
+      if (typeof history !== 'undefined' && 'scrollRestoration' in history && previousScrollRestoration) history.scrollRestoration = previousScrollRestoration;
     };
   });
 </script>
 
-<svelte:head>
-  <title>Speculation Has a Geography</title>
-</svelte:head>
+<svelte:head><title>Speculation Has a Geography</title></svelte:head>
 
 <article class="story-page">
 
-  <!-- dark cinematic opening -->
   <section class="story-opening" id={openingSection.id} bind:this={openingSectionEl}>
-    <div class="opening-inner">
-      {@html openingSection.content}
-    </div>
+    <div class="opening-inner">{@html openingSection.content}</div>
   </section>
 
-  <!-- gradient from dark opening to warm story background -->
   <div class="dark-to-warm"></div>
 
-  <!-- scrollytelling region -->
   <section class="story-scroll-region" bind:this={storyRegionEl} aria-label="Scrollytelling narrative">
-
     <nav class="story-progress" aria-label="Story sections">
       {#each progressSections as section}
         <a href={'#' + section.id}
@@ -230,8 +175,7 @@
           class:t-flip={section.theme === 'flip'}
           class:t-policy={section.theme === 'policy'}>
           <span class="prog-dot"></span>
-          <span class="prog-num">{section.chapter}</span>
-          <span class="prog-label">{section.title}</span>
+          <span class="prog-text">{section.chapter} · {section.label}</span>
         </a>
       {/each}
     </nav>
@@ -246,9 +190,7 @@
       {#each renderedStorySteps as section}
         <section class="story-step" class:chapter-two-step={section.id === 'map-intro'}
           id={section.id} data-section-id={section.id} use:trackStep>
-          <div class="chapter-rule {themeOf(section)}"></div>
-          <div class="chapter-mark {themeOf(section)}">{section.chapter}</div>
-          <h2>{section.title}</h2>
+          <div class="chapter-label {themeOf(section)}">{section.chapter} · {section.label}</div>
           {#if section.id === 'map-intro'}
             <StoryStepBody html={chapter2NarrativeContent} animate={true} contentKey={chapter2NarrativeStepId} />
           {:else}
@@ -259,184 +201,149 @@
     </div>
   </section>
 
-  <!-- cinematic transition to the explorer -->
   <div class="story-transition-strip">
     <p>The story above is the city's story.</p>
     <p>Now explore every tract.</p>
   </div>
 
-  <!-- full interactive explorer -->
   <section class="story-explorer-section" id={explorerSection.id}
     data-section-id={explorerSection.id} use:trackStep bind:this={explorerSectionEl}>
     <StoryExplorer {geoData} {ranges} {counts} {cityAverages} {holdingAverages} {flippingAverages} />
   </section>
 
-  <footer class="story-footer">
-    {@html FOOTER_CONTENT}
-  </footer>
+  <footer class="story-footer">{@html FOOTER_CONTENT}</footer>
 </article>
 
 <style>
-  /* global accessibility: visible keyboard focus on all interactive elements */
-  :global(*:focus-visible) {
-    outline: 2px solid var(--navy);
-    outline-offset: 2px;
-  }
+  :global(*:focus-visible) { outline: 2px solid var(--navy); outline-offset: 2px; }
+  :global(html) { height: auto !important; overflow-x: hidden !important; overflow-y: auto !important; scroll-behavior: smooth; }
+  :global(body) { height: auto !important; min-height: 100% !important; overflow: visible !important; }
 
-  :global(html) {
-    height: auto !important;
-    overflow-x: hidden !important;
-    overflow-y: auto !important;
-    scroll-behavior: smooth;
-  }
+  .story-page { min-height: 100vh; background: var(--bg); color: var(--ink); }
 
-  :global(body) {
-    height: auto !important;
-    min-height: 100% !important;
-    overflow: visible !important;
-  }
-
-  .story-page {
-    min-height: 100vh;
-    background: var(--bg);
-    color: var(--ink);
-  }
-
-  /* ================================================================
-     Dark cinematic opening
-     ================================================================ */
-
+  /* ============================================================
+     Dark cinematic opening with ambient gradient
+     ============================================================ */
   .story-opening {
-    display: grid;
-    min-height: 100vh;
-    place-items: center;
-    padding: 48px 24px;
-    text-align: center;
+    display: grid; min-height: 100vh; place-items: center;
+    padding: 48px 24px; text-align: center;
     background: #111110;
     color: #F2F0EA;
+    animation: ambient-shift 20s ease-in-out infinite alternate;
   }
 
-  .opening-inner { width: min(740px, 100%); }
+  @keyframes ambient-shift {
+    0%   { background: radial-gradient(ellipse at 40% 50%, #161614, #0e0e0d); }
+    100% { background: radial-gradient(ellipse at 60% 50%, #141413, #0e0e0d); }
+  }
 
-  .story-opening :global(.scroll-headline) {
-    margin: 0 auto 24px;
+  .opening-inner { width: min(760px, 100%); }
+
+  /* typographic cascade: small context, huge keyword, supporting question */
+  .story-opening :global(.hero-above) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(14px, 2vw, 22px);
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(242, 240, 234, 0.45);
+    margin-bottom: 12px;
+  }
+
+  .story-opening :global(.hero-word) {
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(36px, 7vw, 80px);
-    line-height: 0.92;
-    letter-spacing: -0.01em;
-    color: #F2F0EA;
+    font-size: clamp(56px, 12vw, 110px);
+    line-height: 0.9;
+    color: var(--amber);
+    margin-bottom: 14px;
   }
 
-  .story-opening :global(.scroll-headline em) {
-    color: var(--amber);
-    font-style: normal;
+  .story-opening :global(.hero-below) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: clamp(22px, 4vw, 42px);
+    line-height: 1.15;
+    color: rgba(242, 240, 234, 0.8);
+    margin-bottom: 36px;
   }
 
   .story-opening :global(.opening-stats) {
-    display: flex;
-    justify-content: center;
-    gap: clamp(16px, 4vw, 40px);
-    margin: 32px auto 30px;
-    max-width: 600px;
+    display: flex; justify-content: center;
+    gap: clamp(24px, 6vw, 60px);
+    margin: 0 auto 32px; max-width: 540px;
   }
 
   .story-opening :global(.opening-stat) {
-    flex: 1;
-    padding: 22px 18px;
-    border-radius: 12px;
-    text-align: center;
+    flex: 1; text-align: center;
   }
 
-  .story-opening :global(.opening-stat-hold) {
-    background: rgba(27, 58, 92, 0.18);
-  }
-
-  .story-opening :global(.opening-stat-flip) {
-    background: rgba(198, 139, 60, 0.18);
-  }
-
-  .story-opening :global(.opening-stat-number) {
-    display: block;
-    font-family: "IBM Plex Mono", monospace;
+  .story-opening :global(.stat-num) {
+    font-family: "DM Serif Display", Georgia, serif;
     font-size: clamp(48px, 9vw, 72px);
-    font-weight: 500;
-    line-height: 1;
-    margin-bottom: 10px;
+    font-weight: 400; line-height: 1;
   }
 
-  .story-opening :global(.opening-stat-hold .opening-stat-number) { color: #6BA3D6; }
-  .story-opening :global(.opening-stat-flip .opening-stat-number) { color: var(--amber); }
+  .story-opening :global(.stat-pct) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: clamp(24px, 4.5vw, 36px);
+    font-weight: 400; opacity: 0.55;
+    vertical-align: super;
+  }
 
   .story-opening :global(.opening-stat-label) {
     display: block;
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.45;
-    color: rgba(242, 240, 234, 0.6);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 13px; line-height: 1.5;
+    color: rgba(242, 240, 234, 0.4);
+    margin-top: 8px;
   }
 
   .story-opening :global(.opening-rule) {
-    width: 48px;
-    height: 1px;
+    width: 48px; height: 1px;
     margin: 0 auto 24px;
-    background: rgba(242, 240, 234, 0.2);
+    background: rgba(242, 240, 234, 0.15);
   }
 
   .story-opening :global(.scroll-subline) {
-    max-width: 560px;
-    margin: 0 auto 22px;
-    color: rgba(242, 240, 234, 0.7);
-    font-size: clamp(16px, 2vw, 21px);
-    line-height: 1.55;
+    max-width: 480px; margin: 0 auto 20px;
+    color: rgba(242, 240, 234, 0.55);
+    font-size: clamp(15px, 2vw, 20px); line-height: 1.55;
   }
 
   .story-opening :global(.scroll-byline) {
-    color: rgba(242, 240, 234, 0.35);
-    font-size: 12px;
-    line-height: 1.6;
-    letter-spacing: 0.03em;
+    color: rgba(242, 240, 234, 0.25);
+    font-size: 11px; letter-spacing: 0.04em;
   }
 
   .story-opening :global(.scroll-cue-wrap) {
-    margin-top: 48px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
+    margin-top: 48px; display: flex; flex-direction: column;
+    align-items: center; gap: 8px;
   }
 
   .story-opening :global(.scroll-cue-text) {
     font-family: "IBM Plex Mono", monospace;
-    font-size: 11px;
-    color: rgba(242, 240, 234, 0.3);
-    letter-spacing: 0.04em;
+    font-size: 10px; color: rgba(242, 240, 234, 0.2);
+    letter-spacing: 0.05em;
   }
 
   .story-opening :global(.scroll-cue-chevron) {
-    color: rgba(242, 240, 234, 0.3);
+    color: rgba(242, 240, 234, 0.2);
     animation: cue-pulse 2.5s ease-in-out infinite;
   }
 
   @keyframes cue-pulse {
-    0%, 100% { opacity: 0.3; transform: translateY(0); }
-    50% { opacity: 1; transform: translateY(5px); }
+    0%, 100% { opacity: 0.2; transform: translateY(0); }
+    50% { opacity: 0.8; transform: translateY(5px); }
   }
 
-  /* gradient from dark opening to warm page */
-  .dark-to-warm {
-    height: 120px;
-    background: linear-gradient(to bottom, #111110, var(--bg));
-  }
+  .dark-to-warm { height: 140px; background: linear-gradient(to bottom, #111110, var(--bg)); }
 
-  /* ================================================================
+  /* ============================================================
      Scrollytelling three-column grid
-     ================================================================ */
-
+     ============================================================ */
   .story-scroll-region {
     --story-top-rail: 28px;
     display: grid;
-    grid-template-columns: minmax(88px, 0.22fr) minmax(320px, 0.92fr) minmax(480px, 1.45fr);
+    grid-template-columns: minmax(100px, 0.24fr) minmax(300px, 0.88fr) minmax(480px, 1.5fr);
     grid-template-areas: "progress text viz";
     align-items: start;
     gap: clamp(22px, 3vw, 56px);
@@ -445,231 +352,168 @@
     padding: var(--story-top-rail) clamp(18px, 4vw, 64px) 14vh;
   }
 
-  /* ── progress sidebar ── */
-
+  /* progress sidebar */
   .story-progress {
-    position: sticky;
-    top: var(--story-top-rail);
+    position: sticky; top: var(--story-top-rail);
     height: calc(100vh - var(--story-top-rail));
-    grid-area: progress;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    gap: 12px;
+    grid-area: progress; display: flex; flex-direction: column;
+    justify-content: center; gap: 14px;
   }
 
   .story-progress a {
-    display: grid;
-    grid-template-columns: 8px 24px 1fr;
-    gap: 6px;
-    align-items: center;
-    color: var(--faint);
-    font-size: 10px;
-    line-height: 1.35;
-    text-decoration: none;
-    transition: color 0.2s;
+    display: flex; align-items: center; gap: 8px;
+    color: var(--faint); font-size: 10px;
+    text-decoration: none; transition: color 0.2s;
   }
 
   .prog-dot {
-    width: 6px; height: 6px; border-radius: 50%;
-    border: 1px solid var(--faint);
+    width: 5px; height: 5px; border-radius: 50%;
+    border: 1px solid var(--faint); flex-shrink: 0;
     transition: all 0.25s;
   }
+
+  .prog-text {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px; white-space: nowrap;
+  }
+
+  .story-progress a.active { color: var(--ink); }
   .story-progress a.active .prog-dot { border-color: var(--ink); background: var(--ink); }
   .story-progress a.active.t-hold .prog-dot { border-color: var(--navy); background: var(--navy); }
   .story-progress a.active.t-flip .prog-dot { border-color: var(--amber); background: var(--amber); }
-  .story-progress a.active.t-policy .prog-dot { border-color: var(--ink); background: var(--ink); }
 
-  .prog-num { font-family: "IBM Plex Mono", monospace; font-size: 10px; }
-  .prog-label { font-size: 10px; }
-  .story-progress a.active { color: var(--ink); font-weight: 600; }
-
-  /* ── text column ── */
-
-  .story-text-column {
-    grid-area: text;
-    display: flex;
-    flex-direction: column;
-  }
+  /* text column */
+  .story-text-column { grid-area: text; display: flex; flex-direction: column; }
 
   .story-step {
-    display: flex;
-    box-sizing: border-box;
+    display: flex; box-sizing: border-box;
     min-height: calc(100vh - var(--story-top-rail));
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: column; justify-content: center;
     padding: clamp(18px, 4vh, 42px) 0;
   }
 
-  .story-step.chapter-two-step :global(.story-copy) {
-    min-height: clamp(280px, 34vh, 420px);
-  }
+  .story-step.chapter-two-step :global(.story-copy) { min-height: clamp(280px, 34vh, 420px); }
 
-  /* thin colored rule above each chapter marker */
-  .chapter-rule { width: 32px; height: 2px; margin-bottom: 14px; background: var(--neutral); }
-  .chapter-rule.theme-hold { background: var(--navy); }
-  .chapter-rule.theme-flip { background: var(--amber); }
-  .chapter-rule.theme-policy { background: var(--ink); }
-
-  .chapter-mark {
-    margin-bottom: 14px;
+  /* clean single-line chapter label: "01 · The Shift" */
+  .chapter-label {
+    margin-bottom: 16px;
     font-family: "IBM Plex Mono", monospace;
-    font-size: 12px;
-    font-weight: 500;
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.03em;
+    color: var(--faint);
   }
 
-  /* solid color bar instead of gradient; encodes section theme */
-  .chapter-mark::after {
-    content: "";
-    display: inline-block;
-    width: 28px; height: 3px;
-    margin-left: 9px;
-    border-radius: 999px;
-    vertical-align: middle;
-    background: var(--neutral);
-  }
-  .chapter-mark.theme-hold { color: var(--navy); }
-  .chapter-mark.theme-hold::after { background: var(--navy); }
-  .chapter-mark.theme-flip { color: var(--amber-dark); }
-  .chapter-mark.theme-flip::after { background: var(--amber); }
-  .chapter-mark.theme-mixed { color: var(--navy); }
-  .chapter-mark.theme-mixed::after { background: linear-gradient(90deg, var(--navy), var(--amber)); }
-  .chapter-mark.theme-policy { color: var(--ink); }
-  .chapter-mark.theme-policy::after { background: var(--ink); }
+  .chapter-label.theme-hold { color: var(--navy); }
+  .chapter-label.theme-flip { color: var(--amber-dark); }
+  .chapter-label.theme-policy { color: var(--ink); }
 
   h2 {
-    max-width: 520px;
-    margin: 0 0 28px;
+    max-width: 520px; margin: 0 0 20px;
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(34px, 4vw, 54px);
-    line-height: 1.04;
+    font-size: clamp(32px, 4vw, 50px); line-height: 1.06;
   }
 
-  /* section takeaway: concluding insight rendered as a serif pullquote with left accent */
+  /* section takeaway pullquote with colored left accent */
   .story-step :global(.section-takeaway) {
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: 17px;
-    line-height: 1.5;
-    color: var(--ink);
-    margin-top: 8px;
-    margin-bottom: 0;
-    padding-left: 14px;
-    border-left: 2px solid var(--neutral);
+    font-size: 17px; line-height: 1.5; color: var(--ink);
+    margin-top: 8px; margin-bottom: 0;
+    padding-left: 14px; border-left: 3px solid var(--neutral);
   }
 
-  .story-step.theme-hold :global(.section-takeaway) { border-left-color: var(--navy); }
-  /* TODO: fix theme class propagation if needed */
-
-  /* equity stat callouts */
-  .story-step :global(.equity-stats) { display: flex; gap: 16px; margin: 8px 0 16px; }
+  /* equity stat callouts with separated percent sign */
+  .story-step :global(.equity-stats) { display: flex; gap: 20px; margin: 12px 0 20px; }
   .story-step :global(.equity-stat) { flex: 1; text-align: center; }
-  .story-step :global(.equity-number) {
-    display: block; font-family: "IBM Plex Mono", monospace;
-    font-size: 48px; font-weight: 500; line-height: 1; margin-bottom: 4px;
+  .story-step :global(.eq-num) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 56px; font-weight: 400; line-height: 1;
   }
-  .story-step :global(.equity-label) { font-size: 12px; color: var(--sub); }
+  .story-step :global(.eq-pct) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 28px; font-weight: 400; opacity: 0.5;
+    vertical-align: super;
+  }
+  .story-step :global(.equity-label) { display: block; font-size: 12px; color: var(--sub); margin-top: 6px; }
 
-  /* ── sticky visualization column ── */
+  /* policy callout boxes embedded in narrative */
+  .story-step :global(.policy-callout) {
+    padding: 14px 16px; border-radius: 6px;
+    margin: 12px 0; border-left: 3px solid;
+  }
+  .story-step :global(.policy-callout strong) { display: block; font-size: 14px; margin-bottom: 4px; }
+  .story-step :global(.policy-callout span) { font-size: 13px; color: var(--sub); line-height: 1.55; }
+  .story-step :global(.policy-callout-hold) { border-color: var(--navy); background: rgba(27, 58, 92, 0.04); }
+  .story-step :global(.policy-callout-hold strong) { color: var(--navy); }
+  .story-step :global(.policy-callout-flip) { border-color: var(--amber); background: rgba(198, 139, 60, 0.04); }
+  .story-step :global(.policy-callout-flip strong) { color: var(--amber-dark); }
 
+  /* sticky viz column */
   .story-viz-column {
-    position: sticky;
-    top: var(--story-top-rail);
-    grid-area: viz;
-    align-self: start;
-    display: flex;
-    height: calc(100vh - var(--story-top-rail));
+    position: sticky; top: var(--story-top-rail);
+    grid-area: viz; align-self: start;
+    display: flex; height: calc(100vh - var(--story-top-rail));
     align-items: center;
   }
 
   .sticky-stage { display: flex; width: 100%; height: 100%; align-items: center; }
 
-  /* ================================================================
-     Transition strip: cinematic curtain before the explorer
-     ================================================================ */
-
+  /* ============================================================
+     Transition strip
+     ============================================================ */
   .story-transition-strip {
-    background: #111110;
-    color: rgba(242, 240, 234, 0.55);
-    text-align: center;
-    padding: 56px 24px;
+    background: #111110; color: rgba(242, 240, 234, 0.5);
+    text-align: center; padding: 64px 24px;
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: 22px;
-    line-height: 1.5;
+    font-size: clamp(20px, 3vw, 28px); line-height: 1.5;
   }
-
   .story-transition-strip p { margin: 0; }
 
-  /* ================================================================
-     Explorer: nearly full-bleed
-     ================================================================ */
-
+  /* ============================================================
+     Explorer: full-bleed, immersive
+     ============================================================ */
   .story-explorer-section {
-    width: calc(100% - 16px);
-    max-width: 1600px;
-    margin: 0 auto 60px;
-    padding-top: 4vh;
+    width: 100%; margin: 0 auto 0;
   }
 
-  /* ================================================================
+  /* ============================================================
      Footer
-     ================================================================ */
-
+     ============================================================ */
   .story-footer {
-    border-top: 1px solid var(--rule);
-    padding: 34px 24px 42px;
-    background: #fff;
-    color: var(--sub);
-    text-align: center;
+    border-top: 1px solid var(--rule); padding: 34px 24px 42px;
+    background: #fff; color: var(--sub); text-align: center;
   }
-
   .story-footer :global(.project-footer) { max-width: 760px; margin: 0 auto; }
   .story-footer :global(p), .story-footer :global(div) { font-size: 12px; line-height: 1.65; }
   .story-footer :global(a) { color: var(--navy); font-weight: 700; }
   .story-footer :global(.footer-mapc) { font-size: 13px; font-weight: 600; margin-bottom: 18px; }
   .story-footer :global(.footer-sources) { margin-bottom: 18px; }
-  .story-footer :global(.footer-source-heading) {
-    font-size: 10px; font-weight: 700; text-transform: uppercase;
-    letter-spacing: 0.08em; color: var(--faint); margin-bottom: 4px;
-  }
+  .story-footer :global(.footer-source-heading) { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--faint); margin-bottom: 4px; }
   .story-footer :global(.footer-note) { margin-top: 6px; font-style: italic; color: var(--faint); }
-  .story-footer :global(.footer-access) {
-    margin-bottom: 14px; font-size: 11px; color: var(--faint);
-    font-family: "IBM Plex Mono", monospace; letter-spacing: 0.02em;
-  }
+  .story-footer :global(.footer-access) { margin-bottom: 14px; font-size: 11px; color: var(--faint); font-family: "IBM Plex Mono", monospace; }
   .story-footer :global(.footer-team) { font-size: 12px; font-weight: 600; color: var(--text); }
 
-  /* ================================================================
+  /* ============================================================
      Responsive
-     ================================================================ */
-
+     ============================================================ */
   @media (max-width: 1040px) {
-    .story-scroll-region {
-      grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.1fr);
-      grid-template-areas: "text viz";
-    }
+    .story-scroll-region { grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.1fr); grid-template-areas: "text viz"; }
     .story-progress { display: none; }
   }
 
   @media (max-width: 760px) {
     .story-scroll-region { display: block; gap: 0; padding: 0 0 8vh; }
-
-    .story-viz-column {
-      position: sticky; top: 0; z-index: 4; height: 46vh;
-      background: var(--bg); box-shadow: 0 8px 18px rgba(25, 24, 22, 0.08);
-    }
-
+    .story-viz-column { position: sticky; top: 0; z-index: 4; height: 46vh; background: var(--bg); box-shadow: 0 8px 18px rgba(25, 24, 22, 0.08); }
     .story-text-column { padding: 0 22px; }
     .sticky-stage { min-height: auto; }
     .story-step { min-height: 74vh; padding: 18vh 0; }
-    h2 { font-size: 36px; }
-
-    .story-explorer-section { width: 100%; padding: 4vh 12px 0; }
-
+    h2 { font-size: 32px; }
+    .story-explorer-section { width: 100%; }
     .story-transition-strip { font-size: 18px; padding: 40px 20px; }
-
     .dark-to-warm { height: 80px; }
-
-    .story-step :global(.equity-number) { font-size: 36px; }
-    .story-opening :global(.opening-stat-number) { font-size: 48px; }
+    .story-step :global(.eq-num) { font-size: 40px; }
+    .story-step :global(.eq-pct) { font-size: 20px; }
+    .story-opening :global(.hero-word) { font-size: 64px; }
+    .story-opening :global(.stat-num) { font-size: 48px; }
+    .story-opening :global(.stat-pct) { font-size: 24px; }
   }
 </style>

@@ -9,13 +9,12 @@
   let el;
   let data = [];
   let hasAnimated = false;
-  let lineAll = null;
-  let lineTop = null;
   let pathAll = null;
   let pathTop = null;
   let annotations = null;
 
-  const DRAW_MS = 2800;
+  const DELAY_BEFORE_DRAW = 500;
+  const DRAW_MS = 3200;
   const EASE = d3.easeCubicInOut;
 
   onMount(async () => {
@@ -27,10 +26,9 @@
     }
   });
 
-  /* when the scroll step activates this section, trigger the draw */
   $: if (active && !hasAnimated && pathAll) {
     hasAnimated = true;
-    triggerAnimation();
+    setTimeout(triggerAnimation, DELAY_BEFORE_DRAW);
   }
 
   function buildChart() {
@@ -55,7 +53,6 @@
     var yMax = Math.ceil(d3.max(data, function(d) { return d.top_decile_share; }) * 10) / 10;
     var y = d3.scaleLinear([0, yMax], [h, 0]);
 
-    /* x axis */
     g.append('g').attr('transform', 'translate(0,' + h + ')')
       .call(d3.axisBottom(x).ticks(6).tickFormat(d3.format('d')).tickSize(0))
       .call(function(a) { a.select('.domain').attr('stroke', '#D6D2C8'); })
@@ -64,37 +61,33 @@
           .style('font-size', '11px').style('font-family', font);
       });
 
-    /* y axis with faint gridlines */
     g.append('g')
       .call(d3.axisLeft(y).ticks(5)
         .tickFormat(function(d) { return Math.round(d * 100) + '%'; }).tickSize(0))
       .call(function(a) { a.select('.domain').remove(); })
       .call(function(a) {
         a.selectAll('.tick line').clone()
-          .attr('x2', w).attr('stroke', '#D6D2C8').attr('stroke-opacity', 0.25);
+          .attr('x2', w).attr('stroke', '#D6D2C8').attr('stroke-opacity', 0.2);
       })
       .call(function(a) {
         a.selectAll('text').attr('fill', '#9C9890')
           .style('font-size', '11px').style('font-family', font);
       });
 
-    /* 2008 marker is visible from the start, setting context */
     g.append('line')
       .attr('x1', x(2008)).attr('x2', x(2008)).attr('y1', 0).attr('y2', h)
       .attr('stroke', '#B0A898').attr('stroke-dasharray', '4 3');
 
-    /* build line generators */
-    lineAll = d3.line()
+    var lineAll = d3.line()
       .x(function(d) { return x(d.year); })
       .y(function(d) { return y(d.investor_share); })
       .curve(d3.curveMonotoneX);
 
-    lineTop = d3.line()
+    var lineTop = d3.line()
       .x(function(d) { return x(d.year); })
       .y(function(d) { return y(d.top_decile_share); })
       .curve(d3.curveMonotoneX);
 
-    /* draw lines but keep them hidden (full dashoffset) */
     pathTop = g.append('path').datum(data).attr('fill', 'none')
       .attr('stroke', '#8AAEC8').attr('stroke-width', 2)
       .attr('stroke-linecap', 'round').attr('d', lineTop);
@@ -107,7 +100,6 @@
     var lenAll = pathAll.node().getTotalLength();
     pathAll.attr('stroke-dasharray', lenAll).attr('stroke-dashoffset', lenAll);
 
-    /* annotation group starts invisible */
     var last = data[data.length - 1];
     var first = data[0];
 
@@ -135,7 +127,6 @@
       .style('font-size', '10px').style('font-family', mono)
       .text(Math.round(first.investor_share * 100) + '%');
 
-    /* legend (always visible) */
     var lg = svg.append('g').attr('transform', 'translate(' + (m.left + 8) + ', 14)');
     lg.append('line').attr('x1', 0).attr('x2', 18).attr('y1', 0).attr('y2', 0)
       .attr('stroke', '#1B3A5C').attr('stroke-width', 3);
@@ -146,27 +137,24 @@
     lg.append('text').attr('x', 119).attr('y', 4).attr('fill', '#46433C')
       .style('font-size', '11px').style('font-family', font).text('Top price decile');
 
-    /* if already active when built (edge case), animate immediately */
     if (active && !hasAnimated) {
       hasAnimated = true;
-      triggerAnimation();
+      setTimeout(triggerAnimation, DELAY_BEFORE_DRAW);
     }
   }
 
   function triggerAnimation() {
     if (!pathAll || !pathTop) return;
 
-    var lenTop = pathTop.node().getTotalLength();
     pathTop.transition().delay(200).duration(DRAW_MS).ease(EASE)
       .attr('stroke-dashoffset', 0)
       .on('end', function() { d3.select(this).attr('stroke-dasharray', null); });
 
-    var lenAll = pathAll.node().getTotalLength();
     pathAll.transition().duration(DRAW_MS).ease(EASE)
       .attr('stroke-dashoffset', 0)
       .on('end', function() { d3.select(this).attr('stroke-dasharray', null); });
 
-    annotations.transition().delay(DRAW_MS + 400).duration(600).ease(d3.easeCubicOut)
+    annotations.transition().delay(DRAW_MS + 500).duration(600).ease(d3.easeCubicOut)
       .attr('opacity', 1);
   }
 </script>

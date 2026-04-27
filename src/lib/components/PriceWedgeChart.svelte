@@ -13,7 +13,8 @@
   let pathFlip = null;
   let annotations = null;
 
-  const DRAW_MS = 2800;
+  const DELAY_BEFORE_DRAW = 500;
+  const DRAW_MS = 3200;
   const FLIP_DELAY = 600;
   const EASE = d3.easeCubicInOut;
 
@@ -28,7 +29,7 @@
 
   $: if (active && !hasAnimated && pathHold) {
     hasAnimated = true;
-    triggerAnimation();
+    setTimeout(triggerAnimation, DELAY_BEFORE_DRAW);
   }
 
   function buildChart() {
@@ -48,14 +49,13 @@
       .attr('width', width).attr('height', height)
       .attr('viewBox', '0 0 ' + width + ' ' + height)
       .attr('role', 'img')
-      .attr('aria-label', 'Investor price premiums diverge: holding tracts reach +82% while flipping tracts saw crisis-era discounts of 25%')
+      .attr('aria-label', 'Investor price premiums diverge: holding tracts reach plus 82% while flipping tracts saw crisis era discounts of 25%')
       .style('max-width', '100%');
 
     svg.append('defs').append('clipPath').attr('id', 'pw-clip')
       .append('rect').attr('width', w).attr('height', h);
 
     var g = svg.append('g').attr('transform', 'translate(' + m.left + ',' + m.top + ')');
-
     var x = d3.scaleLinear([2000, 2022], [0, w]);
     var y = d3.scaleLinear([-30, yCap], [h, 0]);
 
@@ -73,26 +73,23 @@
       .call(function(a) { a.select('.domain').remove(); })
       .call(function(a) {
         a.selectAll('.tick line').clone()
-          .attr('x2', w).attr('stroke', '#D6D2C8').attr('stroke-opacity', 0.25);
+          .attr('x2', w).attr('stroke', '#D6D2C8').attr('stroke-opacity', 0.2);
       })
       .call(function(a) {
         a.selectAll('text').attr('fill', '#9C9890')
           .style('font-size', '11px').style('font-family', font);
       });
 
-    /* zero reference */
     g.append('line').attr('x1', 0).attr('x2', w)
       .attr('y1', y(0)).attr('y2', y(0))
       .attr('stroke', '#B0A898').attr('stroke-width', 1).attr('stroke-dasharray', '4 3');
 
     var clipped = g.append('g').attr('clip-path', 'url(#pw-clip)');
 
-    /* subtle area fills */
     var areaHold = d3.area()
       .x(function(d) { return x(d.year); }).y0(y(0))
       .y1(function(d) { return y(Math.min(d.premium, yCap)); })
       .curve(d3.curveMonotoneX);
-
     var areaFlip = d3.area()
       .x(function(d) { return x(d.year); }).y0(y(0))
       .y1(function(d) { return y(Math.max(d.premium, -30)); })
@@ -103,18 +100,15 @@
     clipped.append('path').datum(flipData)
       .attr('fill', '#C68B3C').attr('fill-opacity', 0.04).attr('d', areaFlip);
 
-    /* line generators */
     var lineHold = d3.line()
       .x(function(d) { return x(d.year); })
       .y(function(d) { return y(Math.min(d.premium, yCap)); })
       .curve(d3.curveMonotoneX);
-
     var lineFlip = d3.line()
       .x(function(d) { return x(d.year); })
       .y(function(d) { return y(Math.max(d.premium, -30)); })
       .curve(d3.curveMonotoneX);
 
-    /* draw lines hidden */
     pathHold = clipped.append('path').datum(holdData).attr('fill', 'none')
       .attr('stroke', '#1B3A5C').attr('stroke-width', 3)
       .attr('stroke-linecap', 'round').attr('d', lineHold);
@@ -127,7 +121,6 @@
     var lenF = pathFlip.node().getTotalLength();
     pathFlip.attr('stroke-dasharray', lenF).attr('stroke-dashoffset', lenF);
 
-    /* annotation group, invisible until animation finishes */
     annotations = g.append('g').attr('opacity', 0);
 
     var spike = holdData.find(function(d) { return d.year === 2019; });
@@ -148,18 +141,15 @@
 
     var lastH = holdData[holdData.length - 1];
     var lastF = flipData[flipData.length - 1];
-
     annotations.append('text').attr('x', x(2022) + 6)
       .attr('y', y(Math.min(lastH.premium, yCap)) + 4)
       .attr('fill', '#1B3A5C').style('font-size', '12px').style('font-weight', '700')
       .style('font-family', mono).text('+' + Math.round(lastH.premium) + '%');
-
     annotations.append('text').attr('x', x(2022) + 6)
       .attr('y', y(lastF.premium) + 4)
       .attr('fill', '#C68B3C').style('font-size', '12px').style('font-weight', '700')
       .style('font-family', mono).text('+' + Math.round(lastF.premium) + '%');
 
-    /* legend */
     var lg = svg.append('g').attr('transform', 'translate(' + (m.left + 8) + ', 14)');
     lg.append('line').attr('x1', 0).attr('x2', 18).attr('y1', 0).attr('y2', 0)
       .attr('stroke', '#1B3A5C').attr('stroke-width', 3);
@@ -172,22 +162,19 @@
 
     if (active && !hasAnimated) {
       hasAnimated = true;
-      triggerAnimation();
+      setTimeout(triggerAnimation, DELAY_BEFORE_DRAW);
     }
   }
 
   function triggerAnimation() {
     if (!pathHold || !pathFlip) return;
-
     pathHold.transition().duration(DRAW_MS).ease(EASE)
       .attr('stroke-dashoffset', 0)
       .on('end', function() { d3.select(this).attr('stroke-dasharray', null); });
-
     pathFlip.transition().delay(FLIP_DELAY).duration(DRAW_MS).ease(EASE)
       .attr('stroke-dashoffset', 0)
       .on('end', function() { d3.select(this).attr('stroke-dasharray', null); });
-
-    annotations.transition().delay(DRAW_MS + FLIP_DELAY + 400)
+    annotations.transition().delay(DRAW_MS + FLIP_DELAY + 500)
       .duration(600).ease(d3.easeCubicOut).attr('opacity', 1);
   }
 </script>
