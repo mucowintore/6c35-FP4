@@ -762,14 +762,15 @@ export function createMapController(callbacks = {}) {
 
     mapGroup = svgElement.append('g').attr('clip-path', 'url(#map-clip)');
 
-    /* Fit the projection to the canvas with a small margin so tract
-     * edges never sit flush against the SVG boundary. */
-    const projection = d3.geoMercator().fitSize([width * 0.98, height * 0.98], geoData);
-    const projectionTranslate = projection.translate();
-    projection.translate([
-      projectionTranslate[0] + width * 0.01,
-      projectionTranslate[1] + height * 0.01
-    ]);
+    /* Fit Boston into the canvas with a 6 px breathing room on each
+     * side. fitExtent uses explicit pixel corners, so Boston fills
+     * the available space tightly regardless of canvas aspect ratio,
+     * with no empty band along whichever axis is less constrained. */
+    const margin = 6;
+    const projection = d3.geoMercator().fitExtent(
+      [[margin, margin], [width - margin, height - margin]],
+      geoData
+    );
 
     pathGenerator = d3.geoPath().projection(projection);
 

@@ -437,12 +437,12 @@
     if (trough) {
       var tx = x(trough.year);
       var ty = y(trough.premium);
-      var labelX = tx - 22;
-      var labelY = ty + 30;
+       var labelX = tx - 14;
+      var labelY = ty - 30;
       troughCallout = g.append('g').attr('opacity', 0);
       troughCallout.append('line')
-        .attr('x1', tx - 4).attr('y1', ty + 6)
-        .attr('x2', labelX + 4).attr('y2', labelY - 14)
+        .attr('x1', tx - 4).attr('y1', ty - 4)
+        .attr('x2', labelX + 4).attr('y2', labelY + 6)
         .attr('stroke', COLOR_AMBER).attr('stroke-width', 1)
         .attr('stroke-opacity', 0.6);
       troughCallout.append('text')

@@ -1136,26 +1136,27 @@ body {
 
 
 /* ===================================================
-   Strategy filter ambient tint.
-   When a strategy is active in the explorer, the entire
-   filter group's background takes a faint matching wash.
+   Strategy filter ambient tint. When a strategy is
+   active in the explorer, the filter group's white
+   card takes a faint matching wash. The white card is
+   already painted by the original .strategy-nav rule
+   higher up in this file; this block layers a tint on
+   top via a colored shadow that the white background
+   shows through.
    =================================================== */
 
 .strategy-nav {
-  border-radius: 8px;
-  padding: 8px;
-  margin: 8px -8px 0;
-  background: transparent;
-  transition: background 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: 8px;
+  transition: box-shadow 0.22s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .strategy-nav.strategy-active-hold {
-  background: rgba(27, 58, 92, 0.05);
+  box-shadow: inset 0 0 0 9999px rgba(27, 58, 92, 0.05);
 }
 .strategy-nav.strategy-active-flip {
-  background: rgba(122, 80, 32, 0.05);
+  box-shadow: inset 0 0 0 9999px rgba(122, 80, 32, 0.05);
 }
 .strategy-nav.strategy-active-mixed {
-  background: rgba(120, 115, 105, 0.06);
+  box-shadow: inset 0 0 0 9999px rgba(120, 115, 105, 0.06);
 }
 
 /* ===================================================
@@ -1176,4 +1177,19 @@ body {
     left: auto;
     right: 8px;
   }
+}
+
+/* ===================================================
+   Section 07 chapter tag in the explorer site header.
+   Sits on the right side of the flex header.
+   =================================================== */
+
+.explorer-chapter-tag {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+  margin-left: auto;
 }

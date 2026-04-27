@@ -249,7 +249,7 @@
   .bloom-caption {
     position: absolute;
     top: clamp(14px, 2.4vh, 22px);
-    right: clamp(16px, 2.4vw, 28px);
+    left: clamp(16px, 2.4vw, 28px);
     font-family: "IBM Plex Mono", monospace;
     font-size: 10.5px;
     font-weight: 700;

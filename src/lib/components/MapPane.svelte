@@ -181,6 +181,9 @@
   <div class="site-title">
     When Boston says &ldquo;speculation,&rdquo; whose <em>neighborhood</em> does it mean?
   </div>
+  <div class="explorer-chapter-tag" aria-label="Section seven of seven, Explore">
+    07 &middot; Explore
+  </div>
 </header>
 
 <div class="context-bar" id="context-bar">

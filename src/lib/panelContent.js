@@ -74,7 +74,19 @@ export function buildOverviewSections({ holdCount, flipCount }) {
 
     <div class="explorer-tile-hint" aria-hidden="true">
       Hover a tile to preview that subset on the map.
-    </div>`;
+    </div>
+
+    <div class="overview-section-divider"></div>
+
+    <div class="overview-title overview-section-title">
+      Citywide comparison
+    </div>
+    <div class="overview-text">
+      Holding-dominant tracts (navy) compared with flipping-dominant
+      tracts (amber) across six core metrics. The center line is the
+      city average for each measure.
+    </div>
+    <div class="paired-bars-container"></div>`;
 
   const howToExplore = `
     <div class="overview-title">How to explore</div>

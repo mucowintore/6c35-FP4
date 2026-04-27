@@ -44,7 +44,7 @@
 
   /* Palette tuned for the dark Section 01 background. */
   const COLOR_NAVY = '#A8C5DD';
-  const COLOR_PRE = 'rgba(168, 197, 221, 0.55)';
+  const COLOR_PRE = 'rgba(168, 197, 221, 0.7)';
   const COLOR_FILL = '#5A88AE';
   const COLOR_END = '#F2F0EA';
   const AXIS_TEXT = 'rgba(242, 240, 234, 0.55)';
@@ -300,8 +300,8 @@
     /* Top decile is the secondary, lighter line. Pre and post halves. */
     pathTopPre = g.append('path').datum(pre)
       .attr('fill', 'none')
-      .attr('stroke', COLOR_NAVY).attr('stroke-width', 1.4)
-      .attr('stroke-opacity', 0.45)
+      .attr('stroke', COLOR_NAVY).attr('stroke-width', 1.7)
+      .attr('stroke-opacity', 0.6)
       .attr('stroke-linecap', 'round')
       .attr('d', lineTopGen);
     lenTopPre = pathTopPre.node().getTotalLength();
@@ -321,7 +321,7 @@
     /* Primary line, pre-crisis muted half. */
     pathPre = g.append('path').datum(pre)
       .attr('fill', 'none')
-      .attr('stroke', COLOR_PRE).attr('stroke-width', 1.8)
+      .attr('stroke', COLOR_PRE).attr('stroke-width', 2.2)
       .attr('stroke-linecap', 'round')
       .attr('d', lineGen);
     lenPre = pathPre.node().getTotalLength();

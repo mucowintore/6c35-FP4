@@ -691,14 +691,14 @@
     margin-left: 4px;
   }
   .story-opening :global(.thesis-num) {
-    display: inline-flex;
-    align-items: baseline;
+    display: inline-block;
     margin: 0 6px;
     font-style: normal;
     font-family: "DM Serif Display", Georgia, serif;
     font-weight: 400;
     line-height: 1;
     font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
   .story-opening :global(.thesis-num-hold) {
     color: #6BA3D6;
@@ -708,15 +708,19 @@
   }
   .story-opening :global(.thesis-sign),
   .story-opening :global(.thesis-digits) {
+    display: inline-block;
+    min-width: 1.6em;
+    text-align: right;
     font-size: clamp(40px, 7vw, 64px);
+    font-variant-numeric: tabular-nums;
   }
   .story-opening :global(.thesis-pct) {
+    display: inline-block;
     font-size: clamp(20px, 3.6vw, 32px);
     opacity: 0.65;
     margin-left: 1px;
-    align-self: flex-start;
+    vertical-align: 0.45em;
   }
-
   /* Mono-caps attribution under the thesis sentence. Anchors the
    * headline in the dataset. */
   .story-opening :global(.opening-attribution) {
