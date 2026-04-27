@@ -1,6 +1,6 @@
 /* ===================================================
    Speculation Has a Geography
-   6.C85 Interactive Data Visualization & Society
+   6.C85 Interactive Data Visualization and Society
    Spring 2026
    =================================================== */
 
@@ -289,7 +289,7 @@ body {
 
 .context-bar b { color: var(--ink); }
 .context-bar .ctx-hold { color: var(--navy); font-weight: 700; }
-.context-bar .ctx-flip { color: var(--amber); font-weight: 700; }
+.context-bar .ctx-flip { color: var(--amber-dark); font-weight: 700; }
 .context-content { display: inline; }
 
 
@@ -312,24 +312,28 @@ body {
 
 /* Census tract polygons.
  *
- * Each tract has a base transition on opacity for the smooth dim and
- * glow interaction. Hover lifts the tract a millimeter off the surface
- * via brightness and a soft drop shadow. The flip-pulse class adds a
- * slow breath that runs only while the section asks for it (Section
- * 04 holdingDimmed). will-change promotes the tract to its own layer
- * and keeps the animation at 60fps. */
+ * Round one promoted every tract to its own GPU layer with
+ * will-change. Across two simultaneous map instances (the persistent
+ * story map and the explorer map), that ran past 340 promoted layers,
+ * which is what was knocking the explorer map out of existence on
+ * modest hardware. Layers thrash, the browser garbage collects them,
+ * tracts disappear and never come back.
+ *
+ * Round two: will-change applies only on hover, so at most one
+ * tract is promoted at a time. That is what will-change was designed
+ * for in the first place. */
 .tract {
   cursor: pointer;
   stroke-linejoin: round;
   transition: opacity 280ms cubic-bezier(0.4, 0, 0.2, 1),
               filter 220ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: opacity, filter;
 }
 
 .tract.dimmed { opacity: 0.08; }
 
 .tract:hover {
   filter: brightness(1.06) drop-shadow(0 0 4px rgba(0, 0, 0, 0.16));
+  will-change: filter;
 }
 
 @keyframes tract-pulse {
@@ -399,6 +403,21 @@ body {
 
 
 /* ===================================================
+   Policy zone label pills.
+   Frosted glass effect on the SVG rect. backdrop-filter applies to
+   the area behind the element, which is exactly what we want:
+   slight blur and saturation boost so the label sits above the map
+   without occluding it.
+   =================================================== */
+
+.policy-pill {
+  backdrop-filter: blur(10px) saturate(140%);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+  filter: drop-shadow(0 4px 14px rgba(25, 24, 22, 0.10));
+}
+
+
+/* ===================================================
    Neighborhood jump buttons
    =================================================== */
 
@@ -419,7 +438,7 @@ body {
   gap: 2px;
   z-index: 5;
   background: rgba(255, 255, 255, 0.85);
-  padding: 7px 7px 7px 7px;
+  padding: 7px;
   border-radius: 10px;
   border: 1px solid var(--rule);
 }
@@ -612,7 +631,6 @@ body {
 
 .detail-panel::-webkit-scrollbar { width: 0; }
 
-/* Overview */
 .overview-tabs {
   display: flex;
   gap: 8px;
@@ -654,12 +672,10 @@ body {
 .overview-section-divider {
   height: 1px;
   background: var(--rule);
-  margin: 18px 0 18px;
+  margin: 18px 0;
 }
 
-.overview-section-title {
-  margin-bottom: 8px;
-}
+.overview-section-title { margin-bottom: 8px; }
 
 .overview-text {
   font-size: 13px;
@@ -718,7 +734,6 @@ body {
   line-height: 1.5;
 }
 
-/* Detail view */
 .tract-name {
   font-family: "DM Serif Display", serif;
   font-size: 18px;
@@ -763,7 +778,6 @@ body {
   margin: 12px 0 6px;
 }
 
-/* Radar chart */
 .radar-container {
   margin: 0 auto 6px;
   text-align: center;
@@ -777,7 +791,6 @@ body {
   margin-bottom: 8px;
 }
 
-/* Metric grid */
 .metric-grid {
   display: grid;
   grid-template-columns: 1fr 1fr 1fr;
@@ -816,7 +829,6 @@ body {
   opacity: 0.18;
 }
 
-/* Score boxes */
 .score-row {
   display: flex;
   gap: 6px;
@@ -847,7 +859,6 @@ body {
   margin-top: 2px;
 }
 
-/* Policy recommendation box */
 .policy-box {
   padding: 10px 12px;
   border-radius: 6px;
@@ -876,7 +887,6 @@ body {
   line-height: 1.55;
 }
 
-/* Diverging bar chart (replaces radar) */
 .profile-chart-container {
   margin: 0 auto 6px;
   text-align: center;
@@ -890,7 +900,6 @@ body {
   margin-bottom: 8px;
 }
 
-/* Metric explanation lines */
 .metric-explanation {
   font-size: 9px;
   color: var(--faint);
@@ -901,7 +910,109 @@ body {
 
 
 /* ===================================================
-   Reduced motion. Every
+   Section 06 narrative blocks: policy callouts and the
+   closing takeaway. The narrativeSections.js markup expects
+   these classes. Refined treatment per round 2.
+   =================================================== */
+
+.story-step .policy-callout {
+  position: relative;
+  padding: 18px 20px 18px 22px;
+  margin: 14px 0;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.04),
+    0 8px 24px rgba(0, 0, 0, 0.04);
+  overflow: hidden;
+}
+
+.story-step .policy-callout::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 4px;
+  border-radius: 2px 0 0 2px;
+}
+
+.story-step .policy-callout-hold {
+  background: rgba(27, 58, 92, 0.04);
+}
+.story-step .policy-callout-hold::before {
+  background: var(--navy);
+}
+
+.story-step .policy-callout-flip {
+  background: rgba(122, 80, 32, 0.05);
+}
+.story-step .policy-callout-flip::before {
+  background: var(--amber);
+}
+
+.story-step .policy-callout .policy-tag {
+  display: block;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 10.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-bottom: 5px;
+}
+
+.story-step .policy-callout-hold .policy-tag { color: var(--navy); }
+.story-step .policy-callout-flip .policy-tag { color: var(--amber-dark); }
+
+.story-step .policy-callout .policy-name {
+  display: block;
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.005em;
+  line-height: 1.25;
+  margin-bottom: 7px;
+  color: var(--ink);
+}
+
+.story-step .policy-callout .policy-body {
+  display: block;
+  font-family: "Plus Jakarta Sans", sans-serif;
+  font-size: 14px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+/* Closing takeaway: the moral of the entire piece. Hairline rule
+ * above, then a serif scale-up. */
+.story-step .closing-rule {
+  width: 56px;
+  height: 1px;
+  background: var(--ink);
+  opacity: 0.55;
+  margin: 32px 0 18px;
+}
+
+.story-step .closing-takeaway {
+  font-family: "DM Serif Display", Georgia, serif;
+  font-size: 24px;
+  line-height: 1.4;
+  letter-spacing: -0.01em;
+  color: var(--ink);
+  max-width: 540px;
+  margin: 0 0 8px;
+}
+
+/* The story-cue (a small italic prompt under section 02) */
+.story-step .story-cue {
+  font-family: "IBM Plex Mono", monospace;
+  font-size: 11px;
+  color: var(--faint);
+  letter-spacing: 0.04em;
+  margin-top: 14px;
+}
+
+
+/* ===================================================
+   Reduced motion: honor the system preference. Every
    animation collapses to an instant transition.
    =================================================== */
 

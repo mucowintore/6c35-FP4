@@ -1,11 +1,29 @@
 <script>
-  /* Neighborhood trajectory chart, persistent across the story.
+  /* Section 05: neighborhood trajectories.
    *
-   * Mounts once. Stays alive even when other sections are showing.
-   * When the timeline section becomes active, the visible flag fades
-   * the chart in and the line drawing animation runs once. After
-   * that, any change to the metric or the selected neighborhoods
-   * redraws with a quick instant transition. */
+   * The chart compares up to five neighborhoods over time across one
+   * of three metrics. The control surface above the chart is the part
+   * the reader actually touches, so it has to feel intentional, not
+   * like a settings panel.
+   *
+   * Round two changes:
+   *
+   *   - The metric selector becomes a single segmented control. One
+   *     pill, three segments, one filled at a time. The previous
+   *     three-buttons-in-a-row read as a generic radio group.
+   *
+   *   - Neighborhoods split into two clearly labeled groups: holding
+   *     zones (navy chips) and flipping zones (amber chips). Reader
+   *     learns the geography while choosing what to compare.
+   *
+   *   - A serif header above the chart reads "Comparing X and Y" and
+   *     updates as the selection changes. The chart used to sit naked.
+   *
+   *   - Selection cap of five. More than that and the chart becomes
+   *     a noodle pile.
+   *
+   *   - Faint area fills under each line. Glass tooltip card. Vertical
+   *     2008 label, same convention as Sections 01 and 03. */
 
   import * as d3 from 'd3';
   import { onMount, tick } from 'svelte';
@@ -13,12 +31,16 @@
   export let active = false;
   export let visible = false;
 
-  /* The nine neighborhoods classified as holding zones. Used to color
-   * their lines navy. Everything else colors amber. */
+  /* The nine neighborhoods classified as holding zones. The remainder
+   * are flipping zones. This split is the editorial spine of the
+   * project, so making the reader see it in the picker is part of the
+   * argument. */
   const HOLD_NH = [
     'Back Bay', 'Beacon Hill', 'Charlestown', 'Downtown',
     'Fenway', 'Longwood', 'South Boston Waterfront', 'South End', 'West End'
   ];
+
+  const MAX_SELECTED = 5;
 
   let data = [];
   let svgEl;
@@ -36,19 +58,25 @@
   ];
 
   $: neighborhoods = Array.from(new Set(data.map(function (d) { return d.neighborhood; }))).sort();
+  $: holdNeighborhoods = neighborhoods.filter(function (n) { return HOLD_NH.includes(n); });
+  $: flipNeighborhoods = neighborhoods.filter(function (n) { return !HOLD_NH.includes(n); });
   $: activeMetric = metrics.find(function (m) { return m.key === selectedMetric; }) || metrics[0];
   $: filteredData = data.filter(function (d) { return selectedNeighborhoods.includes(d.neighborhood); });
 
-  /* Combined key gives reliable reactivity when either the metric or
-   * the selection changes. Without it Svelte sometimes skips a redraw
-   * if it cannot tell that a referenced array has new contents. */
+  /* Header sentence. Comma + and for three or more, no Oxford on two. */
+  $: headerSentence = (function () {
+    var n = selectedNeighborhoods;
+    if (n.length === 0) return 'Pick a neighborhood';
+    if (n.length === 1) return 'Showing ' + n[0];
+    if (n.length === 2) return 'Comparing ' + n[0] + ' and ' + n[1];
+    return 'Comparing ' + n.slice(0, -1).join(', ') + ', and ' + n[n.length - 1];
+  })();
+
   $: selectionKey = selectedMetric + '|' + selectedNeighborhoods.join(',');
   $: if (initialDrawDone && data.length > 0 && selectionKey) {
     tick().then(function () { drawChart(true); });
   }
 
-  /* First entrance: when the section becomes active and data is
-   * loaded, draw with the long ease-in animation. */
   $: if (active && visible && data.length > 0 && svgEl && !initialDrawDone) {
     tick().then(function () { drawChart(false); initialDrawDone = true; });
   }
@@ -66,22 +94,26 @@
 
   function toggleNeighborhood(name) {
     if (selectedNeighborhoods.includes(name)) {
-      if (selectedNeighborhoods.length > 1)
+      if (selectedNeighborhoods.length > 1) {
         selectedNeighborhoods = selectedNeighborhoods.filter(function (n) { return n !== name; });
-    } else {
-      selectedNeighborhoods = [...selectedNeighborhoods, name];
+      }
+      return;
     }
+    if (selectedNeighborhoods.length >= MAX_SELECTED) return;
+    selectedNeighborhoods = [...selectedNeighborhoods, name];
   }
 
   function drawChart(instant) {
     if (!svgEl || !wrapperEl || filteredData.length === 0) return;
 
     var cw = wrapperEl.clientWidth;
-    var ch = 320;
-    var margin = { top: 20, right: 110, bottom: 36, left: 52 };
+    if (cw < 200) cw = 720;
+    var ch = 380;
+    var margin = { top: 22, right: 132, bottom: 38, left: 56 };
     var font = 'Plus Jakarta Sans, sans-serif';
     var mono = 'IBM Plex Mono, monospace';
-    var DRAW_MS = instant ? 400 : 2200;
+    var serif = '"DM Serif Display", Georgia, serif';
+    var DRAW_MS = instant ? 380 : 2200;
     var EASE = instant ? d3.easeCubicOut : d3.easeCubicInOut;
 
     var svg = d3.select(svgEl);
@@ -89,7 +121,12 @@
     svg.attr('viewBox', '0 0 ' + cw + ' ' + ch)
       .attr('preserveAspectRatio', 'xMidYMid meet')
       .attr('role', 'img')
-      .attr('aria-label', 'Neighborhood trajectory chart comparing ' + selectedNeighborhoods.join(' and '));
+      .attr('aria-labelledby', 'tl-title tl-desc');
+
+    svg.append('title').attr('id', 'tl-title').text(headerSentence);
+    svg.append('desc').attr('id', 'tl-desc')
+      .text('Time series chart from 2000 to 2022 showing ' + activeMetric.label.toLowerCase()
+            + ' for the selected Boston neighborhoods.');
 
     var x = d3.scaleLinear()
       .domain(d3.extent(data, function (d) { return d.year; }))
@@ -101,38 +138,51 @@
       .domain([yExt[0] - yPad, yExt[1] + yPad])
       .range([ch - margin.bottom, margin.top]);
 
+    /* x axis */
     svg.append('g').attr('transform', 'translate(0,' + (ch - margin.bottom) + ')')
       .call(d3.axisBottom(x).ticks(6).tickFormat(d3.format('d')).tickSize(0))
       .call(function (a) { a.select('.domain').attr('stroke', '#D6D2C8'); })
       .call(function (a) {
-        a.selectAll('text').attr('fill', '#9C9890')
+        a.selectAll('text').attr('fill', '#9C9890').attr('dy', '1em')
           .style('font-size', '11px').style('font-family', font);
       });
 
+    /* y axis with gridlines */
     svg.append('g').attr('transform', 'translate(' + margin.left + ',0)')
       .call(d3.axisLeft(y).ticks(5).tickFormat(activeMetric.format).tickSize(0))
       .call(function (a) { a.select('.domain').remove(); })
       .call(function (a) {
         a.selectAll('.tick line').clone()
           .attr('x2', cw - margin.left - margin.right)
-          .attr('stroke', '#D6D2C8').attr('stroke-opacity', 0.18);
+          .attr('stroke', '#D6D2C8').attr('stroke-opacity', 0.22);
       })
       .call(function (a) {
-        a.selectAll('text').attr('fill', '#9C9890')
+        a.selectAll('text').attr('fill', '#9C9890').attr('dx', '-0.4em')
           .style('font-size', '11px').style('font-family', font);
       });
 
-    /* 2008 vertical reference. Soft, secondary. */
+    /* 2008 vertical reference. Same convention as the dark sections,
+     * adapted for the cream background. */
     svg.append('line').attr('x1', x(2008)).attr('x2', x(2008))
       .attr('y1', margin.top).attr('y2', ch - margin.bottom)
-      .attr('stroke', '#B0A898').attr('stroke-dasharray', '4 3').attr('stroke-opacity', 0.5);
-    svg.append('text').attr('x', x(2008)).attr('y', margin.top - 8)
-      .attr('text-anchor', 'middle').attr('fill', '#9C9890')
-      .style('font-size', '10px').style('font-family', font).text('2008');
+      .attr('stroke', '#B0A898').attr('stroke-dasharray', '4 3').attr('stroke-opacity', 0.55);
+    svg.append('text')
+      .attr('transform', 'translate(' + (x(2008) - 7) + ',' + (margin.top + 16) + ') rotate(-90)')
+      .attr('text-anchor', 'end').attr('fill', '#9C9890')
+      .style('font-size', '9.5px').style('font-family', font)
+      .style('letter-spacing', '0.16em').style('text-transform', 'uppercase')
+      .text('2008');
 
     var line = d3.line()
       .x(function (d) { return x(d.year); })
       .y(function (d) { return y(d[selectedMetric]); })
+      .defined(function (d) { return d[selectedMetric] != null; })
+      .curve(d3.curveMonotoneX);
+
+    var area = d3.area()
+      .x(function (d) { return x(d.year); })
+      .y0(ch - margin.bottom)
+      .y1(function (d) { return y(d[selectedMetric]); })
       .defined(function (d) { return d[selectedMetric] != null; })
       .curve(d3.curveMonotoneX);
 
@@ -144,6 +194,11 @@
       var vals = entry[1].slice().sort(function (a, b) { return a.year - b.year; });
       var color = isHold(nh) ? '#1B3A5C' : '#C68B3C';
 
+      /* Faint area fill under the line. Adds weight without shouting. */
+      svg.append('path').datum(vals)
+        .attr('fill', color).attr('opacity', 0.06)
+        .attr('d', area);
+
       var p = svg.append('path').datum(vals).attr('fill', 'none')
         .attr('stroke', color).attr('stroke-width', 2.5)
         .attr('stroke-linecap', 'round').attr('d', line);
@@ -153,22 +208,26 @@
         .attr('stroke-dashoffset', 0)
         .on('end', function () { d3.select(this).attr('stroke-dasharray', null); });
 
+      /* End-of-line label with neighborhood name and current value. */
       var last = vals[vals.length - 1];
       if (last && last[selectedMetric] != null) {
         var eg = svg.append('g').attr('opacity', 0);
         eg.append('text').attr('x', x(last.year) + 8).attr('y', y(last[selectedMetric]) + 4)
-          .attr('fill', color).style('font-size', '11px').style('font-weight', '600').style('font-family', font).text(nh);
-        eg.append('text').attr('x', x(last.year) + 8).attr('y', y(last[selectedMetric]) + 17)
-          .attr('fill', color).attr('opacity', 0.7).style('font-size', '10px').style('font-family', mono)
-          .text(activeMetric.format(last[selectedMetric]));
+          .attr('fill', color).style('font-size', '11.5px').style('font-weight', '700')
+          .style('font-family', font).text(nh);
+        eg.append('text').attr('x', x(last.year) + 8).attr('y', y(last[selectedMetric]) + 18)
+          .attr('fill', color).attr('opacity', 0.78).style('font-size', '10px')
+          .style('font-family', mono).text(activeMetric.format(last[selectedMetric]));
         eg.transition().delay(idx * 120 + DRAW_MS + 200).duration(400).ease(d3.easeCubicOut).attr('opacity', 1);
       }
       idx++;
     }
 
-    /* Hover: vertical rule with floating tooltip card. */
+    /* Hover layer: vertical guide and a frosted glass tooltip card. */
     var hLine = svg.append('line').attr('y1', margin.top).attr('y2', ch - margin.bottom)
-      .attr('stroke', '#46433C').attr('stroke-width', 1).attr('stroke-opacity', 0).style('pointer-events', 'none');
+      .attr('stroke', '#46433C').attr('stroke-width', 1)
+      .attr('stroke-opacity', 0).attr('stroke-dasharray', '2 3')
+      .style('pointer-events', 'none');
     var hG = svg.append('g').attr('opacity', 0).style('pointer-events', 'none');
     var years = Array.from(new Set(data.map(function (d) { return d.year; }))).sort();
 
@@ -178,26 +237,50 @@
       .on('mousemove', function (event) {
         var mx = d3.pointer(event, svgEl)[0];
         var yr = Math.round(x.invert(mx));
-        yr = Math.max(years[0], Math.min(years[years.length - 1], yr));
-        hLine.attr('x1', x(yr)).attr('x2', x(yr)).attr('stroke-opacity', 0.3);
+        if (yr < years[0]) yr = years[0];
+        if (yr > years[years.length - 1]) yr = years[years.length - 1];
+        hLine.attr('x1', x(yr)).attr('x2', x(yr)).attr('stroke-opacity', 0.4);
         hG.selectAll('*').remove(); hG.attr('opacity', 1);
-        var tx = x(yr) + 10; if (tx > cw - 140) tx = x(yr) - 120;
-        hG.append('rect').attr('x', tx - 6).attr('y', margin.top)
-          .attr('width', 130).attr('height', 16 + selectedNeighborhoods.length * 16)
-          .attr('fill', 'rgba(255,255,255,0.96)').attr('rx', 4)
+
+        var rowH = 18;
+        var cardH = 22 + selectedNeighborhoods.length * rowH;
+        var cardW = 160;
+        var tx = x(yr) + 12;
+        if (tx + cardW > cw - 6) tx = x(yr) - cardW - 12;
+        var ty = margin.top + 6;
+
+        /* Glass card. The fill is rgba white at 0.92, with a subtle
+         * border. The CSS class adds backdrop-filter blur because that
+         * is not an SVG attribute. */
+        hG.append('rect').attr('x', tx).attr('y', ty)
+          .attr('width', cardW).attr('height', cardH)
+          .attr('rx', 8)
+          .attr('class', 'tl-tooltip-card')
+          .attr('fill', 'rgba(255, 255, 255, 0.94)')
           .attr('stroke', '#D6D2C8').attr('stroke-width', 0.5);
-        hG.append('text').attr('x', tx).attr('y', margin.top + 12).attr('fill', '#46433C')
-          .style('font-size', '11px').style('font-weight', '700').style('font-family', font).text(yr);
+
+        hG.append('text').attr('x', tx + 12).attr('y', ty + 16).attr('fill', '#191816')
+          .style('font-size', '12px').style('font-weight', '700')
+          .style('font-family', mono).style('letter-spacing', '0.06em')
+          .text(yr);
+
         selectedNeighborhoods.forEach(function (n, i) {
           var match = data.find(function (d) { return d.neighborhood === n && d.year === yr; });
           var v = match ? match[selectedMetric] : null;
           var c = isHold(n) ? '#1B3A5C' : '#C68B3C';
-          hG.append('text').attr('x', tx).attr('y', margin.top + 28 + i * 16).attr('fill', c)
-            .style('font-size', '10px').style('font-family', font).text(n + ': ' + (v != null ? activeMetric.format(v) : 'n/a'));
+          hG.append('circle').attr('cx', tx + 18).attr('cy', ty + 30 + i * rowH)
+            .attr('r', 3.5).attr('fill', c);
+          hG.append('text').attr('x', tx + 28).attr('y', ty + 34 + i * rowH).attr('fill', '#46433C')
+            .style('font-size', '11px').style('font-family', font)
+            .text(n);
+          hG.append('text').attr('x', tx + cardW - 12).attr('y', ty + 34 + i * rowH)
+            .attr('text-anchor', 'end').attr('fill', c)
+            .style('font-size', '11px').style('font-weight', '700').style('font-family', mono)
+            .text(v != null ? activeMetric.format(v) : 'n/a');
           if (match && v != null) {
             hG.append('circle').attr('cx', x(yr)).attr('cy', y(v))
-              .attr('r', 3.5).attr('fill', c)
-              .attr('stroke', '#fff').attr('stroke-width', 1.5);
+              .attr('r', 4).attr('fill', '#fff')
+              .attr('stroke', c).attr('stroke-width', 2);
           }
         });
       })
@@ -213,54 +296,220 @@
 </script>
 
 <div class="tl-wrap" bind:this={wrapperEl} class:visible>
-  <div class="tl-controls">
-    <div class="tl-metrics">
-      {#each metrics as m}
-        <button class:active={selectedMetric === m.key} on:click={() => selectedMetric = m.key}>{m.label}</button>
-      {/each}
+  <!-- Editorial header that updates with the selection -->
+  <h3 class="tl-header">{headerSentence}</h3>
+  <p class="tl-sub">on {activeMetric.label.toLowerCase()}, 2000 to 2022</p>
+
+  <!-- Segmented metric control -->
+  <div class="tl-segmented" role="tablist" aria-label="Choose metric">
+    {#each metrics as m}
+      <button
+        class="tl-seg"
+        class:active={selectedMetric === m.key}
+        role="tab"
+        aria-selected={selectedMetric === m.key}
+        on:click={() => selectedMetric = m.key}>{m.label}</button>
+    {/each}
+  </div>
+
+  <!-- Neighborhood chip groups, split by zone -->
+  <div class="tl-groups">
+    <div class="tl-group">
+      <div class="tl-group-head">
+        <span class="tl-dot tl-dot-hold" aria-hidden="true"></span>
+        <span class="tl-group-label">Holding zones</span>
+        <span class="tl-group-count">{holdNeighborhoods.length}</span>
+      </div>
+      <div class="tl-chips">
+        {#each holdNeighborhoods as nh}
+          <button class="tl-chip tl-chip-hold"
+            class:active={selectedNeighborhoods.includes(nh)}
+            disabled={!selectedNeighborhoods.includes(nh) && selectedNeighborhoods.length >= MAX_SELECTED}
+            aria-pressed={selectedNeighborhoods.includes(nh)}
+            on:click={() => toggleNeighborhood(nh)}>{nh}</button>
+        {/each}
+      </div>
     </div>
-    <div class="tl-nh-scroll">
-      {#each neighborhoods as nh}
-        <button class="tl-nh"
-          class:active={selectedNeighborhoods.includes(nh)}
-          class:hold={isHold(nh)} class:flip={!isHold(nh)}
-          on:click={() => toggleNeighborhood(nh)}>{nh}</button>
-      {/each}
+    <div class="tl-group">
+      <div class="tl-group-head">
+        <span class="tl-dot tl-dot-flip" aria-hidden="true"></span>
+        <span class="tl-group-label">Flipping zones</span>
+        <span class="tl-group-count">{flipNeighborhoods.length}</span>
+      </div>
+      <div class="tl-chips">
+        {#each flipNeighborhoods as nh}
+          <button class="tl-chip tl-chip-flip"
+            class:active={selectedNeighborhoods.includes(nh)}
+            disabled={!selectedNeighborhoods.includes(nh) && selectedNeighborhoods.length >= MAX_SELECTED}
+            aria-pressed={selectedNeighborhoods.includes(nh)}
+            on:click={() => toggleNeighborhood(nh)}>{nh}</button>
+        {/each}
+      </div>
     </div>
   </div>
+
+  <p class="tl-helper">Compare up to {MAX_SELECTED} at a time. {selectedNeighborhoods.length} selected.</p>
+
   {#if data.length === 0}
     <div class="tl-empty">Loading…</div>
   {:else}
-    <svg bind:this={svgEl} class="tl-chart"></svg>
+    <svg bind:this={svgEl} class="tl-chart" aria-live="polite"></svg>
   {/if}
 </div>
 
 <style>
-  .tl-wrap { width: 100%; height: 100%; display: flex; flex-direction: column; }
-  .tl-controls { flex-shrink: 0; padding: 0 0 8px; }
-  .tl-metrics { display: flex; gap: 4px; margin-bottom: 6px; }
-  .tl-metrics button {
-    padding: 4px 10px; border: 1px solid var(--rule); border-radius: 4px;
-    background: transparent; color: var(--sub);
-    font-family: "Plus Jakarta Sans", sans-serif; font-size: 10px; font-weight: 600;
-    cursor: pointer; transition: all 0.15s;
+  .tl-wrap {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
   }
-  .tl-metrics button:hover { border-color: var(--neutral); }
-  .tl-metrics button.active { background: var(--ink); border-color: var(--ink); color: #fff; }
-  .tl-nh-scroll {
-    display: flex; gap: 3px; overflow-x: auto; padding-bottom: 2px;
-    scrollbar-width: none;
+
+  .tl-header {
+    margin: 0;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 19px;
+    font-weight: 400;
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+    color: var(--ink);
   }
-  .tl-nh-scroll::-webkit-scrollbar { display: none; }
-  .tl-nh {
-    padding: 3px 7px; border: 1px solid var(--rule); border-radius: 3px;
-    background: transparent; color: var(--faint); white-space: nowrap;
-    font-family: "Plus Jakarta Sans", sans-serif; font-size: 9px; font-weight: 500;
-    cursor: pointer; transition: all 0.15s; flex-shrink: 0;
+  .tl-sub {
+    margin: 0;
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 10px;
+    color: var(--faint);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
   }
-  .tl-nh:hover { border-color: var(--neutral); color: var(--text); }
-  .tl-nh.active.hold { background: var(--navy); border-color: var(--navy); color: #fff; font-weight: 700; }
-  .tl-nh.active.flip { background: var(--amber); border-color: var(--amber); color: #fff; font-weight: 700; }
-  .tl-chart { flex: 1; width: 100%; min-height: 240px; }
-  .tl-empty { flex: 1; display: grid; place-items: center; color: var(--faint); font-size: 13px; }
+
+  /* Segmented control: a single rounded pill containing three
+   * mutually exclusive segments. Active fill is the ink color. */
+  .tl-segmented {
+    display: inline-flex;
+    margin: 6px 0 4px;
+    padding: 3px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--rule);
+    align-self: flex-start;
+  }
+  .tl-seg {
+    appearance: none;
+    border: none;
+    background: transparent;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--sub);
+    padding: 6px 14px;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: background 0.18s, color 0.18s;
+    letter-spacing: 0.01em;
+  }
+  .tl-seg:hover { color: var(--ink); }
+  .tl-seg.active {
+    background: var(--ink);
+    color: #fff;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12);
+  }
+
+  /* Two zone groups, stacked. */
+  .tl-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .tl-group { display: flex; flex-direction: column; gap: 4px; }
+  .tl-group-head {
+    display: flex; align-items: center; gap: 7px;
+    padding-left: 2px;
+  }
+  .tl-dot {
+    display: inline-block; width: 7px; height: 7px;
+    border-radius: 50%;
+  }
+  .tl-dot-hold { background: var(--navy); }
+  .tl-dot-flip { background: var(--amber); }
+  .tl-group-label {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 9.5px;
+    font-weight: 700;
+    color: var(--sub);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+  }
+  .tl-group-count {
+    font-family: "IBM Plex Mono", monospace;
+    font-size: 9.5px;
+    color: var(--faint);
+  }
+
+  .tl-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .tl-chip {
+    appearance: none;
+    padding: 4px 9px;
+    border-radius: 14px;
+    border: 1px solid var(--rule);
+    background: #fff;
+    color: var(--sub);
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 10.5px;
+    font-weight: 500;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.15s;
+  }
+  .tl-chip:hover:not(:disabled) {
+    border-color: var(--neutral);
+    color: var(--ink);
+  }
+  .tl-chip:disabled { opacity: 0.4; cursor: not-allowed; }
+  .tl-chip-hold.active {
+    background: var(--navy);
+    border-color: var(--navy);
+    color: #fff;
+    font-weight: 700;
+  }
+  .tl-chip-flip.active {
+    background: var(--amber);
+    border-color: var(--amber);
+    color: #fff;
+    font-weight: 700;
+  }
+
+  .tl-helper {
+    margin: 6px 0 4px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 10.5px;
+    color: var(--faint);
+  }
+
+  .tl-chart {
+    flex: 1;
+    width: 100%;
+    min-height: 320px;
+    margin-top: 2px;
+  }
+
+  .tl-empty {
+    flex: 1; display: grid; place-items: center;
+    color: var(--faint); font-size: 13px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+  }
+
+  /* Frosted glass effect on the SVG hover card. backdrop-filter
+   * applies through the SVG when the rect carries this class. */
+  :global(.tl-tooltip-card) {
+    backdrop-filter: blur(12px) saturate(140%);
+    -webkit-backdrop-filter: blur(12px) saturate(140%);
+    filter: drop-shadow(0 8px 24px rgba(25, 24, 22, 0.12));
+  }
 </style>

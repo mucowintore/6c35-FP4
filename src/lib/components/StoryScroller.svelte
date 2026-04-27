@@ -2,24 +2,22 @@
   /* StoryScroller orchestrates the entire narrative.
    *
    * Three new mechanisms layered on top of the existing wheel-snap
-   * machinery:
+   * machinery, all of which is preserved verbatim:
    *
-   *   1. Per-section scroll progress, computed on every passive scroll
-   *      from getBoundingClientRect. Routed to charts so the line
-   *      drawing follows the wheel.
+   *   1. The counter system. Any element with data-count-target tweens
+   *      from zero on first scroll into view, AND resets when scrolled
+   *      out of view, so a re-entry replays the count. The earlier
+   *      one-shot version made section 04 feel dead on a second visit.
    *
-   *   2. A counter system. Any [data-count-target] element tweens
-   *      from zero on first scroll into view, optionally with prefix
-   *      suffix and delay attributes.
+   *   2. A skip-to-content anchor at the top of the article. Visually
+   *      hidden until focused, jumps the reader past the dark opening
+   *      straight into the first story section.
    *
-   *   3. Page background switching. The active section's id matches
-   *      one of three sets (dark, amber, white) and a class flips on
-   *      .story-page; a 600ms transition crossfades both background
-   *      and inherited text colors.
+   *   3. aria-current="step" on the active progress dot, so a screen
+   *      reader announces which section is active as the reader scrolls.
    *
-   * The wheel-snap, IntersectionObserver, and scroll-restoration logic
-   * is preserved verbatim from the baseline. Adding to it, never
-   * touching it. */
+   * The wheel-snap, IntersectionObserver, scroll-restoration, and
+   * page-background switching logic are unchanged from round one. */
 
   import { onMount } from 'svelte';
   import { NARRATIVE_SECTIONS, FOOTER_CONTENT } from '$lib/narrativeSections';
@@ -61,9 +59,6 @@
   let stepCursorId = storySteps[0]?.id ?? '';
   let activeLockUntil = 0;
   let chapter2NarrativeStepId = 'map-intro';
-
-  /* Per-section scroll progress, computed on every scroll. */
-  let sectionProgress = {};
 
   const STEP_SCROLL_COOLDOWN_MS = 640;
   const WHEEL_GESTURE_IDLE_MS = 320;
@@ -121,32 +116,6 @@
   }
   function explorerAtTop() {
     return explorerSectionEl && explorerSectionEl.getBoundingClientRect().top >= -12;
-  }
-
-  /* Compute scroll progress per section.
-   * progress = 0 when section top sits at 60% of viewport height.
-   * progress = 1 when section top reaches the sticky rail.
-   * Beyond the rail, progress stays at 1 so charts stay drawn as the
-   * reader scrolls into the next section. */
-  function recomputeProgress() {
-    if (typeof window === 'undefined') return;
-    const vh = window.innerHeight;
-    const triggerStart = vh * 0.6;
-    const triggerEnd = STORY_TOP_RAIL_PX;
-    const range = triggerStart - triggerEnd;
-    if (range <= 0) return;
-
-    const next = {};
-    for (const id in storyStepNodes) {
-      const node = storyStepNodes[id];
-      if (!node) continue;
-      const top = node.getBoundingClientRect().top;
-      let p = (triggerStart - top) / range;
-      if (p < 0) p = 0;
-      else if (p > 1) p = 1;
-      next[id] = p;
-    }
-    sectionProgress = next;
   }
 
   function activateStep(id) {
@@ -245,10 +214,19 @@
     scrollToStep(tEl, tId);
   }
 
-  /* Counter system. Any element with data-count-target tweens from
-   * zero up to the target the first time it scrolls into view. The
-   * opening's +49 and 25 fire after a 1400ms delay to align with the
-   * entrance choreography. Section 04's 87 and 34 fire on intersection. */
+  /* Counter system, round two.
+   *
+   * Round one was one-shot: an IntersectionObserver fired on entry,
+   * set data-counted="true", and ignored the element forever after.
+   * Section 04 felt dead on a second visit because the 87% / 34%
+   * sat static.
+   *
+   * Round two listens for both directions. On entry, tween up. On
+   * exit, clear data-counted and reset the displayed text to the
+   * starting value (data-count-prefix + 0 + data-count-suffix), so
+   * the next entry plays fresh. Same logic benefits the opening
+   * counters, the equity counters, and any future counter wired up
+   * the same way. */
   let counterObserver = null;
 
   function animateCount(el, target, opts) {
@@ -258,8 +236,13 @@
     var suffix = opts.suffix || '';
     var delay = opts.delay || 0;
     var startAt = performance.now() + delay;
+    var token = (el._countToken || 0) + 1;
+    el._countToken = token;
 
     function frame(now) {
+      /* If a newer animation has started on this element, abandon. */
+      if (el._countToken !== token) return;
+
       if (now < startAt) {
         requestAnimationFrame(frame);
         return;
@@ -274,6 +257,14 @@
     requestAnimationFrame(frame);
   }
 
+  function resetCounter(el) {
+    var prefix = el.dataset.countPrefix || '';
+    var suffix = el.dataset.countSuffix || '';
+    el.textContent = prefix + '0' + suffix;
+    el._countToken = (el._countToken || 0) + 1;
+    delete el.dataset.counted;
+  }
+
   function setupCounters() {
     if (typeof window === 'undefined') return;
     var els = document.querySelectorAll('[data-count-target]');
@@ -281,18 +272,23 @@
 
     counterObserver = new IntersectionObserver(function (entries) {
       entries.forEach(function (entry) {
-        if (!entry.isIntersecting) return;
         var el = entry.target;
-        if (el.dataset.counted === 'true') return;
-        el.dataset.counted = 'true';
-        var target = parseFloat(el.dataset.countTarget);
-        var prefix = el.dataset.countPrefix || '';
-        var suffix = el.dataset.countSuffix || '';
-        var duration = parseInt(el.dataset.countDuration, 10) || 1200;
-        var delay = parseInt(el.dataset.countDelay, 10) || 0;
-        animateCount(el, target, { prefix: prefix, suffix: suffix, duration: duration, delay: delay });
+        if (entry.isIntersecting) {
+          if (el.dataset.counted === 'true') return;
+          el.dataset.counted = 'true';
+          var target = parseFloat(el.dataset.countTarget);
+          var prefix = el.dataset.countPrefix || '';
+          var suffix = el.dataset.countSuffix || '';
+          var duration = parseInt(el.dataset.countDuration, 10) || 1200;
+          var delay = parseInt(el.dataset.countDelay, 10) || 0;
+          animateCount(el, target, { prefix: prefix, suffix: suffix, duration: duration, delay: delay });
+        } else {
+          /* Exit. Clear flag and snap text back to zero so the next
+           * re-entry plays the count again. */
+          if (el.dataset.counted === 'true') resetCounter(el);
+        }
       });
-    }, { threshold: 0.45 });
+    }, { threshold: [0, 0.45] });
 
     els.forEach(function (el) { counterObserver.observe(el); });
   }
@@ -354,14 +350,11 @@
     observedNodes.forEach((n) => observer.observe(n));
 
     window.addEventListener('wheel', handleWheel, { passive: false });
-    window.addEventListener('scroll', recomputeProgress, { passive: true });
-    window.addEventListener('resize', recomputeProgress, { passive: true });
 
-    /* Initial measurement after the next paint, when story step cards
-     * have their final layout dimensions. */
+    /* Defer counter setup until after the DOM has settled so that
+     * data-count-target nodes inside @html'd content are present. */
     requestAnimationFrame(function () {
       requestAnimationFrame(function () {
-        recomputeProgress();
         setupCounters();
       });
     });
@@ -370,8 +363,6 @@
       observer?.disconnect();
       counterObserver?.disconnect();
       window.removeEventListener('wheel', handleWheel);
-      window.removeEventListener('scroll', recomputeProgress);
-      window.removeEventListener('resize', recomputeProgress);
       window.clearTimeout(stepTransitionTimer);
       window.clearTimeout(wheelGestureResetTimer);
       if (typeof history !== 'undefined' && 'scrollRestoration' in history && previousScrollRestoration) {
@@ -383,22 +374,29 @@
 
 <svelte:head><title>Speculation Has a Geography</title></svelte:head>
 
+<!-- Skip-to-content link.
+     Visually hidden until focused. A keyboard or screen reader user
+     can hit Tab once on page load and jump past the cinematic opening
+     straight into the first story section. -->
+<a class="skip-link" href="#regime-shift">Skip to the story</a>
+
 <article class="story-page"
   class:bg-dark={isDarkSection}
   class:bg-amber={isAmberSection}
   class:bg-white={isWhiteSection}>
 
-  <section class="story-opening" id={openingSection.id} bind:this={openingSectionEl}>
+  <section class="story-opening" id={openingSection.id} bind:this={openingSectionEl}
+    aria-label="Introduction">
     <div class="opening-inner">{@html openingSection.content}</div>
   </section>
 
-  <div class="dark-to-warm"></div>
+  <div class="dark-to-warm" aria-hidden="true"></div>
 
   <section class="story-scroll-region" bind:this={storyRegionEl} aria-label="Scrollytelling narrative">
     <!-- Vertical timeline progress sidebar.
          Thin rail with dots per section. The active dot grows and
-         takes the section theme color. Text appears on hover for
-         accessibility. -->
+         takes the section theme color. The active link carries
+         aria-current="step" so a screen reader announces it. -->
     <nav class="story-progress" aria-label="Story sections">
       <span class="progress-rail" aria-hidden="true"></span>
       {#each progressSections as section}
@@ -409,8 +407,9 @@
           class:t-flip={section.theme === 'flip'}
           class:t-policy={section.theme === 'policy'}
           aria-label="{section.chapter} {section.label}"
+          aria-current={activeChapter === section.chapter ? 'step' : undefined}
           title="{section.chapter} · {section.label}">
-          <span class="prog-dot"></span>
+          <span class="prog-dot" aria-hidden="true"></span>
           <span class="prog-text">{section.chapter} · {section.label}</span>
         </a>
       {/each}
@@ -423,8 +422,7 @@
           {geoData}
           {ranges}
           {counts}
-          {loadError}
-          {sectionProgress} />
+          {loadError} />
       </div>
     </div>
 
@@ -444,7 +442,7 @@
     </div>
   </section>
 
-  <div class="story-transition-strip">
+  <div class="story-transition-strip" aria-hidden="true">
     <div class="transition-inner">
       <p>The story above is the city's story.</p>
       <p>Now explore every tract.</p>
@@ -452,7 +450,8 @@
   </div>
 
   <section class="story-explorer-section" id={explorerSection.id}
-    data-section-id={explorerSection.id} use:trackStep bind:this={explorerSectionEl}>
+    data-section-id={explorerSection.id} use:trackStep bind:this={explorerSectionEl}
+    aria-label="Tract explorer">
     <StoryExplorer {geoData} {ranges} {counts} {cityAverages} {holdingAverages} {flippingAverages} />
   </section>
 
@@ -473,9 +472,31 @@
     overflow: visible !important;
   }
 
+  /* Skip link: invisible until keyboard focus lands on it. */
+  .skip-link {
+    position: absolute;
+    top: -100px;
+    left: 12px;
+    z-index: 1000;
+    background: var(--ink);
+    color: #fff;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: top 0.18s;
+  }
+  .skip-link:focus {
+    top: 12px;
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+  }
+
   /* The page background shifts between cream, dark, amber tinted, and
-   * white based on the active section. Smooth, slow transition makes
-   * each section feel like a new room. */
+   * a warm off-white based on the active section. Slow transition so
+   * each section feels like a new room rather than a slide. */
   .story-page {
     min-height: 100vh;
     background: var(--bg);
@@ -485,7 +506,7 @@
   }
   .story-page.bg-dark { background: #0F0F0E; }
   .story-page.bg-amber { background: #F5EDDC; }
-  .story-page.bg-white { background: #FFFFFF; }
+  .story-page.bg-white { background: #FAFAF6; }
 
   /* On dark sections, body text shifts to cream. */
   .story-page.bg-dark :global(.story-step h2),
@@ -528,10 +549,6 @@
     overflow: hidden;
   }
 
-  /* Pseudo-element holds a fixed radial gradient. We animate its
-   * transform (translate) instead of trying to interpolate gradient
-   * stops, which CSS does not do smoothly. The gradient drifts in a
-   * slow elliptical cycle, never quite repeating. */
   .story-opening::before {
     content: '';
     position: absolute;
@@ -569,8 +586,6 @@
     will-change: opacity;
   }
 
-  /* Hero row: left quote, the word, right quote on one line. The
-   * quotes are tinted way down so the word dominates. */
   .story-opening :global(.hero-row) {
     display: flex; align-items: baseline; justify-content: center;
     gap: 0;
@@ -703,8 +718,6 @@
     50%      { opacity: 0.85; transform: translateY(5px); }
   }
 
-  /* Soft transition strip from the dark opening into the cream
-   * scroll region. */
   .dark-to-warm {
     height: 140px;
     background: linear-gradient(to bottom, #0F0F0E, var(--bg));
@@ -728,8 +741,6 @@
     padding: var(--story-top-rail) clamp(18px, 4vw, 64px) 14vh;
   }
 
-  /* Vertical timeline: thin rail, dots, no text labels by default.
-   * The active dot grows. Text fades in on hover for accessibility. */
   .story-progress {
     position: sticky;
     top: var(--story-top-rail);
@@ -779,7 +790,8 @@
     transition: opacity 0.2s, transform 0.2s;
   }
   .progress-dot-link:hover .prog-text,
-  .progress-dot-link.active .prog-text {
+  .progress-dot-link.active .prog-text,
+  .progress-dot-link:focus-visible .prog-text {
     opacity: 1; transform: translateX(0);
   }
 
@@ -824,8 +836,6 @@
   .chapter-label.theme-flip { color: var(--amber-dark); }
   .chapter-label.theme-policy { color: var(--ink); }
 
-  /* Section takeaway: serif pullquote with extra breathing room. The
-   * sentence deserves silence around it. */
   .story-step :global(.section-takeaway) {
     font-family: "DM Serif Display", Georgia, serif;
     font-size: 19px; line-height: 1.5; color: var(--ink);
@@ -836,8 +846,6 @@
                 border-left-color 600ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 
-  /* Human sentence (Section 04). Slightly larger serif, generous
-   * whitespace, no border. Grounds the statistics in lived experience. */
   .story-step :global(.human-sentence) {
     font-family: "DM Serif Display", Georgia, serif;
     font-size: 17px;
@@ -848,7 +856,6 @@
     max-width: 540px;
   }
 
-  /* Equity stat callouts with separated percent sign. */
   .story-step :global(.equity-stats) {
     display: flex; gap: 20px; margin: 12px 0 20px;
   }
@@ -867,18 +874,6 @@
     display: block; font-size: 12px; color: var(--sub); margin-top: 6px;
   }
 
-  /* Policy callout boxes embedded in narrative. */
-  .story-step :global(.policy-callout) {
-    padding: 14px 16px; border-radius: 6px;
-    margin: 12px 0; border-left: 3px solid;
-  }
-  .story-step :global(.policy-callout strong) { display: block; font-size: 14px; margin-bottom: 4px; }
-  .story-step :global(.policy-callout span) { font-size: 13px; color: var(--sub); line-height: 1.55; }
-  .story-step :global(.policy-callout-hold) { border-color: var(--navy); background: rgba(27, 58, 92, 0.04); }
-  .story-step :global(.policy-callout-hold strong) { color: var(--navy); }
-  .story-step :global(.policy-callout-flip) { border-color: var(--amber); background: rgba(198, 139, 60, 0.04); }
-  .story-step :global(.policy-callout-flip strong) { color: var(--amber-dark); }
-
   /* Sticky viz column */
   .story-viz-column {
     position: sticky; top: var(--story-top-rail);
@@ -888,9 +883,7 @@
   }
   .sticky-stage { display: flex; width: 100%; height: 100%; align-items: center; }
 
-  /* ============================================================
-     Transition strip: full viewport height, dark, contemplative
-     ============================================================ */
+  /* Transition strip between story and explorer. */
   .story-transition-strip {
     background: #0F0F0E;
     color: rgba(242, 240, 234, 0.7);
@@ -906,16 +899,10 @@
   .story-transition-strip p { margin: 0; }
   .story-transition-strip p + p { margin-top: 14px; color: rgba(242, 240, 234, 0.45); }
 
-  /* ============================================================
-     Explorer: full bleed
-     ============================================================ */
   .story-explorer-section {
     width: 100%; margin: 0 auto;
   }
 
-  /* ============================================================
-     Footer
-     ============================================================ */
   .story-footer {
     border-top: 1px solid var(--rule); padding: 36px 24px 44px;
     background: #fff; color: var(--sub); text-align: center;
@@ -937,9 +924,6 @@
   }
   .story-footer :global(.footer-team) { font-size: 12px; font-weight: 600; color: var(--text); }
 
-  /* ============================================================
-     Responsive
-     ============================================================ */
   @media (max-width: 1040px) {
     .story-scroll-region {
       grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.1fr);

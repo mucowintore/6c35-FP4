@@ -43,6 +43,11 @@ const SELECTED_STROKE = '#ffffff';
 const BLOOM_ORIGIN_LON = -71.0655;
 const BLOOM_ORIGIN_LAT = 42.3554;
 
+/* Maximum number of animation frames to wait for a non-zero container
+ * size before giving up on a build attempt. Four frames at 60fps is
+ * about 67ms, well under any threshold a user would notice. */
+const BUILD_MAX_RETRY_FRAMES = 4;
+
 /* Nudge a hex color toward white by amt (0..1). Used for the brightness
  * overshoot during the bloom transition: each tract briefly flashes
  * 18% lighter than its target color, then settles. The standard
@@ -83,6 +88,7 @@ export function createMapController(callbacks = {}) {
   let allowInteraction = true;
   let bloomMaxDist = 1;
   let pulseTimer = null;
+  let pendingBuildFrame = null;
 
   const holdColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(HOLD_RAMP));
   const flipColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(FLIP_RAMP));
@@ -191,7 +197,7 @@ export function createMapController(callbacks = {}) {
      *
      * Tracts near Boston Common color first; the wave radiates outward.
      * Each tract first transitions to a brighter version of its target
-     * color (520ms), then settles to the correct value (320ms). This
+     * color (520ms), then settles to the correct value (320ms). The
      * follow-through gives the bloom an organic, almost living quality.
      * Holding leads, mixed follows, flipping last. */
     if (animate && previousPresentationState === 'gray' && presentationState === 'classified') {
@@ -279,7 +285,14 @@ export function createMapController(callbacks = {}) {
     }
   }
 
-  /* Policy zone labels placed at the centroid of each tract cluster. */
+  /* Policy zone labels.
+   *
+   * Round two upgrade. Each label is now a small frosted-glass pill
+   * with a 4 px accent stripe, set in serif type, and connected to
+   * the tract cluster centroid by a thin leader line. The previous
+   * version used a flat colored pill with bold sans-serif. The new
+   * treatment reads as editorial annotation rather than as legend
+   * artifact, which is what this section needs. */
   function addPolicyAnnotations() {
     if (!mapGroup || !geoData || !pathGenerator) return;
     removePolicyAnnotations();
@@ -302,33 +315,88 @@ export function createMapController(callbacks = {}) {
 
     var hc = clusterCenter(holdFeats);
     var fc = clusterCenter(flipFeats);
-    var font = 'Plus Jakarta Sans, sans-serif';
+    var serif = '"DM Serif Display", Georgia, serif';
+    var mono = 'IBM Plex Mono, monospace';
 
-    function placeLabel(cx, cy, text, color, bgColor) {
-      var g = mapGroup.append('g')
-        .attr('class', 'policy-annotation')
-        .attr('transform', 'translate(' + cx + ',' + cy + ')');
+    /* Place a label group: a thin leader line from the cluster
+     * centroid to the label position, then the frosted pill with an
+     * accent stripe on its left edge, then the label text in serif
+     * with a small uppercased tag below. */
+    function placeLabel(centroidXY, offsetX, offsetY, label, tag, accent) {
+      var labelX = centroidXY[0] + offsetX;
+      var labelY = centroidXY[1] + offsetY;
 
-      var t = g.append('text')
-        .attr('text-anchor', 'middle').attr('dy', '0.35em')
-        .attr('fill', color)
-        .attr('font-size', '11px').attr('font-weight', '700')
-        .attr('font-family', font)
-        .text(text);
+      var g = mapGroup.append('g').attr('class', 'policy-annotation');
 
-      var bbox = t.node().getBBox();
-      g.insert('rect', 'text')
-        .attr('x', bbox.x - 6).attr('y', bbox.y - 3)
-        .attr('width', bbox.width + 12).attr('height', bbox.height + 6)
-        .attr('rx', 4).attr('fill', bgColor).attr('opacity', 0.88);
+      /* Leader line from centroid to the label anchor point. */
+      g.append('line')
+        .attr('x1', centroidXY[0]).attr('y1', centroidXY[1])
+        .attr('x2', labelX).attr('y2', labelY)
+        .attr('stroke', accent).attr('stroke-width', 1)
+        .attr('stroke-opacity', 0.65)
+        .attr('stroke-dasharray', '2 2');
 
+      /* Small dot at the centroid end of the leader. */
+      g.append('circle')
+        .attr('cx', centroidXY[0]).attr('cy', centroidXY[1])
+        .attr('r', 2.5).attr('fill', accent).attr('stroke', '#fff').attr('stroke-width', 1);
+
+      /* Build the label content first so we can size the pill to
+       * exactly fit the type. */
+      var labelGroup = g.append('g').attr('transform', 'translate(' + labelX + ',' + labelY + ')');
+
+      var tagText = labelGroup.append('text')
+        .attr('x', 14).attr('y', 14)
+        .attr('fill', accent)
+        .attr('font-family', mono)
+        .attr('font-size', '9px')
+        .attr('font-weight', '700')
+        .attr('letter-spacing', '0.12em')
+        .text(tag.toUpperCase());
+
+      var nameText = labelGroup.append('text')
+        .attr('x', 14).attr('y', 30)
+        .attr('fill', '#191816')
+        .attr('font-family', serif)
+        .attr('font-size', '13px')
+        .text(label);
+
+      var tagBBox = tagText.node().getBBox();
+      var nameBBox = nameText.node().getBBox();
+      var pillW = Math.max(tagBBox.width, nameBBox.width) + 26;
+      var pillH = 40;
+
+      /* Insert the pill background behind the text. Frosted glass
+       * effect comes through the .policy-pill CSS class which sets
+       * backdrop-filter, since SVG fill alone cannot blur. */
+      labelGroup.insert('rect', 'text')
+        .attr('class', 'policy-pill')
+        .attr('x', 0).attr('y', 0)
+        .attr('width', pillW).attr('height', pillH)
+        .attr('rx', 6)
+        .attr('fill', 'rgba(255, 255, 255, 0.82)')
+        .attr('stroke', 'rgba(0, 0, 0, 0.05)')
+        .attr('stroke-width', 0.5);
+
+      /* Accent stripe on the left edge. */
+      labelGroup.insert('rect', 'text')
+        .attr('x', 0).attr('y', 0)
+        .attr('width', 4).attr('height', pillH)
+        .attr('rx', 1.5)
+        .attr('fill', accent);
+
+      /* Subtle entry. */
       g.attr('opacity', 0)
         .transition().duration(500).ease(d3.easeCubicOut)
         .attr('opacity', 1);
     }
 
-    placeLabel(hc[0], hc[1], 'Transfer fee zone', '#1B3A5C', '#E2ECF4');
-    placeLabel(fc[0], fc[1], 'TOPA zone', '#7A5020', '#FDF4E6');
+    /* Offset the labels diagonally from each cluster so they don't
+     * occlude the tracts they describe. Holding cluster's label sits
+     * up and to the right; flipping cluster's label sits down and
+     * to the left. */
+    placeLabel(hc, 28, -54, 'Transfer fee zone', 'Holding', '#1B3A5C');
+    placeLabel(fc, -180, 36, 'TOPA zone', 'Flipping', '#7A5020');
   }
 
   function removePolicyAnnotations() {
@@ -627,11 +695,35 @@ export function createMapController(callbacks = {}) {
     toggleSelection(this, feature);
   }
 
-  function buildMap() {
+  /* Defensive width-and-height guard.
+   *
+   * If the container measures zero on either axis, defer the build and
+   * try again on the next animation frame, up to BUILD_MAX_RETRY_FRAMES
+   * frames. This handles the race where the explorer mounts during a
+   * page background transition or during a window resize, both of
+   * which can briefly zero out the layout. Without this guard, the
+   * map's projection collapses to the origin and every tract path
+   * becomes "M0,0Z", which is unrecoverable. */
+  function buildMap(retryCount) {
+    retryCount = retryCount || 0;
     if (!container || !geoData || !ranges) return;
 
-    const width = container.clientWidth;
-    const height = container.clientHeight;
+    var width = container.clientWidth;
+    var height = container.clientHeight;
+
+    if ((width === 0 || height === 0) && retryCount < BUILD_MAX_RETRY_FRAMES) {
+      if (pendingBuildFrame) cancelAnimationFrame(pendingBuildFrame);
+      pendingBuildFrame = requestAnimationFrame(function () {
+        pendingBuildFrame = null;
+        buildMap(retryCount + 1);
+      });
+      return;
+    }
+
+    if (width === 0 || height === 0) {
+      console.warn('mapController: container measured zero after retries, skipping build');
+      return;
+    }
 
     d3.select(container).html('');
     hoveredPath = null;
@@ -649,7 +741,8 @@ export function createMapController(callbacks = {}) {
       .attr('width', width)
       .attr('height', height)
       .attr('role', 'img')
-      .attr('aria-label', 'Map of Boston census tracts colored by dominant investor strategy');
+      .attr('aria-label', 'Map of Boston census tracts colored by dominant investor strategy')
+      .attr('aria-describedby', 'map-legend');
 
     svgElement
       .append('defs')
@@ -829,14 +922,24 @@ export function createMapController(callbacks = {}) {
   function jumpToNeighborhood(name) {
     if (!svgElement || !pathGenerator || !zoomBehavior || !geoData) return;
 
+    /* Same defensive width guard as buildMap. If the container is
+     * zero-width at the moment of the jump (which happens during page
+     * background transitions or rapid resize), the projection scale
+     * computation below would divide by zero and produce NaN, which
+     * d3.zoom silently swallows and which leaves the map empty with
+     * no obvious error. Bail out cleanly instead. */
+    var width = container ? container.clientWidth : 0;
+    var height = container ? container.clientHeight : 0;
+    if (width === 0 || height === 0) {
+      console.warn('mapController: jumpToNeighborhood called with zero-size container, skipping');
+      return;
+    }
+
     const features = geoData.features.filter((feature) => feature.properties.neighborhood === name);
     if (features.length === 0) return;
 
     const bounds = pathGenerator.bounds({ type: 'FeatureCollection', features });
     const [[x0, y0], [x1, y1]] = bounds;
-
-    const width = container.clientWidth;
-    const height = container.clientHeight;
 
     const scale = Math.min(10, 0.6 / Math.max((x1 - x0 || 1) / width, (y1 - y0 || 1) / height));
 
@@ -892,6 +995,10 @@ export function createMapController(callbacks = {}) {
   function destroy() {
     if (leaveTimer) clearTimeout(leaveTimer);
     leaveTimer = null;
+    if (pendingBuildFrame) {
+      cancelAnimationFrame(pendingBuildFrame);
+      pendingBuildFrame = null;
+    }
     clearFlipPulseTimer();
     pendingPointerDown = null;
     removePolicyAnnotations();
