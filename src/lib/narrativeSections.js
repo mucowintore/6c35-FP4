@@ -27,6 +27,9 @@ export const NARRATIVE_SECTIONS = [
   /* Section 0: Opening */
   {
     id: 'opening',
+    chapter: '00',
+    title: 'When Boston says "speculation," whose neighborhood does it mean?',
+    theme: 'mixed',
     layout: 'fullscreen',
     viz: null,
     mapState: null,
@@ -44,6 +47,9 @@ export const NARRATIVE_SECTIONS = [
   /* Section 1: The Regime Shift */
   {
     id: 'regime-shift',
+    chapter: '01',
+    title: 'After 2008, investors never left',
+    theme: 'hold',
     layout: 'split',
     viz: 'timeseries',
     mapState: null,
@@ -66,11 +72,14 @@ export const NARRATIVE_SECTIONS = [
   /* Section 2a: Map appears, neutral gray */
   {
     id: 'map-intro',
+    chapter: '02',
+    title: 'Speculation split into two markets',
+    theme: 'mixed',
     layout: 'split',
     viz: 'map',
     mapState: 'gray',
     content: `
-      <h2 class="scroll-section-title">Two markets emerge</h2>
+      <h2 class="scroll-section-title">Speculation split into two markets</h2>
       <p>But where is this happening? And what kind of investing
         are we actually talking about?</p>
       <p>We classified every census tract in Boston by the dominant
@@ -84,6 +93,9 @@ export const NARRATIVE_SECTIONS = [
   /* Section 2b: Map blooms into color */
   {
     id: 'map-classified',
+    chapter: '02',
+    title: 'Speculation split into two markets',
+    theme: 'mixed',
     layout: 'split',
     viz: 'map',
     mapState: 'classified',
@@ -116,11 +128,14 @@ export const NARRATIVE_SECTIONS = [
   /* Section 3: The Price Wedge */
   {
     id: 'price-wedge',
+    chapter: '03',
+    title: 'Investors pay differently in each market',
+    theme: 'mixed',
     layout: 'split',
     viz: 'pricewedge',
     mapState: null,
     content: `
-      <h2 class="scroll-section-title">The price wedge</h2>
+      <h2 class="scroll-section-title">Investors pay differently in each market</h2>
       <p>The two strategies differ not just in geography but in how
         investors actually behave when they show up to buy.</p>
       <p>In holding zones, investors consistently pay well above what
@@ -142,11 +157,14 @@ export const NARRATIVE_SECTIONS = [
   /* Section 4: Who Bears the Cost */
   {
     id: 'equity',
+    chapter: '04',
+    title: 'The burden falls unevenly',
+    theme: 'flip',
     layout: 'split',
     viz: 'map',
     mapState: 'holdingDimmed',
     content: `
-      <h2 class="scroll-section-title">Who bears the cost</h2>
+      <h2 class="scroll-section-title">The burden falls unevenly</h2>
       <p>The geography of flipping is not random. It maps almost
         perfectly onto the geography of race and income in Boston.</p>
       <p>Flipping-dominant tracts are 87% non-white, with a median
@@ -163,12 +181,14 @@ export const NARRATIVE_SECTIONS = [
   /* Section 5: Policy */
   {
     id: 'policy',
+    chapter: '05',
+    title: 'Different markets need different tools',
+    theme: 'policy',
     layout: 'split',
     viz: 'map',
     mapState: 'fullView',
     content: `
-      <h2 class="scroll-section-title">Different problems,
-        different tools</h2>
+      <h2 class="scroll-section-title">Different markets need different tools</h2>
       <p>A blanket anti-speculation policy will be too weak for
         $800,000 condos in the Seaport and too blunt for $300,000
         triple-deckers in Dorchester. The policy has to match the
@@ -193,11 +213,14 @@ export const NARRATIVE_SECTIONS = [
   /* Section 6: Explorer */
   {
     id: 'explorer',
+    chapter: '06',
+    title: 'Explore the tract-level story',
+    theme: 'mixed',
     layout: 'explorer',
     viz: 'explorer',
     mapState: 'interactive',
     content: `
-      <h2 class="scroll-section-title">Explore every tract</h2>
+      <h2 class="scroll-section-title">Explore the tract-level story</h2>
       <p>The story above is the city's story. Now explore the story
         of any individual census tract. Hover to see its investor
         profile. Click to lock a selection. Use the filter buttons
@@ -209,6 +232,9 @@ export const NARRATIVE_SECTIONS = [
   /* Section 7: Neighborhood graph */
   {
     id: 'neighborhood-trajectories',
+    chapter: '07',
+    title: 'The same city, different paths',
+    theme: 'mixed',
     layout: 'split',
     viz: 'timeline',
     mapState: null,

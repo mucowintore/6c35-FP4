@@ -1,13 +1,11 @@
 <script>
-  import * as d3 from 'd3';
   import { onMount } from 'svelte';
   import IntroOverlay from '$lib/components/IntroOverlay.svelte';
   import MapPane from '$lib/components/MapPane.svelte';
   import SidePanel from '$lib/components/SidePanel.svelte';
-  import NeighborhoodTimeline from '$lib/components/NeighborhoodTimeline.svelte';
+  import { loadTractProfileData } from '$lib/mapData';
   import {
     DEFAULT_CONTEXT,
-    METRIC_KEYS,
     buildHoverContextHtml,
     buildTooltipModel,
     isLowDataTract
@@ -46,66 +44,13 @@
 
   async function loadData() {
     try {
-      const data = await d3.json('data/fp2_boston_tract_profiles.geojson');
-
-      let holdCount = 0;
-      let flipCount = 0;
-      let mixedCount = 0;
-      let lowDataCount = 0;
-      const metricRanges = {};
-
-      data.features.forEach((feature) => {
-        const props = feature.properties;
-
-        if (isLowDataTract(props)) {
-          lowDataCount += 1;
-          return;
-        }
-
-        if (props.dominant === 'holding') holdCount += 1;
-        else if (props.dominant === 'flipping') flipCount += 1;
-        else mixedCount += 1;
-
-        for (const key of METRIC_KEYS) {
-          const value = props[key];
-          if (value == null || !Number.isFinite(value)) continue;
-
-          if (!metricRanges[key]) metricRanges[key] = { min: Infinity, max: -Infinity };
-
-          metricRanges[key].min = Math.min(metricRanges[key].min, value);
-          metricRanges[key].max = Math.max(metricRanges[key].max, value);
-        }
-      });
-
-      /* ── City-wide averages ── */
-      const averages = {};
-      const validFeatures = data.features.filter((f) => !isLowDataTract(f.properties));
-      for (const key of METRIC_KEYS) {
-        const values = validFeatures
-          .map((f) => f.properties[key])
-          .filter((v) => v != null && Number.isFinite(v));
-        averages[key] = d3.mean(values);
-      }
-
-      /* ── Per-type averages (for paired diverging bars) ── */
-      const holdFeatures = validFeatures.filter((f) => f.properties.dominant === 'holding');
-      const flipFeatures = validFeatures.filter((f) => f.properties.dominant === 'flipping');
-
-      const hAvg = {};
-      const fAvg = {};
-      for (const key of METRIC_KEYS) {
-        const hVals = holdFeatures.map((f) => f.properties[key]).filter((v) => v != null && Number.isFinite(v));
-        const fVals = flipFeatures.map((f) => f.properties[key]).filter((v) => v != null && Number.isFinite(v));
-        hAvg[key] = d3.mean(hVals);
-        fAvg[key] = d3.mean(fVals);
-      }
-
-      counts = { holdCount, flipCount, mixedCount, lowDataCount };
-      ranges = metricRanges;
-      cityAverages = averages;
-      holdingAverages = hAvg;
-      flippingAverages = fAvg;
-      geoData = data;
+      const loaded = await loadTractProfileData();
+      counts = loaded.counts;
+      ranges = loaded.ranges;
+      cityAverages = loaded.cityAverages;
+      holdingAverages = loaded.holdingAverages;
+      flippingAverages = loaded.flippingAverages;
+      geoData = loaded.geoData;
     } catch (error) {
       console.error('Could not load GeoJSON:', error);
       loadError = 'Could not load the data file. Make sure fp2_boston_tract_profiles.geojson is in the data/ folder.';

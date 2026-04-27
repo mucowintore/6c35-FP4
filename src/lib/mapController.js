@@ -59,6 +59,8 @@ export function createMapController(callbacks = {}) {
   let selectedGeoid = null;
   let leaveTimer = null;
   let pendingPointerDown = null;
+  let presentationState = 'interactive';
+  let allowInteraction = true;
 
   const holdColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(HOLD_RAMP));
   const flipColorScale = d3.scaleSequential().interpolator(d3.interpolateRgbBasis(FLIP_RAMP));
@@ -80,7 +82,7 @@ export function createMapController(callbacks = {}) {
     return accentColorFromDominant(props.dominant);
   }
 
-  function tractFill(feature) {
+  function classifiedTractFill(feature) {
     const p = feature.properties;
 
     if (isLowDataTract(p)) {
@@ -100,8 +102,53 @@ export function createMapController(callbacks = {}) {
     return COLORS.neutral;
   }
 
+  function tractFill(feature) {
+    const props = feature.properties;
+
+    if (presentationState === 'gray') {
+      return isLowDataTract(props) ? '#F5F3ED' : '#CFC9BC';
+    }
+
+    return classifiedTractFill(feature);
+  }
+
+  function tractOpacity(feature) {
+    const props = feature.properties;
+
+    if (presentationState === 'holdingDimmed') {
+      return props.dominant === 'flipping' && !isLowDataTract(props) ? 1 : 0.12;
+    }
+
+    if (presentationState === 'gray') {
+      return isLowDataTract(props) ? 0.45 : 0.9;
+    }
+
+    return 1;
+  }
+
+  function applyPresentationState(options = {}) {
+    if (!tractPaths) return;
+
+    const { animate = true } = options;
+    if (!allowInteraction || presentationState !== 'interactive') {
+      tractPaths.classed('dimmed', false);
+    }
+
+    const target = animate
+      ? tractPaths.transition().duration(650).ease(d3.easeCubicOut)
+      : tractPaths;
+
+    target
+      .attr('fill', tractFill)
+      .attr('opacity', tractOpacity)
+      .attr('pointer-events', allowInteraction ? 'auto' : 'none');
+
+    refreshPathStrokes();
+  }
+
   function applyDimming() {
     if (!tractPaths) return;
+    if (!allowInteraction || presentationState !== 'interactive') return;
 
     tractPaths.classed('dimmed', (feature) => {
       const props = feature.properties;
@@ -438,14 +485,20 @@ export function createMapController(callbacks = {}) {
       .attr('class', 'tract')
       .attr('d', pathGenerator)
       .attr('fill', tractFill)
+      .attr('opacity', tractOpacity)
       .attr('stroke', (d) => tractStrokeFromProps(d.properties))
       .attr('stroke-width', 0.5)
-      .on('mouseenter', handleMouseEnter)
-      .on('mousemove', handleMouseMove)
-      .on('mouseleave', handleMouseLeave)
-      .on('pointerdown', handleTractPointerDown)
-      .on('pointerup', handleTractPointerUp)
-      .on('pointercancel', clearPendingPointerDown);
+      .attr('pointer-events', allowInteraction ? 'auto' : 'none');
+
+    if (allowInteraction) {
+      tractPaths
+        .on('mouseenter', handleMouseEnter)
+        .on('mousemove', handleMouseMove)
+        .on('mouseleave', handleMouseLeave)
+        .on('pointerdown', handleTractPointerDown)
+        .on('pointerup', handleTractPointerUp)
+        .on('pointercancel', clearPendingPointerDown);
+    }
 
     if (selectedGeoid) {
       selectedPath = tractPaths.filter((d) => d.properties.geoid === selectedGeoid).node() || null;
@@ -510,40 +563,45 @@ export function createMapController(callbacks = {}) {
       .attr('opacity', 0)
       .text((d) => d.id);
 
-    zoomBehavior = d3
-      .zoom()
-      .scaleExtent([1, 16])
-      .clickDistance(8)
-      .tapDistance(12)
-      .filter((event) => {
-        const target = event.target;
-        const isTract = target?.classList?.contains('tract');
+    if (allowInteraction) {
+      zoomBehavior = d3
+        .zoom()
+        .scaleExtent([1, 16])
+        .clickDistance(8)
+        .tapDistance(12)
+        .filter((event) => {
+          const target = event.target;
+          const isTract = target?.classList?.contains('tract');
 
-        if (event.type === 'wheel') return true;
-        if (isTract) return false;
+          if (event.type === 'wheel') return true;
+          if (isTract) return false;
 
-        if (event.type === 'mousedown') return event.button === 0;
-        if (event.type === 'touchstart') return true;
+          if (event.type === 'mousedown') return event.button === 0;
+          if (event.type === 'touchstart') return true;
 
-        return true;
-      })
-      .on('zoom', onZoom);
+          return true;
+        })
+        .on('zoom', onZoom);
 
-    svgElement.call(zoomBehavior);
+      svgElement.call(zoomBehavior);
 
-    svgElement.on('click', (event) => {
-      if (event.target.tagName === 'svg') {
-        clearNeighborhoodFilter({ notify: true });
-        clearSelection({ notify: true });
+      svgElement.on('click', (event) => {
+        if (event.target.tagName === 'svg') {
+          clearNeighborhoodFilter({ notify: true });
+          clearSelection({ notify: true });
+          clearHoverState();
+          callbacks.onBackgroundClick?.();
+        }
+      });
+
+      svgElement.on('mouseleave', () => {
         clearHoverState();
-        callbacks.onBackgroundClick?.();
-      }
-    });
+      });
+    } else {
+      zoomBehavior = null;
+    }
 
-    svgElement.on('mouseleave', () => {
-      clearHoverState();
-    });
-
+    applyPresentationState({ animate: false });
     applyDimming();
     refreshPathStrokes(1);
     callbacks.onZoomChange?.({ k: 1 });
@@ -553,6 +611,11 @@ export function createMapController(callbacks = {}) {
     currentFocus = mode;
     ensureSelectionMatchesActiveFilters({ notify: true });
     applyDimming();
+  }
+
+  function setPresentationState(state, options = {}) {
+    presentationState = state || 'interactive';
+    applyPresentationState(options);
   }
 
   function jumpToNeighborhood(name) {
@@ -606,10 +669,12 @@ export function createMapController(callbacks = {}) {
     buildMap();
   }
 
-  function init({ containerEl, data, metricRanges }) {
+  function init({ containerEl, data, metricRanges, interactive = true, initialPresentationState = 'interactive' }) {
     container = containerEl;
     geoData = data;
     ranges = metricRanges;
+    allowInteraction = interactive;
+    presentationState = initialPresentationState;
     buildMap();
   }
 
@@ -642,6 +707,7 @@ export function createMapController(callbacks = {}) {
   return {
     init,
     setFocus,
+    setPresentationState,
     jumpToNeighborhood,
     resetZoom,
     resize,
