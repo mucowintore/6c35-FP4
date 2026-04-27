@@ -1,5 +1,6 @@
 <script>
   import { onMount } from 'svelte';
+  import { fade } from 'svelte/transition';
   import { NARRATIVE_SECTIONS, FOOTER_CONTENT } from '$lib/narrativeSections';
   import { loadTractProfileData } from '$lib/mapData';
   import StoryStage from '$lib/components/StoryStage.svelte';
@@ -10,7 +11,10 @@
   );
   const openingSection = STORY_SECTIONS.find((section) => section.layout === 'fullscreen');
   const storySteps = STORY_SECTIONS.filter((section) => section.layout === 'split');
+  const renderedStorySteps = storySteps.filter((section) => section.id !== 'map-classified');
   const explorerSection = STORY_SECTIONS.find((section) => section.layout === 'explorer');
+  const mapIntroStep = storySteps.find((section) => section.id === 'map-intro');
+  const mapClassifiedStep = storySteps.find((section) => section.id === 'map-classified');
   const progressSections = STORY_SECTIONS.filter(
     (section) => section.layout !== 'fullscreen' && section.id !== 'map-classified'
   );
@@ -18,6 +22,24 @@
   let activeId = storySteps[0]?.id ?? '';
   let observer;
   let observedNodes = [];
+  let openingSectionEl;
+  let storyRegionEl;
+  let storyStepNodes = {};
+  let explorerSectionEl;
+  let isStepTransitioning = false;
+  let stepTransitionTimer;
+  let wheelGestureConsumed = false;
+  let wheelGestureResetTimer;
+  let previousScrollRestoration = null;
+  let wheelGuardUntil = 0;
+  let stepCursorId = storySteps[0]?.id ?? '';
+  let activeLockUntil = 0;
+  let chapter2TextStepId = 'map-intro';
+
+  const STEP_SCROLL_COOLDOWN_MS = 640;
+  const WHEEL_GESTURE_IDLE_MS = 320;
+  const INITIAL_WHEEL_GUARD_MS = 700;
+  const ACTIVE_LOCK_MS = 950;
 
   let geoData = null;
   let ranges = {};
@@ -41,14 +63,160 @@
 
   function trackStep(node) {
     observedNodes = [...observedNodes, node];
+    const sectionId = node?.dataset?.sectionId;
+    if (sectionId) {
+      storyStepNodes = { ...storyStepNodes, [sectionId]: node };
+    }
     observer?.observe(node);
 
     return {
       destroy() {
         observer?.unobserve(node);
         observedNodes = observedNodes.filter((entry) => entry !== node);
+        if (sectionId && storyStepNodes[sectionId] === node) {
+          const nextNodes = { ...storyStepNodes };
+          delete nextNodes[sectionId];
+          storyStepNodes = nextNodes;
+        }
       }
     };
+  }
+
+  function isDesktopOrTablet() {
+    return typeof window !== 'undefined' && window.innerWidth > 760;
+  }
+
+  function inView(el) {
+    if (!el) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.bottom > 0 && rect.top < window.innerHeight;
+  }
+
+  function storyStepModeActive() {
+    if (!storyRegionEl) return false;
+    const rect = storyRegionEl.getBoundingClientRect();
+    return rect.top <= 28;
+  }
+
+  function chapter2TextId() {
+    if (chapter2TextStepId === 'map-classified') return 'map-classified';
+    if (stepCursorId === 'map-classified' || activeId === 'map-classified') return 'map-classified';
+    return 'map-intro';
+  }
+
+  function chapter2TextContent() {
+    const stepId = chapter2TextId();
+    const step = storySteps.find((section) => section.id === stepId);
+    return step?.content ?? mapIntroStep?.content ?? '';
+  }
+
+  function activateStep(sectionId) {
+    if (!sectionId) return;
+    activeId = sectionId;
+    stepCursorId = sectionId;
+    if (sectionId === 'map-intro' || sectionId === 'map-classified') {
+      chapter2TextStepId = sectionId;
+    }
+    activeLockUntil = Date.now() + ACTIVE_LOCK_MS;
+    isStepTransitioning = true;
+    window.clearTimeout(stepTransitionTimer);
+    stepTransitionTimer = window.setTimeout(() => {
+      isStepTransitioning = false;
+    }, STEP_SCROLL_COOLDOWN_MS);
+  }
+
+  function scrollToStep(targetEl, targetSectionId = '') {
+    if (!targetEl) return;
+    if (targetSectionId && storySteps.some((section) => section.id === targetSectionId)) {
+      activateStep(targetSectionId);
+    } else {
+      isStepTransitioning = true;
+      window.clearTimeout(stepTransitionTimer);
+      stepTransitionTimer = window.setTimeout(() => {
+        isStepTransitioning = false;
+      }, STEP_SCROLL_COOLDOWN_MS);
+    }
+    targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  function queueWheelGestureReset() {
+    window.clearTimeout(wheelGestureResetTimer);
+    wheelGestureResetTimer = window.setTimeout(() => {
+      wheelGestureConsumed = false;
+    }, WHEEL_GESTURE_IDLE_MS);
+  }
+
+  function handleNarrativeWheel(event) {
+    if (!isDesktopOrTablet() || event.ctrlKey) return;
+    if (Date.now() < wheelGuardUntil) return;
+
+    const openingVisible = inView(openingSectionEl);
+    const storyIsVisible = inView(storyRegionEl);
+    const storyStepMode = storyStepModeActive();
+    const explorerIsVisible = inView(explorerSectionEl);
+    if (!openingVisible && !storyIsVisible && !explorerIsVisible) return;
+
+    if (isStepTransitioning || wheelGestureConsumed) {
+      event.preventDefault();
+      queueWheelGestureReset();
+      return;
+    }
+
+    if (event.deltaY === 0) return;
+    const direction = event.deltaY > 0 ? 1 : -1;
+
+    const referenceId = stepCursorId || activeId;
+    const currentIndex = storySteps.findIndex((section) => section.id === referenceId);
+    let targetEl = null;
+    let targetSectionId = '';
+
+    if (direction > 0) {
+      if (openingVisible && !storyStepMode) {
+        targetEl = storyStepNodes[storySteps[0]?.id];
+        targetSectionId = storySteps[0]?.id ?? '';
+      } else {
+        if (!storyIsVisible || !storyStepMode) return;
+        if (referenceId === 'map-intro') {
+          event.preventDefault();
+          wheelGestureConsumed = true;
+          queueWheelGestureReset();
+          activateStep('map-classified');
+          return;
+        }
+        if (currentIndex >= 0 && currentIndex < storySteps.length - 1) {
+          targetSectionId = storySteps[currentIndex + 1]?.id ?? '';
+          targetEl = storyStepNodes[targetSectionId];
+        } else if (currentIndex === storySteps.length - 1) {
+          targetEl = explorerSectionEl;
+        }
+      }
+    } else {
+      if (explorerIsVisible && currentIndex === -1) {
+        targetSectionId = storySteps[storySteps.length - 1]?.id ?? '';
+        targetEl = storyStepNodes[targetSectionId];
+      } else if (referenceId === 'map-classified') {
+        event.preventDefault();
+        wheelGestureConsumed = true;
+        queueWheelGestureReset();
+        activateStep('map-intro');
+        return;
+      } else if (currentIndex > 0) {
+        targetSectionId = storySteps[currentIndex - 1]?.id ?? '';
+        targetEl = storyStepNodes[targetSectionId];
+        if (!targetEl && targetSectionId === 'map-classified') {
+          targetEl = storyStepNodes['map-intro'];
+        }
+      } else if (currentIndex === 0) {
+        targetEl = openingSectionEl;
+      }
+    }
+
+    if (!targetEl) return;
+
+    event.preventDefault();
+    wheelGestureConsumed = true;
+    queueWheelGestureReset();
+    scrollToStep(targetEl, targetSectionId);
   }
 
   async function loadData() {
@@ -68,6 +236,16 @@
 
   onMount(() => {
     loadData();
+    if (typeof history !== 'undefined' && 'scrollRestoration' in history) {
+      previousScrollRestoration = history.scrollRestoration;
+      history.scrollRestoration = 'manual';
+    }
+
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    requestAnimationFrame(() => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    });
+    wheelGuardUntil = Date.now() + INITIAL_WHEEL_GUARD_MS;
 
     observer = new IntersectionObserver(
       (entries) => {
@@ -76,7 +254,16 @@
           .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
 
         if (visible?.target?.dataset?.sectionId) {
-          activeId = visible.target.dataset.sectionId;
+          const observedId = visible.target.dataset.sectionId;
+          if (Date.now() < activeLockUntil && observedId !== stepCursorId) return;
+          if (stepCursorId === 'map-classified' && observedId === 'map-intro') return;
+          activeId = observedId;
+          if (storySteps.some((section) => section.id === observedId)) {
+            stepCursorId = observedId;
+            if (observedId === 'map-intro' || observedId === 'map-classified') {
+              chapter2TextStepId = observedId;
+            }
+          }
         }
       },
       {
@@ -87,9 +274,16 @@
     );
 
     observedNodes.forEach((node) => observer.observe(node));
+    window.addEventListener('wheel', handleNarrativeWheel, { passive: false });
 
     return () => {
       observer?.disconnect();
+      window.removeEventListener('wheel', handleNarrativeWheel);
+      window.clearTimeout(stepTransitionTimer);
+      window.clearTimeout(wheelGestureResetTimer);
+      if (typeof history !== 'undefined' && 'scrollRestoration' in history && previousScrollRestoration) {
+        history.scrollRestoration = previousScrollRestoration;
+      }
     };
   });
 </script>
@@ -99,7 +293,7 @@
 </svelte:head>
 
 <article class="story-page">
-  <section class="story-opening" id={openingSection.id}>
+  <section class="story-opening" id={openingSection.id} bind:this={openingSectionEl}>
     <div class="opening-inner">
       {@html openingSection.content}
       <div class="opening-stats" aria-label="Project summary">
@@ -119,7 +313,7 @@
     </div>
   </section>
 
-  <section class="story-scroll-region" aria-label="Scrollytelling narrative">
+  <section class="story-scroll-region" aria-label="Scrollytelling narrative" bind:this={storyRegionEl}>
     <nav class="story-progress" aria-label="Story sections">
       {#each progressSections as section}
         <a
@@ -139,7 +333,7 @@
     </div>
 
     <div class="story-text-column">
-      {#each storySteps as section}
+      {#each renderedStorySteps as section}
         <section
           class="story-step"
           id={section.id}
@@ -148,9 +342,21 @@
         >
           <div class="chapter-mark {themeClass(section)}">{section.chapter}</div>
           <h2>{section.title}</h2>
-          <div class="story-copy">
-            {@html sectionBody(section.content)}
-          </div>
+          {#if section.id === 'map-intro'}
+            {#key chapter2TextId()}
+              <div
+                class="story-copy story-copy-fade"
+                in:fade={{ duration: 220 }}
+                out:fade={{ duration: 180 }}
+              >
+                {@html sectionBody(chapter2TextContent())}
+              </div>
+            {/key}
+          {:else}
+            <div class="story-copy">
+              {@html sectionBody(section.content)}
+            </div>
+          {/if}
         </section>
       {/each}
     </div>
@@ -161,6 +367,7 @@
     id={explorerSection.id}
     data-section-id={explorerSection.id}
     use:trackStep
+    bind:this={explorerSectionEl}
   >
     <div class="explorer-intro">
       <div class="chapter-mark {themeClass(explorerSection)}">{explorerSection.chapter}</div>
@@ -329,10 +536,14 @@
 
   .story-step {
     display: flex;
-    min-height: 86vh;
+    min-height: 68vh;
     flex-direction: column;
     justify-content: center;
-    padding: 18vh 0;
+    padding: 11vh 0;
+  }
+
+  .story-copy-fade {
+    will-change: opacity;
   }
 
   .chapter-mark {
