@@ -55,7 +55,7 @@
   <div class="story-map-canvas" bind:this={mapCanvas}></div>
 
   <div class="story-map-legend">
-    <div class="legend-title">Speculator strategy</div>
+    <div class="legend-title">Investor strategy</div>
     <div
       class="legend-gradient"
       style="background: linear-gradient(to right,
@@ -79,9 +79,10 @@
     height: 100%;
     min-height: 420px;
     overflow: hidden;
-    background: #E2DFD6;
     border: 1px solid var(--rule);
     border-radius: 8px;
+    /* subtle radial vignette draws the eye to the center of the geography */
+    background: radial-gradient(ellipse at 50% 48%, #E8E5DC, #D8D4CA);
   }
 
   .story-map-canvas {
@@ -94,10 +95,10 @@
     left: 14px;
     bottom: 14px;
     width: 210px;
-    padding: 10px 12px;
-    border: 1px solid var(--rule);
+    padding: 12px 14px;
     border-radius: 8px;
     background: rgba(255, 255, 255, 0.94);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
     font-size: 11px;
   }
 

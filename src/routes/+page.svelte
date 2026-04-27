@@ -1,5 +1,5 @@
 <script>
-  import App from '$lib/components/App.svelte';
+  import StoryScroller from '$lib/components/StoryScroller.svelte';
 </script>
 
-<App />
+<StoryScroller />

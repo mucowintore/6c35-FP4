@@ -13,6 +13,14 @@
   $: mapState = activeSection?.mapState ?? 'classified';
   $: stageKey = `${viz}-${mapState}-${activeSection?.id ?? 'none'}`;
   $: isLineChart = viz === 'timeseries' || viz === 'pricewedge';
+
+  /* The kicker states the finding, not the data description */
+  const KICKERS = {
+    'regime-shift': 'Before 2008, one in six. After, one in three.',
+    'price-wedge': 'In holding zones, investors overpay. In flipping zones, they bought the crisis.'
+  };
+
+  $: kicker = KICKERS[activeSection?.id] || '';
 </script>
 
 <div class="story-stage" class:story-stage-line={isLineChart}>
@@ -21,13 +29,13 @@
   {:else}
     {#key stageKey}
       {#if viz === 'timeseries'}
-        <div class="chart-stage chart-stage-timeseries slide-in">
-          <div class="stage-kicker">Investor share of Boston purchases</div>
+        <div class="chart-stage slide-in">
+          <div class="stage-kicker">{kicker}</div>
           <TimeSeriesChart width={660} height={420} />
         </div>
       {:else if viz === 'pricewedge'}
         <div class="chart-stage slide-in">
-          <div class="stage-kicker">Investor price premium vs. non-investors</div>
+          <div class="stage-kicker">{kicker}</div>
           <PriceWedgeChart width={640} height={390} />
         </div>
       {:else if viz === 'map'}
@@ -65,29 +73,23 @@
     justify-content: center;
     overflow: hidden;
     padding: 28px 28px 24px;
-    border: 1px solid var(--rule);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.4);
   }
 
   .chart-stage :global(svg) {
     width: 100%;
     height: auto;
-    max-height: calc(100% - 34px);
+    max-height: calc(100% - 38px);
   }
 
   .stage-kicker {
-    margin: 0 0 16px 22px;
-    color: #3f3b34;
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.01em;
-    text-transform: none;
+    margin: 0 0 18px 22px;
+    color: var(--ink);
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
     line-height: 1.25;
-  }
-
-  .chart-stage-timeseries .stage-kicker {
-    font-size: 16px;
   }
 
   .stage-message {
@@ -95,9 +97,8 @@
     height: 100%;
     place-items: center;
     padding: 24px;
-    border: 1px solid var(--rule);
     border-radius: 8px;
-    background: rgba(255, 255, 255, 0.72);
+    background: rgba(255, 255, 255, 0.4);
     color: var(--sub);
     font-size: 14px;
     text-align: center;
@@ -127,12 +128,11 @@
     .chart-stage {
       padding: 18px 10px 14px;
       border-radius: 0;
-      border-left: 0;
-      border-right: 0;
     }
 
     .stage-kicker {
       margin-left: 10px;
+      font-size: 16px;
     }
   }
 </style>
