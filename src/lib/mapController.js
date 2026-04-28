@@ -908,6 +908,10 @@ svgElement = d3
           const target = event.target;
           const isTract = target?.classList?.contains('tract');
 
+          /* Wheel events belong to the page scroll handler, never
+           * to d3.zoom. Letting d3 claim them caused the map to
+           * zoom and drift downward as the reader scrolled into
+           * the explorer section. */
           if (event.type === 'wheel') return false;
 
           if (isTract) return false;
@@ -920,6 +924,12 @@ svgElement = d3
         .on('zoom', onZoom);
 
       svgElement.call(zoomBehavior);
+
+      /* Belt and suspenders. d3.zoom binds its own wheel listener
+       * separately from the filter; remove it so wheel events
+       * cannot trigger zoom under any circumstance. The map is
+       * still zoomable via the neighborhood jump buttons. */
+      svgElement.on('wheel.zoom', null);
 
       svgElement.on('click', (event) => {
         if (event.target.tagName === 'svg') {
