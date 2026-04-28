@@ -196,6 +196,10 @@
     var grouped = d3.group(filteredData, function (d) { return d.neighborhood; });
     var idx = 0;
 
+    /* Pass one: draw lines and area fills, collect label anchor
+     * data for each selected neighborhood. */
+    var labelData = [];
+
     for (var entry of grouped) {
       var nh = entry[0];
       var vals = entry[1].slice().sort(function (a, b) { return a.year - b.year; });
@@ -215,20 +219,46 @@
         .attr('stroke-dashoffset', 0)
         .on('end', function () { d3.select(this).attr('stroke-dasharray', null); });
 
-      /* End-of-line label with neighborhood name and current value. */
       var last = vals[vals.length - 1];
       if (last && last[selectedMetric] != null) {
-        var eg = svg.append('g').attr('opacity', 0);
-        eg.append('text').attr('x', x(last.year) + 8).attr('y', y(last[selectedMetric]) + 4)
-          .attr('fill', color).style('font-size', '11.5px').style('font-weight', '700')
-          .style('font-family', font).text(nh);
-        eg.append('text').attr('x', x(last.year) + 8).attr('y', y(last[selectedMetric]) + 18)
-          .attr('fill', color).attr('opacity', 0.78).style('font-size', '10px')
-          .style('font-family', mono).text(activeMetric.format(last[selectedMetric]));
-        eg.transition().delay(idx * 120 + DRAW_MS + 200).duration(400).ease(d3.easeCubicOut).attr('opacity', 1);
+        labelData.push({
+          nh: nh,
+          color: color,
+          xPos: x(last.year) + 8,
+          yPos: y(last[selectedMetric]),
+          value: activeMetric.format(last[selectedMetric]),
+          drawDelay: idx * 120 + DRAW_MS + 200
+        });
       }
       idx++;
     }
+
+    /* Pass two: collision avoidance. Sort by y, walk through, and
+     * push any label that crowds the one above down by enough to
+     * clear a 32 px minimum gap. The label name sits on the first
+     * line and the value on the second; together they need roughly
+     * 24 px of vertical room, plus 8 px of breathing space. */
+    var MIN_GAP = 32;
+    var sorted = labelData.slice().sort(function (a, b) { return a.yPos - b.yPos; });
+    for (var i = 1; i < sorted.length; i++) {
+      var prev = sorted[i - 1];
+      var cur = sorted[i];
+      if (cur.yPos - prev.yPos < MIN_GAP) {
+        cur.yPos = prev.yPos + MIN_GAP;
+      }
+    }
+
+    /* Render each label at its (possibly nudged) y position. */
+    sorted.forEach(function (d) {
+      var eg = svg.append('g').attr('opacity', 0);
+      eg.append('text').attr('x', d.xPos).attr('y', d.yPos + 4)
+        .attr('fill', d.color).style('font-size', '11.5px').style('font-weight', '700')
+        .style('font-family', font).text(d.nh);
+      eg.append('text').attr('x', d.xPos).attr('y', d.yPos + 18)
+        .attr('fill', d.color).attr('opacity', 0.78).style('font-size', '10px')
+        .style('font-family', mono).text(d.value);
+      eg.transition().delay(d.drawDelay).duration(400).ease(d3.easeCubicOut).attr('opacity', 1);
+    });
 
     /* Hover layer: vertical guide and a frosted glass tooltip card.
      * The card now carries a tract-count footer line so the reader

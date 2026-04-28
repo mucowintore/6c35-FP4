@@ -263,8 +263,9 @@
     </div>
   </div>
 
-  <button class="reset-btn" id="reset-btn" style:display={zoomScale > 1.1 ? 'block' : 'none'} on:click={handleReset}
-    >Reset view</button
+  <button class="reset-btn" id="reset-btn"
+    style:display={(zoomScale > 1.1 || selectedNeighborhood || focusMode !== 'all') ? 'block' : 'none'}
+    on:click={handleReset}>Reset view</button
   >
 </section>
 

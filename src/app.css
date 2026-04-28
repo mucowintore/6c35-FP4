@@ -301,7 +301,7 @@ body {
   grid-column: 1;
   grid-row: 3;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   background: #E2DFD6;
 }
 

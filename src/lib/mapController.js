@@ -783,10 +783,11 @@ export function createMapController(callbacks = {}) {
 
     mapGroup = svgElement.append('g').attr('clip-path', 'url(#map-clip)');
 
-    /* Fit Boston into the SVG with a 6 px breathing room on each
+    /* Fit Boston into the SVG with a 2 px breathing room on each
      * side. Since the SVG is already Boston-aspect, the projection
-     * fills the SVG fully, no empty interior. */
-    const margin = 6;
+     * fills the SVG fully. The 2 px gap keeps tract strokes from
+     * being clipped where they sit flush against the SVG boundary. */
+    const margin = 2;
     const projection = d3.geoMercator().fitExtent(
       [[margin, margin], [svgW - margin, svgH - margin]],
       geoData
