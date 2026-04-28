@@ -195,9 +195,18 @@
         if (idx >= 0 && idx < storySteps.length - 1) {
           tId = storySteps[idx + 1]?.id ?? '';
           tEl = storyStepNodes[tId];
-        } else if (idx === storySteps.length - 1) {
-          if (ev) return;
+} else if (idx === storySteps.length - 1) {
+          if (ev) {
+            /* Already at the explorer. Prevent any further wheel
+             * events from scrolling the page past it (which would
+             * carry the user into the story outro and footer with
+             * no apparent reason). The explorer is the terminal
+             * interactive section. */
+            event.preventDefault();
+            return;
+          }
           tEl = explorerSectionEl;
+        }
         }
       }
     } else {
