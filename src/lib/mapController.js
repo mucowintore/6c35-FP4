@@ -506,6 +506,7 @@ export function createMapController(callbacks = {}) {
   }
 
   function onZoom(event) {
+    console.log('[onZoom', event.transform.toString(), 'sourceEvent:', event.sourceEvent?.type);
     mapGroup.attr('transform', event.transform);
     const k = event.transform.k;
     if (tractPaths) {
@@ -908,10 +909,6 @@ svgElement = d3
           const target = event.target;
           const isTract = target?.classList?.contains('tract');
 
-          /* Wheel events belong to the page scroll handler, never
-           * to d3.zoom. Letting d3 claim them caused the map to
-           * zoom and drift downward as the reader scrolled into
-           * the explorer section. */
           if (event.type === 'wheel') return false;
 
           if (isTract) return false;
