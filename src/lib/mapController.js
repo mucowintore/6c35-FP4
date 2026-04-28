@@ -904,11 +904,12 @@ svgElement = d3
         .scaleExtent([1, 16])
         .clickDistance(8)
         .tapDistance(12)
-        .filter((event) => {
+.filter((event) => {
           const target = event.target;
           const isTract = target?.classList?.contains('tract');
 
-          if (event.type === 'wheel') return true;
+          if (event.type === 'wheel') return false;
+
           if (isTract) return false;
 
           if (event.type === 'mousedown') return event.button === 0;
