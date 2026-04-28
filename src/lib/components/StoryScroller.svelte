@@ -207,7 +207,6 @@
           }
           tEl = explorerSectionEl;
         }
-        }
       }
     } else {
       if (ev) {
