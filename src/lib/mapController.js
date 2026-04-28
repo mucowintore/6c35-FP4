@@ -743,32 +743,11 @@ export function createMapController(callbacks = {}) {
     }
     clearFlipPulseTimer();
 
-/* Probe Boston's natural projected aspect at unit scale. We
-     * use a 1000 by 1000 fitSize call just to read the bounds
-     * the projection would draw at any scale. */
-    var probe = d3.geoMercator().fitSize([1000, 1000], geoData);
-    var probeBounds = d3.geoPath().projection(probe).bounds(geoData);
-    var bostonW = probeBounds[1][0] - probeBounds[0][0];
-    var bostonH = probeBounds[1][1] - probeBounds[0][1];
-    var bostonAspect = bostonW / bostonH;
-
-    /* Pick the largest Boston-aspect rectangle that fits inside
-     * the container. Whichever axis is more constraining sets
-     * the size; the other axis follows from Boston's aspect. */
-    var svgW, svgH;
-    if (width / height > bostonAspect) {
-      svgH = height;
-      svgW = height * bostonAspect;
-    } else {
-      svgW = width;
-      svgH = width / bostonAspect;
-    }
-
-    svgElement = d3
+svgElement = d3
       .select(container)
       .append('svg')
-      .attr('width', svgW)
-      .attr('height', svgH)
+      .attr('width', width)
+      .attr('height', height)
       .attr('role', 'img')
       .attr('aria-label', 'Map of Boston census tracts colored by dominant investor strategy')
       .attr('aria-describedby', 'map-legend');
@@ -778,18 +757,34 @@ export function createMapController(callbacks = {}) {
       .append('clipPath')
       .attr('id', 'map-clip')
       .append('rect')
-      .attr('width', svgW)
-      .attr('height', svgH);
+      .attr('width', width)
+      .attr('height', height);
 
     mapGroup = svgElement.append('g').attr('clip-path', 'url(#map-clip)');
 
-    /* Fit Boston into the SVG with a 2 px breathing room on each
-     * side. Since the SVG is already Boston-aspect, the projection
-     * fills the SVG fully. The 2 px gap keeps tract strokes from
-     * being clipped where they sit flush against the SVG boundary. */
-    const margin = 2;
+    /* Fit Boston into the natural Boston-aspect rectangle that sits
+     * centered inside the larger SVG. Boston has room to be panned
+     * around the whole SVG before any tract gets clipped at the
+     * column's outer edge. */
+    var probe = d3.geoMercator().fitSize([1000, 1000], geoData);
+    var probeBounds = d3.geoPath().projection(probe).bounds(geoData);
+    var bostonW = probeBounds[1][0] - probeBounds[0][0];
+    var bostonH = probeBounds[1][1] - probeBounds[0][1];
+    var bostonAspect = bostonW / bostonH;
+
+    var fitW, fitH;
+    if (width / height > bostonAspect) {
+      fitH = height;
+      fitW = height * bostonAspect;
+    } else {
+      fitW = width;
+      fitH = width / bostonAspect;
+    }
+    var fitX0 = (width - fitW) / 2;
+    var fitY0 = (height - fitH) / 2;
+
     const projection = d3.geoMercator().fitExtent(
-      [[margin, margin], [svgW - margin, svgH - margin]],
+      [[fitX0, fitY0], [fitX0 + fitW, fitY0 + fitH]],
       geoData
     );
 
