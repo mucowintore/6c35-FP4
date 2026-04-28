@@ -752,13 +752,22 @@ svgElement = d3
       .attr('aria-label', 'Map of Boston census tracts colored by dominant investor strategy')
       .attr('aria-describedby', 'map-legend');
 
+/* The clipPath is intentionally generous. Its rect sits in the
+     * same coordinate space as mapGroup, so it transforms along when
+     * the user pans or zooms. A clipPath sized to (width, height)
+     * would draw a visible internal cutoff line whenever the map is
+     * dragged; sizing it 4x larger and offset by -width, -height
+     * pushes those edges far past the visible SVG bounds, leaving
+     * the SVG's natural extent as the only visible boundary. */
     svgElement
       .append('defs')
       .append('clipPath')
       .attr('id', 'map-clip')
       .append('rect')
-      .attr('width', width)
-      .attr('height', height);
+      .attr('x', -width)
+      .attr('y', -height)
+      .attr('width', width * 4)
+      .attr('height', height * 4);
 
     mapGroup = svgElement.append('g').attr('clip-path', 'url(#map-clip)');
 
