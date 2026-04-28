@@ -49,13 +49,11 @@ const BLOOM_ORIGIN_LAT = 42.3554;
 const BUILD_MAX_RETRY_FRAMES = 4;
 
 /* Minimum delta in container size, in pixels, before a ResizeObserver
- * tick triggers a rebuild. One pixel catches every real change while
- * still ignoring the subpixel layout flicker that fires during a
- * transition. */
-const RESIZE_THRESHOLD_PX = 1;
+ * tick triggers a rebuild.*/
+const RESIZE_THRESHOLD_PX = 24;
 
 /* Debounce window for resize rebuilds. */
-const RESIZE_DEBOUNCE_MS = 60;
+const RESIZE_DEBOUNCE_MS = 120;
 
 /* Nudge a hex color toward white by amt (0..1). Each tract briefly
  * overshoots toward this lighter version of its target color during
