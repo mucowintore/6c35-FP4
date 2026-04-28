@@ -23,7 +23,6 @@
   let panelEl;
   let overviewPanelEl;
   let barsContainer;
-  let pairedBarsContainer;
 
   let activeTract = null;
   let detail = null;
@@ -102,10 +101,13 @@
       }
     }
 
-    if (!activeTract && overviewTab === 'overview' && pairedBarsContainer
+    if (!activeTract && overviewTab === 'overview' && overviewPanelEl
         && holdingAverages && Object.keys(holdingAverages).length > 0 && !pairedDrawn) {
-      drawPairedDivergingBars(pairedBarsContainer, holdingAverages, flippingAverages, ranges, cityAverages);
-      pairedDrawn = true;
+      var pairedHost = overviewPanelEl.querySelector('.paired-bars-container');
+      if (pairedHost) {
+        drawPairedDivergingBars(pairedHost, holdingAverages, flippingAverages, ranges, cityAverages);
+        pairedDrawn = true;
+      }
     }
 
     bindPreviewTiles();

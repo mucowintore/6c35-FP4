@@ -743,11 +743,32 @@ export function createMapController(callbacks = {}) {
     }
     clearFlipPulseTimer();
 
+/* Probe Boston's natural projected aspect at unit scale. We
+     * use a 1000 by 1000 fitSize call just to read the bounds
+     * the projection would draw at any scale. */
+    var probe = d3.geoMercator().fitSize([1000, 1000], geoData);
+    var probeBounds = d3.geoPath().projection(probe).bounds(geoData);
+    var bostonW = probeBounds[1][0] - probeBounds[0][0];
+    var bostonH = probeBounds[1][1] - probeBounds[0][1];
+    var bostonAspect = bostonW / bostonH;
+
+    /* Pick the largest Boston-aspect rectangle that fits inside
+     * the container. Whichever axis is more constraining sets
+     * the size; the other axis follows from Boston's aspect. */
+    var svgW, svgH;
+    if (width / height > bostonAspect) {
+      svgH = height;
+      svgW = height * bostonAspect;
+    } else {
+      svgW = width;
+      svgH = width / bostonAspect;
+    }
+
     svgElement = d3
       .select(container)
       .append('svg')
-      .attr('width', width)
-      .attr('height', height)
+      .attr('width', svgW)
+      .attr('height', svgH)
       .attr('role', 'img')
       .attr('aria-label', 'Map of Boston census tracts colored by dominant investor strategy')
       .attr('aria-describedby', 'map-legend');
@@ -757,18 +778,17 @@ export function createMapController(callbacks = {}) {
       .append('clipPath')
       .attr('id', 'map-clip')
       .append('rect')
-      .attr('width', width)
-      .attr('height', height);
+      .attr('width', svgW)
+      .attr('height', svgH);
 
     mapGroup = svgElement.append('g').attr('clip-path', 'url(#map-clip)');
 
-    /* Fit Boston into the canvas with a 6 px breathing room on each
-     * side. fitExtent uses explicit pixel corners, so Boston fills
-     * the available space tightly regardless of canvas aspect ratio,
-     * with no empty band along whichever axis is less constrained. */
+    /* Fit Boston into the SVG with a 6 px breathing room on each
+     * side. Since the SVG is already Boston-aspect, the projection
+     * fills the SVG fully, no empty interior. */
     const margin = 6;
     const projection = d3.geoMercator().fitExtent(
-      [[margin, margin], [width - margin, height - margin]],
+      [[margin, margin], [svgW - margin, svgH - margin]],
       geoData
     );
 

@@ -437,30 +437,16 @@
     if (trough) {
       var tx = x(trough.year);
       var ty = y(trough.premium);
-       var labelX = tx - 14;
-      var labelY = ty - 30;
+      var labelY = ty - 50;
       troughCallout = g.append('g').attr('opacity', 0);
-      troughCallout.append('line')
-        .attr('x1', tx - 4).attr('y1', ty - 4)
-        .attr('x2', labelX + 4).attr('y2', labelY + 6)
-        .attr('stroke', COLOR_AMBER).attr('stroke-width', 1)
-        .attr('stroke-opacity', 0.6);
       troughCallout.append('text')
-        .attr('x', labelX).attr('y', labelY)
-        .attr('text-anchor', 'end')
+        .attr('x', tx).attr('y', labelY)
+        .attr('text-anchor', 'middle')
         .attr('fill', COLOR_END)
         .style('font-family', serif)
         .style('font-size', '20px')
         .style('font-weight', '400')
         .text(Math.round(trough.premium) + '% in ' + trough.year);
-      troughCallout.append('text')
-        .attr('x', labelX).attr('y', labelY + 14)
-        .attr('text-anchor', 'end')
-        .attr('fill', AXIS_TEXT)
-        .style('font-family', mono)
-        .style('font-size', '9.5px')
-        .style('letter-spacing', '0.1em')
-        .text('FLIPPING TRACTS');
     }
 
     /* The "the gap" annotation. A small italic serif label sits in
