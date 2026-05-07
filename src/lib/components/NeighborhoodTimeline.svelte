@@ -118,7 +118,7 @@
     var ch = 380;
     var margin = { top: 22, right: 132, bottom: 38, left: 56 };
     var font = 'Plus Jakarta Sans, sans-serif';
-    var mono = 'IBM Plex Mono, monospace';
+    var mono = 'Plus Jakarta Sans, sans-serif';
     var serif = '"DM Serif Display", Georgia, serif';
     var DRAW_MS = instant ? 380 : 2200;
     var EASE = instant ? d3.easeCubicOut : d3.easeCubicInOut;
@@ -438,7 +438,7 @@
   }
   .tl-sub {
     margin: 0;
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 10px;
     color: var(--faint);
     letter-spacing: 0.06em;
@@ -504,7 +504,7 @@
     letter-spacing: 0.12em;
   }
   .tl-group-count {
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 9.5px;
     color: var(--faint);
   }

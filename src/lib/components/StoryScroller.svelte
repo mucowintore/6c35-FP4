@@ -25,20 +25,9 @@
 
   const openingSection = NARRATIVE_SECTIONS.find((s) => s.layout === 'fullscreen');
   const storySteps = NARRATIVE_SECTIONS.filter((s) => s.layout === 'split');
-  /* map-classified shares its narrative slot with map-intro. The
-   * rendered card list skips it; the wheel handler still tracks it
-   * as a logical step. */
-  const renderedStorySteps = storySteps.filter((s) => s.id !== 'map-classified');
+  const renderedStorySteps = storySteps;
   const explorerSection = NARRATIVE_SECTIONS.find((s) => s.layout === 'explorer');
-  const mapIntroStep = storySteps.find((s) => s.id === 'map-intro');
-  const progressSections = NARRATIVE_SECTIONS.filter(
-    (s) => s.layout !== 'fullscreen' && s.id !== 'map-classified'
-  );
-
-  /* Sections that change the page background. */
-  const DARK_SECTIONS = new Set(['regime-shift', 'price-wedge']);
-  const AMBER_SECTIONS = new Set(['equity']);
-  const WHITE_SECTIONS = new Set(['policy']);
+  const progressSections = NARRATIVE_SECTIONS.filter((s) => s.layout !== 'fullscreen');
 
   /* activeId starts null on cold load. The observer only flips it
    * once the reader has actually scrolled into a step. Until then,
@@ -59,7 +48,11 @@
   let wheelGuardUntil = 0;
   let stepCursorId = null;
   let activeLockUntil = 0;
-  let chapter2NarrativeStepId = 'map-intro';
+  let mapIntroVizVisible = false;
+  let mapIntroRevealRaf = 0;
+  let prevStepId = '';
+  let methodDialogEls = [];
+  let methodDialogClickHandler = null;
 
   const STEP_SCROLL_COOLDOWN_MS = 640;
   const WHEEL_GESTURE_IDLE_MS = 320;
@@ -69,10 +62,8 @@
   const ACTIVE_LOCK_MS = 950;
   const STORY_TOP_RAIL_PX = 28;
 
-  /* The opening counters are gated on the parent fade-in completing.
-   * The choreography fades .opening-thesis at 1400 ms; we start the
-   * counters at 1700 ms so the tween runs while the element is fully
-   * visible, never during a fade. */
+  /* Opening counters, when present, are deferred until after the
+   * opening choreography so any tween runs while content is visible. */
   const OPENING_COUNTERS_FIRE_MS = 1350;
 
   let geoData = null;
@@ -89,13 +80,34 @@
   $: activeChapter = activeId
     ? NARRATIVE_SECTIONS.find((s) => s.id === activeId)?.chapter
     : null;
-  $: chapter2NarrativeContent =
-    storySteps.find((s) => s.id === chapter2NarrativeStepId)?.content ??
-    mapIntroStep?.content ?? '';
+  $: currentStoryStepId = stepCursorId || activeId || '';
+  $: currentStoryStep = storySteps.find((s) => s.id === currentStoryStepId) ?? activeSection;
+  $: activeStepLayout = currentStoryStep?.stepLayout ?? 'split';
+  $: showVizLane = activeStepLayout === 'split';
+  $: mapDelayedHidden = currentStoryStepId === 'map-intro' && !mapIntroVizVisible;
+  $: wedgeVizEmphasis = activeSection?.id === 'price-wedge';
+  $: geoAndWedgeWideViz = activeSection?.id === 'map-intro' || activeSection?.id === 'price-wedge';
 
-  $: isDarkSection = DARK_SECTIONS.has(activeId);
-  $: isAmberSection = AMBER_SECTIONS.has(activeId);
-  $: isWhiteSection = WHITE_SECTIONS.has(activeId);
+  function queueMapIntroReveal() {
+    if (mapIntroRevealRaf) cancelAnimationFrame(mapIntroRevealRaf);
+    mapIntroVizVisible = false;
+    mapIntroRevealRaf = requestAnimationFrame(function () {
+      mapIntroRevealRaf = 0;
+      mapIntroVizVisible = true;
+    });
+  }
+
+  $: if (currentStoryStepId !== prevStepId) {
+    prevStepId = currentStoryStepId;
+    if (currentStoryStepId === 'map-intro') queueMapIntroReveal();
+    else {
+      if (mapIntroRevealRaf) {
+        cancelAnimationFrame(mapIntroRevealRaf);
+        mapIntroRevealRaf = 0;
+      }
+      mapIntroVizVisible = false;
+    }
+  }
 
   function themeOf(s) { return 'theme-' + (s?.theme ?? 'mixed'); }
 
@@ -117,6 +129,43 @@
     };
   }
 
+  function setupMethodologyDialogs() {
+    if (!storyRegionEl) return;
+
+    methodDialogClickHandler = function (event) {
+      var openBtn = event.target.closest('[data-method-dialog-open]');
+      if (openBtn) {
+        event.preventDefault();
+        var root = openBtn.closest('.s2-methodology-block');
+        var dialog = root?.querySelector('dialog[data-method-dialog]');
+        if (!dialog) return;
+        if (typeof dialog.showModal === 'function') dialog.showModal();
+        else dialog.setAttribute('open', '');
+        return;
+      }
+
+      var closeBtn = event.target.closest('[data-method-dialog-close]');
+      if (closeBtn) {
+        event.preventDefault();
+        var host = closeBtn.closest('dialog');
+        if (!host) return;
+        if (typeof host.close === 'function') host.close();
+        else host.removeAttribute('open');
+      }
+    };
+
+    storyRegionEl.addEventListener('click', methodDialogClickHandler);
+    methodDialogEls = Array.from(storyRegionEl.querySelectorAll('dialog[data-method-dialog]'));
+    methodDialogEls.forEach(function (dialog) {
+      dialog.addEventListener('click', function (event) {
+        if (event.target === dialog) {
+          if (typeof dialog.close === 'function') dialog.close();
+          else dialog.removeAttribute('open');
+        }
+      });
+    });
+  }
+
   function isWide() { return typeof window !== 'undefined' && window.innerWidth > 760; }
   function inView(el) {
     if (!el) return false;
@@ -134,7 +183,6 @@
     if (!id) return;
     activeId = id;
     stepCursorId = id;
-    if (id === 'map-intro' || id === 'map-classified') chapter2NarrativeStepId = id;
     activeLockUntil = Date.now() + ACTIVE_LOCK_MS;
     isStepTransitioning = true;
     window.clearTimeout(stepTransitionTimer);
@@ -185,17 +233,10 @@
         tId = storySteps[0]?.id ?? '';
       } else {
         if (!sv || !sm) return;
-        if (ref === 'map-intro') {
-          event.preventDefault();
-          wheelGestureConsumed = true;
-          queueWheelReset();
-          activateStep('map-classified');
-          return;
-        }
         if (idx >= 0 && idx < storySteps.length - 1) {
           tId = storySteps[idx + 1]?.id ?? '';
           tEl = storyStepNodes[tId];
-} else if (idx === storySteps.length - 1) {
+        } else if (idx === storySteps.length - 1) {
           if (ev) {
             /* Already at the explorer. Prevent any further wheel
              * events from scrolling the page past it (which would
@@ -213,16 +254,9 @@
         if (!explorerAtTop()) return;
         tId = storySteps[storySteps.length - 1]?.id ?? '';
         tEl = storyStepNodes[tId];
-      } else if (ref === 'map-classified') {
-        event.preventDefault();
-        wheelGestureConsumed = true;
-        queueWheelReset();
-        activateStep('map-intro');
-        return;
       } else if (idx > 0) {
         tId = storySteps[idx - 1]?.id ?? '';
         tEl = storyStepNodes[tId];
-        if (!tEl && tId === 'map-classified') tEl = storyStepNodes['map-intro'];
       } else if (idx === 0) {
         tEl = openingSectionEl;
       }
@@ -385,17 +419,20 @@
       if (vis?.target?.dataset?.sectionId) {
         var oid = vis.target.dataset.sectionId;
         if (Date.now() < activeLockUntil && oid !== stepCursorId) return;
-        if (stepCursorId === 'map-classified' && oid === 'map-intro') return;
         activeId = oid;
         if (storySteps.some((s) => s.id === oid)) {
           stepCursorId = oid;
-          if (oid === 'map-intro') chapter2NarrativeStepId = 'map-intro';
         }
       }
-    }, { root: null, rootMargin: '-34% 0px -42% 0px', threshold: [0.1, 0.35, 0.6, 0.85] });
+    }, {
+      root: null,
+      rootMargin: '-34% 0px -42% 0px',
+      threshold: [0.1, 0.35, 0.6, 0.85]
+    });
     observedNodes.forEach((n) => observer.observe(n));
 
     window.addEventListener('wheel', handleWheel, { passive: false });
+    setupMethodologyDialogs();
 
     /* Defer counter setup until after @html'd content has rendered. */
     requestAnimationFrame(function () {
@@ -408,6 +445,18 @@
       observer?.disconnect();
       counterObserver?.disconnect();
       window.removeEventListener('wheel', handleWheel);
+      if (storyRegionEl && methodDialogClickHandler) {
+        storyRegionEl.removeEventListener('click', methodDialogClickHandler);
+      }
+      methodDialogEls.forEach(function (dialog) {
+        if (typeof dialog.close === 'function') dialog.close();
+      });
+      methodDialogEls = [];
+      methodDialogClickHandler = null;
+      if (mapIntroRevealRaf) {
+        cancelAnimationFrame(mapIntroRevealRaf);
+        mapIntroRevealRaf = 0;
+      }
       window.clearTimeout(stepTransitionTimer);
       window.clearTimeout(wheelGestureResetTimer);
       if (typeof history !== 'undefined' && 'scrollRestoration' in history && previousScrollRestoration) {
@@ -421,10 +470,7 @@
 
 <a class="skip-link" href="#regime-shift">Skip to the story</a>
 
-<article class="story-page"
-  class:bg-dark={isDarkSection}
-  class:bg-amber={isAmberSection}
-  class:bg-white={isWhiteSection}>
+<article class="story-page">
 
   <section class="story-opening" id={openingSection.id} bind:this={openingSectionEl}
     aria-label="Introduction">
@@ -433,7 +479,8 @@
 
   <div class="dark-to-warm" aria-hidden="true"></div>
 
-  <section class="story-scroll-region" bind:this={storyRegionEl} aria-label="Scrollytelling narrative">
+  <section class="story-scroll-region" bind:this={storyRegionEl}
+    aria-label="Scrollytelling narrative">
     <nav class="story-progress" aria-label="Story sections">
       <span class="progress-rail" aria-hidden="true"></span>
       {#each progressSections as section}
@@ -453,30 +500,38 @@
       {/each}
     </nav>
 
-    <div class="story-viz-column" aria-live="polite">
-      <div class="sticky-stage">
-        <StoryStage
-          {activeSection}
-          {geoData}
-          {ranges}
-          {counts}
-          {loadError} />
+    <div class="story-content-plane"
+      class:geo-wedge-wide-viz={geoAndWedgeWideViz}
+      class:wedge-viz-emphasis={wedgeVizEmphasis}>
+      <div class="story-viz-column"
+        class:viz-hidden={!showVizLane}
+        class:viz-delayed-hidden={mapDelayedHidden}
+        aria-live="polite">
+        <div class="sticky-stage">
+          <StoryStage
+            {activeSection}
+            {geoData}
+            {ranges}
+            {counts}
+            {loadError} />
+        </div>
       </div>
-    </div>
 
-    <div class="story-text-column">
-      {#each renderedStorySteps as section}
-        <section class="story-step"
-          class:chapter-two-step={section.id === 'map-intro'}
-          id={section.id} data-section-id={section.id} use:trackStep>
-          <div class="chapter-label {themeOf(section)}">{section.chapter} · {section.label}</div>
-          {#if section.id === 'map-intro'}
-            <StoryStepBody html={chapter2NarrativeContent} animate={true} contentKey={chapter2NarrativeStepId} />
-          {:else}
-            <StoryStepBody html={section.content} />
-          {/if}
-        </section>
-      {/each}
+      <div class="story-text-column">
+        {#each renderedStorySteps as section}
+          <section class="story-step"
+            class:chapter-one-step={section.id === 'regime-shift'}
+            class:chapter-two-step={section.id === 'map-intro'}
+            id={section.id} data-section-id={section.id} use:trackStep>
+            <div class="story-step-layout"
+              class:is-text={section.stepLayout === 'text'}
+              class:is-split={section.stepLayout !== 'text'}>
+              <div class="chapter-label {themeOf(section)}">{section.chapter} · {section.label}</div>
+              <StoryStepBody html={section.content} />
+            </div>
+          </section>
+        {/each}
+      </div>
     </div>
   </section>
 
@@ -536,47 +591,15 @@
     outline-offset: 2px;
   }
 
-  /* Page background shifts between cream, dark, amber-tinted, and a
-   * warm off-white based on the active section. The transition is
-   * slow enough that each section feels like a new room. */
+  /* One constant light background for the full story. */
   .story-page {
     min-height: 100vh;
-    background: var(--bg);
+    background: #FAFAF6;
     color: var(--ink);
     transition: background-color 600ms cubic-bezier(0.4, 0, 0.2, 1),
                 color 600ms cubic-bezier(0.4, 0, 0.2, 1);
   }
-  .story-page.bg-dark { background: #0F0F0E; }
-  .story-page.bg-amber { background: #F5EDDC; }
-  .story-page.bg-white { background: #FAFAF6; }
-
-  /* On dark sections, body text shifts to cream. */
-  .story-page.bg-dark :global(.story-step h2),
-  .story-page.bg-dark :global(.story-copy) :global(h2) {
-    color: #F2F0EA;
-    transition: color 600ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .story-page.bg-dark :global(.story-copy) :global(p),
-  .story-page.bg-dark :global(.story-copy) :global(li) {
-    color: rgba(242, 240, 234, 0.78);
-  }
-  .story-page.bg-dark :global(.story-copy) :global(strong) { color: #F2F0EA; }
-  .story-page.bg-dark :global(.section-takeaway) {
-    color: rgba(242, 240, 234, 0.92) !important;
-    border-left-color: var(--amber) !important;
-  }
-  .story-page.bg-dark :global(.human-sentence) { color: rgba(242, 240, 234, 0.85) !important; }
-  .story-page.bg-dark .chapter-label { color: rgba(242, 240, 234, 0.45); }
-  .story-page.bg-dark .chapter-label.theme-hold { color: #8AAEC8; }
-  .story-page.bg-dark .chapter-label.theme-flip { color: var(--amber-mid); }
-
-  /* Policy section: ink-dark accent on takeaway. */
-  .story-page.bg-white :global(.section-takeaway) {
-    color: var(--ink) !important;
-    border-left-color: var(--ink) !important;
-  }
-
-  /* Dark cinematic opening. Ambient gradient drifts behind everything. */
+  /* Opening uses the same flat background as the rest of the page. */
   .story-opening {
     position: relative;
     display: grid;
@@ -584,223 +607,124 @@
     place-items: center;
     padding: 48px 24px;
     text-align: center;
-    background: #0F0F0E;
-    color: #F2F0EA;
+    background: #FAFAF6;
+    color: var(--ink);
     overflow: hidden;
   }
 
-  .story-opening::before {
-    content: '';
-    position: absolute;
-    inset: -22%;
-    background:
-      radial-gradient(ellipse at 50% 50%,
-        rgba(78, 60, 38, 0.22) 0%,
-        rgba(78, 60, 38, 0.08) 30%,
-        transparent 65%);
-    pointer-events: none;
-    will-change: transform;
-    animation: ambient-drift 28s ease-in-out infinite alternate;
-  }
-  @keyframes ambient-drift {
-    0%   { transform: translate(-9%, -4%); }
-    100% { transform: translate(9%, 4%); }
+  .opening-inner {
+    width: min(1020px, 100%);
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
   }
 
-  .opening-inner { width: min(820px, 100%); position: relative; z-index: 1; }
-
-  .story-opening :global(.hero-stack) {
-    display: flex; flex-direction: column; align-items: center;
-  }
-
-  .story-opening :global(.hero-above) {
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: clamp(13px, 1.6vw, 18px);
-    font-weight: 500;
-    letter-spacing: 0.18em;
-    text-transform: uppercase;
-    color: rgba(242, 240, 234, 0.45);
-    margin-bottom: 14px;
-    opacity: 0;
-    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 0ms forwards;
-    will-change: opacity;
-  }
-
-  .story-opening :global(.hero-row) {
-    display: flex; align-items: baseline; justify-content: center;
-    gap: 0;
-    margin-bottom: 16px;
-  }
-
-  .story-opening :global(.hero-quote) {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(64px, 13vw, 120px);
-    line-height: 0.9;
-    color: rgba(242, 240, 234, 0.32);
-    opacity: 0;
-    animation: open-fade 800ms cubic-bezier(0.16, 1, 0.3, 1) 400ms forwards;
-    will-change: opacity;
-  }
-  .story-opening :global(.hero-quote-l) { margin-right: 4px; }
-  .story-opening :global(.hero-quote-r) { margin-left: 4px; }
-
-  /* Hero word: blur-in plus a 1.05 scale settle. The word lands the
-   * way a held breath does. */
-  .story-opening :global(.hero-word) {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(58px, 12vw, 112px);
-    line-height: 0.9;
-    color: var(--amber);
-    opacity: 0;
-    transform: scale(1.05);
-    filter: blur(8px);
-    animation: open-word-in 1100ms cubic-bezier(0.16, 1, 0.3, 1) 600ms forwards;
-    will-change: opacity, transform, filter;
-  }
-  @keyframes open-word-in {
-    to { opacity: 1; transform: scale(1); filter: blur(0); }
-  }
-
-  .story-opening :global(.hero-below) {
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(22px, 4vw, 42px);
-    line-height: 1.18;
-    color: rgba(242, 240, 234, 0.82);
-    margin-bottom: 40px;
-    opacity: 0;
-    animation: open-fade 800ms cubic-bezier(0.16, 1, 0.3, 1) 1000ms forwards;
-    will-change: opacity;
-  }
-
-  /* Opening thesis sentence with two embedded display numbers. The
-   * sentence flows; the numbers are large and the bridge text is
-   * smaller, italicized in places, so the sentence reads as one
-   * thought rather than two specs. */
-  .story-opening :global(.opening-thesis) {
-    max-width: 820px;
-    margin: 0 auto 22px;
-    padding: 0 12px;
-    color: rgba(242, 240, 234, 0.85);
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(18px, 2.4vw, 26px);
-    line-height: 1.45;
-    text-align: center;
-    opacity: 0;
-    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 1400ms forwards;
-    will-change: opacity;
-  }
-  .story-opening :global(.thesis-lead),
-  .story-opening :global(.thesis-bridge),
-  .story-opening :global(.thesis-tail) {
-    font-style: italic;
-    color: rgba(242, 240, 234, 0.65);
-  }
-  .story-opening :global(.thesis-bridge-tight) {
-    margin-left: 4px;
-  }
-  .story-opening :global(.thesis-num) {
-    display: inline-block;
-    margin: 0 6px;
-    font-style: normal;
+  .story-opening :global(.hero-title) {
+    max-width: 800px;
+    margin: 0 0 clamp(20px, 4vh, 34px);
     font-family: "DM Serif Display", Georgia, serif;
     font-weight: 400;
-    line-height: 1;
-    font-variant-numeric: tabular-nums;
-    white-space: nowrap;
-  }
-  .story-opening :global(.thesis-num-hold) {
-    color: #6BA3D6;
-  }
-  .story-opening :global(.thesis-num-flip) {
-    color: var(--amber);
-  }
-  .story-opening :global(.thesis-sign),
-  .story-opening :global(.thesis-digits) {
-    display: inline-block;
-    min-width: 1.6em;
-    text-align: right;
-    font-size: clamp(40px, 7vw, 64px);
-    font-variant-numeric: tabular-nums;
-  }
-  .story-opening :global(.thesis-pct) {
-    display: inline-block;
-    font-size: clamp(20px, 3.6vw, 32px);
-    opacity: 0.65;
-    margin-left: 1px;
-    vertical-align: 0.45em;
-  }
-  /* Mono-caps attribution under the thesis sentence. Anchors the
-   * headline in the dataset. */
-  .story-opening :global(.opening-attribution) {
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 10px;
-    color: rgba(242, 240, 234, 0.42);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
-    margin: 0 auto 22px;
+    font-size: clamp(44px, 7vw, 84px);
+    line-height: 1.02;
+    letter-spacing: -0.01em;
+    color: var(--ink);
     opacity: 0;
-    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 1900ms forwards;
+    animation: open-fade 680ms cubic-bezier(0.16, 1, 0.3, 1) 80ms forwards;
     will-change: opacity;
   }
 
-  .story-opening :global(.opening-rule) {
-    width: 56px; height: 1px;
-    margin: 0 auto 22px;
-    background: rgba(242, 240, 234, 0.18);
-    transform-origin: center;
-    transform: scaleX(0);
-    animation: open-rule 700ms cubic-bezier(0.16, 1, 0.3, 1) 2200ms forwards;
-    will-change: transform;
-  }
-  @keyframes open-rule {
-    to { transform: scaleX(1); }
-  }
-
-  /* Film credits. Reads as opening titles, not as a sub-byline. */
-  .story-opening :global(.film-credits) {
-    margin: 0 auto 18px;
-    max-width: 720px;
+  .story-opening :global(.hero-card-grid) {
+    width: min(920px, 100%);
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: clamp(14px, 2vw, 20px);
+    margin: 0 0 clamp(26px, 4.5vh, 44px);
     opacity: 0;
-    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 2600ms forwards;
+    animation: open-fade 680ms cubic-bezier(0.16, 1, 0.3, 1) 420ms forwards;
     will-change: opacity;
   }
-  .story-opening :global(.film-credit-row) {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    justify-content: center;
-    gap: 14px 28px;
-    font-family: "IBM Plex Mono", monospace;
-    font-size: 10.5px;
-    color: rgba(242, 240, 234, 0.46);
-    letter-spacing: 0.14em;
-    text-transform: uppercase;
+
+  .story-opening :global(.hero-card) {
+    border-radius: 12px;
+    padding: clamp(18px, 2.2vw, 26px);
+    text-align: left;
+    min-height: 232px;
+    box-shadow: 0 8px 24px rgba(25, 24, 22, 0.08);
   }
-  .story-opening :global(.film-credit-tag) {
-    color: rgba(242, 240, 234, 0.32);
+  .story-opening :global(.hero-card-flip) {
+    background: var(--amber-mid-dark);
+    color: #fff;
   }
-  .story-opening :global(.film-credit-names) {
-    color: rgba(242, 240, 234, 0.6);
-    letter-spacing: 0.18em;
+  .story-opening :global(.hero-card-hold) {
+    background: var(--navy-mid-dark);
+    color: #fff;
   }
-  .story-opening :global(.film-credit-meta) {
-    margin-top: 8px;
-    font-size: 9.5px;
-    color: rgba(242, 240, 234, 0.32);
-    letter-spacing: 0.16em;
+  .story-opening :global(.hero-card-title) {
+    margin: 0 0 10px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: clamp(28px, 3vw, 38px);
+    line-height: 1.04;
+    font-weight: 400;
+    letter-spacing: -0.01em;
+  }
+  .story-opening :global(.hero-card-body) {
+    margin: 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(15px, 1.4vw, 18px);
+    line-height: 1.58;
+    letter-spacing: 0.001em;
+    color: inherit;
   }
 
-  /* Scroll cue. Just the chevron now; words are gone. */
+  .story-opening :global(.hero-text-block) {
+    max-width: 760px;
+    margin: 0 auto;
+    display: grid;
+    gap: 8px;
+    opacity: 0;
+    animation: open-fade 680ms cubic-bezier(0.16, 1, 0.3, 1) 760ms forwards;
+    will-change: opacity;
+  }
+  .story-opening :global(.hero-summary),
+  .story-opening :global(.hero-question-lead),
+  .story-opening :global(.hero-question) {
+    margin: 0;
+    color: rgba(25, 24, 22, 0.82);
+  }
+  .story-opening :global(.hero-summary) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: clamp(16px, 1.65vw, 21px);
+    line-height: 1.62;
+  }
+  .story-opening :global(.hero-question-lead) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(25, 24, 22, 0.68);
+    margin-top: 32px;
+  }
+  .story-opening :global(.hero-question) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(24px, 3vw, 36px);
+    line-height: 1.24;
+    color: var(--ink);
+  }
+
   .story-opening :global(.scroll-cue-wrap) {
-    margin-top: 50px;
+    margin-top: clamp(34px, 5.2vh, 56px);
     display: flex; flex-direction: column;
     align-items: center; gap: 8px;
     opacity: 0;
-    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 3000ms forwards;
+    animation: open-fade 700ms cubic-bezier(0.16, 1, 0.3, 1) 1280ms forwards;
     will-change: opacity;
   }
   .story-opening :global(.scroll-cue-chevron) {
-    color: rgba(242, 240, 234, 0.32);
+    color: rgba(25, 24, 22, 0.34);
     animation: cue-pulse 2.4s ease-in-out infinite;
   }
   @keyframes open-fade { to { opacity: 1; } }
@@ -811,23 +735,33 @@
 
   .dark-to-warm {
     height: 140px;
-    background: linear-gradient(to bottom, #0F0F0E, var(--bg));
-  }
-  .story-page.bg-dark .dark-to-warm {
-    background: linear-gradient(to bottom, #0F0F0E, #0F0F0E);
+    background: #FAFAF6;
   }
 
-  /* Three-column scrollytelling grid. */
+  /* Progress rail + per-step layout plane. */
   .story-scroll-region {
     --story-top-rail: 28px;
+    --story-viz-width: clamp(460px, 36vw, 620px);
+    --story-viz-gap: clamp(16px, 2.2vw, 36px);
     display: grid;
-    grid-template-columns: minmax(96px, 0.18fr) minmax(300px, 0.84fr) minmax(540px, 1.6fr);
-    grid-template-areas: "progress text viz";
+    grid-template-columns: minmax(72px, 0.12fr) minmax(0, 1fr);
+    grid-template-areas: "progress content";
     align-items: start;
-    gap: clamp(22px, 3vw, 60px);
-    width: min(1500px, 100%);
+    gap: var(--story-viz-gap);
+    width: min(1600px, 100%);
     margin: 0 auto;
     padding: var(--story-top-rail) clamp(18px, 4vw, 64px) 14vh;
+  }
+  .story-content-plane {
+    grid-area: content;
+    display: grid;
+    position: relative;
+  }
+  .story-content-plane.geo-wedge-wide-viz {
+    --story-viz-width: clamp(500px, 39vw, 680px);
+  }
+  .story-content-plane > * {
+    grid-area: 1 / 1;
   }
 
   .story-progress {
@@ -847,9 +781,6 @@
     width: 1px;
     background: rgba(120, 115, 105, 0.22);
   }
-  .story-page.bg-dark .story-progress .progress-rail {
-    background: rgba(242, 240, 234, 0.16);
-  }
 
   /* Progress link layout: chapter number always visible in mono caps,
    * dot in the middle, full label revealed on hover or active. */
@@ -866,7 +797,7 @@
   }
 
   .prog-num {
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 10px;
     font-weight: 700;
     color: rgba(120, 115, 105, 0.5);
@@ -886,7 +817,7 @@
   }
 
   .prog-text {
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 10px;
     white-space: nowrap;
     opacity: 0;
@@ -911,16 +842,20 @@
   .progress-dot-link.active.t-policy .prog-dot { background: var(--ink); }
   .progress-dot-link.active { color: var(--ink); }
 
-  .story-page.bg-dark .progress-dot-link { color: rgba(242, 240, 234, 0.45); }
-  .story-page.bg-dark .prog-num { color: rgba(242, 240, 234, 0.32); }
-  .story-page.bg-dark .prog-dot { background: rgba(242, 240, 234, 0.32); }
-  .story-page.bg-dark .progress-dot-link.active { color: rgba(242, 240, 234, 0.95); }
-  .story-page.bg-dark .progress-dot-link.active .prog-num { color: rgba(242, 240, 234, 0.95); }
-  .story-page.bg-dark .progress-dot-link.active .prog-dot { background: #F2F0EA; }
-  .story-page.bg-dark .progress-dot-link.active.t-hold .prog-dot { background: #8AAEC8; }
-  .story-page.bg-dark .progress-dot-link.active.t-flip .prog-dot { background: var(--amber-mid); }
-
-  .story-text-column { grid-area: text; display: flex; flex-direction: column; }
+  .story-text-column {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    z-index: 2;
+  }
+  .story-content-plane.wedge-viz-emphasis .story-text-column {
+    width: calc(100% - (var(--story-viz-width) + var(--story-viz-gap)));
+    max-width: calc(100% - (var(--story-viz-width) + var(--story-viz-gap)));
+  }
+  .story-content-plane.wedge-viz-emphasis .story-step-layout.is-split {
+    max-width: 100%;
+    padding-right: 0;
+  }
 
   .story-step {
     display: flex; box-sizing: border-box;
@@ -928,13 +863,24 @@
     flex-direction: column; justify-content: center;
     padding: clamp(18px, 4vh, 42px) 0;
   }
+  .story-step-layout { width: 100%; }
+  .story-step-layout.is-text {
+    max-width: min(940px, 100%);
+  }
+  .story-step-layout.is-split {
+    max-width: min(1220px, 100%);
+    padding-right: calc(var(--story-viz-width) + var(--story-viz-gap));
+  }
   .story-step.chapter-two-step :global(.story-copy) {
     min-height: clamp(280px, 34vh, 420px);
+  }
+  .story-step.chapter-one-step :global(.story-copy) {
+    max-width: 100%;
   }
 
   .chapter-label {
     margin-bottom: 16px;
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 11px; font-weight: 500;
     letter-spacing: 0.04em;
     color: var(--faint);
@@ -952,6 +898,377 @@
     border-left: 3px solid var(--neutral);
     transition: color 600ms cubic-bezier(0.4, 0, 0.2, 1),
                 border-left-color 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Section 01 redesign: title, framing paragraph, then two strategy cards. */
+  .story-step :global(.s1-title) {
+    margin: 0 0 16px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(34px, 4.4vw, 52px);
+    line-height: 1.04;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    max-width: 760px;
+  }
+  .story-step :global(.s1-intro) {
+    margin: 0 0 22px;
+    max-width: 720px;
+    color: var(--text);
+    font-size: 16px;
+    line-height: 1.68;
+  }
+  .story-step :global(.s1-pattern-grid) {
+    margin-top: 6px;
+    max-width: 840px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+  }
+  .story-step :global(.s1-pattern-card) {
+    border-radius: 12px;
+    border: 1px solid var(--rule);
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(25, 24, 22, 0.06);
+  }
+  .story-step :global(.s1-pattern-header) {
+    padding: 14px 16px;
+  }
+  .story-step :global(.s1-pattern-flip .s1-pattern-header) {
+    background: var(--amber-mid-dark);
+    color: #fff;
+  }
+  .story-step :global(.s1-pattern-hold .s1-pattern-header) {
+    background: var(--navy-mid-dark);
+    color: #fff;
+  }
+  .story-step :global(.s1-pattern-name) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 30px;
+    line-height: 1;
+    margin-bottom: 6px;
+  }
+  .story-step :global(.s1-pattern-thesis) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 12px;
+    line-height: 1.4;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-weight: 600;
+    opacity: 0.95;
+  }
+  .story-step :global(.s1-pattern-body) {
+    padding: 14px 16px 16px;
+    background: #fff;
+  }
+  .story-step :global(.s1-pattern-body p) {
+    margin: 0;
+    color: var(--text);
+    font-size: 14.5px;
+    line-height: 1.62;
+  }
+  .story-step :global(.s1-pattern-body p + p) {
+    margin-top: 10px;
+  }
+
+  /* Section 02 redesign: concentration first, then classification method. */
+  .story-step :global(.s2-title) {
+    margin: 0 0 14px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(33px, 4.2vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    max-width: 760px;
+  }
+  .story-step :global(.s2-intro) {
+    margin: 0 0 18px;
+    max-width: 760px;
+    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.68;
+  }
+  .story-step :global(.s2-concentration-grid) {
+    margin-top: 8px;
+    max-width: 860px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+  }
+  .story-step :global(.s2-concentration-card) {
+    border-radius: 12px;
+    border: 1px solid var(--rule);
+    background: #fff;
+    padding: 14px 16px 16px;
+    box-shadow: 0 6px 18px rgba(25, 24, 22, 0.06);
+  }
+  .story-step :global(.s2-concentration-tag) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 8px;
+  }
+  .story-step :global(.s2-concentration-place) {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 28px;
+    line-height: 1.1;
+    margin-bottom: 8px;
+    letter-spacing: -0.01em;
+  }
+  .story-step :global(.s2-concentration-card p) {
+    margin: 0;
+    color: var(--text);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .story-step :global(.s2-concentration-hold .s2-concentration-tag),
+  .story-step :global(.s2-concentration-hold .s2-concentration-place) {
+    color: var(--navy-mid-dark);
+  }
+  .story-step :global(.s2-concentration-flip .s2-concentration-tag),
+  .story-step :global(.s2-concentration-flip .s2-concentration-place) {
+    color: var(--amber-mid-dark);
+  }
+
+  .story-step :global(.s2-method-intro) {
+    margin: 0 0 14px;
+    max-width: 760px;
+    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.66;
+  }
+  .story-step :global(.s2-method-grid) {
+    max-width: 860px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .story-step :global(.s2-method-card) {
+    border-radius: 12px;
+    border: 1px solid var(--rule);
+    background: #fff;
+    overflow: hidden;
+  }
+  .story-step :global(.s2-method-title) {
+    padding: 12px 14px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 24px;
+    line-height: 1.08;
+    color: #fff;
+  }
+  .story-step :global(.s2-method-hold .s2-method-title) {
+    background: var(--navy-mid-dark);
+  }
+  .story-step :global(.s2-method-flip .s2-method-title) {
+    background: var(--amber-mid-dark);
+  }
+  .story-step :global(.s2-method-card p) {
+    margin: 0;
+    padding: 12px 14px 14px;
+    color: var(--text);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .story-step :global(.s2-method-close) {
+    margin: 0;
+    max-width: 860px;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.66;
+  }
+  .story-step :global(.s2-methodology-block) {
+    margin-top: 12px;
+    max-width: 860px;
+  }
+  .story-step :global(.s2-method-link) {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy-mid-dark);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    cursor: pointer;
+  }
+  .story-step :global(.s2-method-link:hover),
+  .story-step :global(.s2-method-link:focus-visible) {
+    color: var(--navy);
+  }
+  .story-step :global(.s2-method-dialog) {
+    position: fixed;
+    inset: 0;
+    margin: auto;
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    padding: 0;
+    width: min(980px, calc(100vw - 32px));
+    max-height: calc(100vh - 40px);
+    overflow: auto;
+    background: #fff;
+    box-shadow: 0 24px 56px rgba(25, 24, 22, 0.22);
+  }
+  .story-step :global(.s2-method-dialog::backdrop) {
+    background: rgba(25, 24, 22, 0.3);
+  }
+  .story-step :global(.s2-method-dialog-shell) {
+    padding: 28px 30px 30px;
+  }
+  .story-step :global(.s2-method-dialog-head) {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .story-step :global(.s2-method-dialog-kicker) {
+    margin: 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--faint);
+  }
+  .story-step :global(.s2-method-dialog-close) {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--sub);
+    cursor: pointer;
+  }
+  .story-step :global(.s2-method-dialog-title) {
+    margin: 0 0 14px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 28px;
+    line-height: 1.08;
+    color: var(--ink);
+  }
+  .story-step :global(.s2-method-dialog p) {
+    margin: 0;
+    color: var(--text);
+    font-size: 14.5px;
+    line-height: 1.62;
+  }
+  .story-step :global(.s2-method-dialog p + p) {
+    margin-top: 16px;
+  }
+  .story-step :global(.s2-method-dialog-lead) {
+    margin-bottom: 34px;
+    color: var(--text);
+  }
+  .story-step :global(.s2-method-dialog-score-lines) {
+    margin-bottom: 22px;
+    display: grid;
+    gap: 8px;
+  }
+  .story-step :global(.s2-method-dialog-score-lines p + p) {
+    margin-top: 0;
+  }
+  .story-step :global(.s2-method-dialog-score-line) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 14px;
+    line-height: 1.62;
+    color: var(--text);
+    white-space: nowrap;
+    padding: 0;
+  }
+  .story-step :global(.s2-method-dialog-score-line-hold .s2-method-dialog-score-name) {
+    color: var(--navy-mid-dark);
+  }
+  .story-step :global(.s2-method-dialog-score-line-flip .s2-method-dialog-score-name) {
+    color: var(--amber-mid-dark);
+  }
+  .story-step :global(.s2-method-dialog-score-name) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: inherit;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .story-step :global(.s2-method-dialog-ruleline) {
+    margin: 0 0 20px;
+    color: var(--text);
+  }
+  .story-step :global(.s2-method-dialog-validation-title) {
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--sub);
+    margin-top: 24px;
+    margin-bottom: 0;
+  }
+  .story-step :global(.s2-method-dialog-validation-line) {
+    color: var(--text);
+    line-height: 1.68;
+    margin-top: 6px !important;
+  }
+
+  /* Section 03 redesign: title, short framing paragraph, two strategy cards. */
+  .story-step :global(.s3-title) {
+    margin: 0 0 14px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(33px, 4.2vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    max-width: 760px;
+  }
+  .story-step :global(.s3-intro) {
+    margin: 0 0 18px;
+    max-width: 760px;
+    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.66;
+  }
+  .story-step :global(.s3-strategy-grid) {
+    max-width: 860px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .story-step :global(.s3-strategy-card) {
+    border-radius: 12px;
+    border: 1px solid var(--rule);
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(25, 24, 22, 0.06);
+  }
+  .story-step :global(.s3-strategy-head) {
+    padding: 12px 14px;
+  }
+  .story-step :global(.s3-strategy-hold .s3-strategy-head) {
+    background: var(--navy-mid-dark);
+  }
+  .story-step :global(.s3-strategy-flip .s3-strategy-head) {
+    background: var(--amber-mid-dark);
+  }
+  .story-step :global(.s3-strategy-name) {
+    margin: 0;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 26px;
+    line-height: 1.06;
+    color: #fff;
+  }
+  .story-step :global(.s3-strategy-body) {
+    margin: 0;
+    padding: 12px 14px 14px;
+    color: var(--text);
+    font-size: 14.5px;
+    line-height: 1.6;
   }
 
   /* Hairline rule above the human sentence. Echoes the closing rule
@@ -1006,14 +1323,9 @@
   .story-step :global(.zone-chip-hold) :global(.zone-chip-dot) { background: var(--navy); }
   .story-step :global(.zone-chip-flip) { color: var(--amber-dark); }
   .story-step :global(.zone-chip-flip) :global(.zone-chip-dot) { background: var(--amber-dark); }
-  .story-page.bg-dark .story-step :global(.zone-chip-hold) { color: #8AAEC8; }
-  .story-page.bg-dark .story-step :global(.zone-chip-hold) :global(.zone-chip-dot) { background: #8AAEC8; }
-  .story-page.bg-dark .story-step :global(.zone-chip-flip) { color: var(--amber-mid); }
-  .story-page.bg-dark .story-step :global(.zone-chip-flip) :global(.zone-chip-dot) { background: var(--amber-mid); }
-
   /* Section 02 cue. One word, mono caps, low opacity. */
   .story-step :global(.story-cue) {
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 11px;
     color: var(--faint);
     letter-spacing: 0.18em;
@@ -1039,7 +1351,7 @@
     max-width: 600px;
   }
   .story-step :global(.closing-footnote) {
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-style: italic;
     font-size: 10.5px;
     color: var(--faint);
@@ -1050,16 +1362,36 @@
 
   .story-viz-column {
     position: sticky; top: var(--story-top-rail);
-    grid-area: viz; align-self: start;
-    display: flex; height: calc(100vh - var(--story-top-rail));
+    align-self: start;
+    justify-self: end;
+    width: var(--story-viz-width);
+    display: flex;
+    height: calc(100vh - var(--story-top-rail));
     align-items: center;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
+                transform 420ms cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+  }
+  .story-viz-column.viz-hidden {
+    opacity: 0;
+    transform: translateY(0);
+    pointer-events: none;
+  }
+  .story-viz-column.viz-delayed-hidden {
+    opacity: 0;
+    transform: translateY(8px);
+    pointer-events: none;
   }
   .sticky-stage { display: flex; width: 100%; height: 100%; align-items: center; }
 
   /* Transition strip between the story and the explorer. */
   .story-transition-strip {
-    background: #0F0F0E;
-    color: rgba(242, 240, 234, 0.7);
+    background: #F2EFE6;
+    color: rgba(25, 24, 22, 0.72);
+    border-top: 1px solid #E4DFD2;
+    border-bottom: 1px solid #E4DFD2;
     text-align: center;
     min-height: 38vh;
     display: grid; place-items: center;
@@ -1070,7 +1402,7 @@
   }
   .transition-inner { max-width: 720px; }
   .story-transition-strip p { margin: 0; }
-  .story-transition-strip p + p { margin-top: 14px; color: rgba(242, 240, 234, 0.45); }
+  .story-transition-strip p + p { margin-top: 14px; color: rgba(25, 24, 22, 0.5); }
 
   .story-explorer-section {
     width: 100%; margin: 0 auto;
@@ -1078,10 +1410,11 @@
 
   /* Quiet outro band between the explorer and the footer. */
   .story-outro {
-    background: #0F0F0E;
-    color: rgba(242, 240, 234, 0.62);
+    background: #F2EFE6;
+    color: rgba(25, 24, 22, 0.62);
     text-align: center;
     padding: clamp(40px, 8vh, 84px) 24px;
+    border-bottom: 1px solid #E4DFD2;
   }
   .story-outro :global(.story-outro-line) {
     font-family: "DM Serif Display", Georgia, serif;
@@ -1090,7 +1423,7 @@
     line-height: 1.5;
     max-width: 640px;
     margin: 0 auto;
-    color: rgba(242, 240, 234, 0.7);
+    color: rgba(25, 24, 22, 0.72);
   }
 
   .story-footer {
@@ -1110,31 +1443,104 @@
   .story-footer :global(.footer-note) { margin-top: 6px; font-style: italic; color: var(--faint); }
   .story-footer :global(.footer-access) {
     margin-bottom: 14px; font-size: 11px; color: var(--faint);
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
   }
   .story-footer :global(.footer-team) { font-size: 12px; font-weight: 600; color: var(--text); }
 
   @media (max-width: 1040px) {
     .story-scroll-region {
-      grid-template-columns: minmax(280px, 0.9fr) minmax(420px, 1.1fr);
-      grid-template-areas: "text viz";
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas: "content";
+      --story-viz-width: clamp(360px, 42vw, 500px);
     }
     .story-progress { display: none; }
   }
 
   @media (max-width: 760px) {
+    .opening-inner { width: min(560px, 100%); }
+    .story-opening { padding: 34px 20px; }
+    .story-opening :global(.hero-title) {
+      margin-bottom: 18px;
+      font-size: clamp(34px, 11.5vw, 52px);
+    }
+    .story-opening :global(.hero-card-grid) {
+      grid-template-columns: 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .story-opening :global(.hero-card) {
+      min-height: 0;
+      padding: 16px 16px 18px;
+    }
+    .story-opening :global(.hero-card-title) { font-size: clamp(24px, 8vw, 34px); }
+    .story-opening :global(.hero-card-body) { font-size: 15px; line-height: 1.55; }
+    .story-opening :global(.hero-summary) { font-size: 16px; }
+    .story-opening :global(.hero-question) { font-size: clamp(22px, 7vw, 30px); }
+
     .story-scroll-region {
       display: block; gap: 0; padding: 0 0 8vh;
     }
+    .story-content-plane { display: block; }
     .story-viz-column {
       position: sticky; top: 0; z-index: 4;
+      width: 100%;
       height: 46vh; background: var(--bg);
       box-shadow: 0 8px 18px rgba(25, 24, 22, 0.08);
     }
-    .story-page.bg-dark .story-viz-column { background: #0F0F0E; }
     .story-text-column { padding: 0 22px; }
+    .story-content-plane.wedge-viz-emphasis .story-text-column {
+      width: auto;
+      max-width: none;
+    }
     .sticky-stage { min-height: auto; }
     .story-step { min-height: 74vh; padding: 18vh 0; }
+    .story-step-layout.is-text,
+    .story-step-layout.is-split {
+      max-width: 100%;
+      padding-right: 0;
+    }
+    .story-step :global(.s1-title) { font-size: clamp(30px, 9vw, 40px); }
+    .story-step :global(.s1-intro) { font-size: 15px; margin-bottom: 18px; }
+    .story-step :global(.s1-pattern-grid) {
+      grid-template-columns: 1fr;
+      gap: 12px;
+    }
+    .story-step :global(.s1-pattern-name) { font-size: 26px; }
+    .story-step :global(.s1-pattern-thesis) { font-size: 11.5px; }
+    .story-step :global(.s1-pattern-body p) { font-size: 14px; line-height: 1.6; }
+    .story-step :global(.s2-title) { font-size: clamp(30px, 9vw, 40px); }
+    .story-step :global(.s2-intro),
+    .story-step :global(.s2-method-intro),
+    .story-step :global(.s2-method-close) { font-size: 14.5px; }
+    .story-step :global(.s2-concentration-grid),
+    .story-step :global(.s2-method-grid) {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .story-step :global(.s2-concentration-place) { font-size: 24px; }
+    .story-step :global(.s2-concentration-card p),
+    .story-step :global(.s2-method-card p) {
+      font-size: 14px;
+      line-height: 1.58;
+    }
+    .story-step :global(.s2-method-title) { font-size: 22px; }
+    .story-step :global(.s2-method-dialog-title) { font-size: 24px; }
+    .story-step :global(.s2-method-dialog-shell) { padding: 22px 20px 22px; }
+    .story-step :global(.s2-method-dialog-score-line) {
+      font-size: 13px;
+      white-space: normal;
+    }
+    .story-step :global(.s3-title) { font-size: clamp(30px, 9vw, 40px); }
+    .story-step :global(.s3-intro) { font-size: 14.5px; }
+    .story-step :global(.s3-strategy-grid) {
+      grid-template-columns: 1fr;
+      gap: 10px;
+    }
+    .story-step :global(.s3-strategy-name) { font-size: 22px; }
+    .story-step :global(.s3-strategy-body) {
+      font-size: 14px;
+      line-height: 1.58;
+    }
     .story-explorer-section { width: 100%; }
     .story-transition-strip { font-size: 19px; padding: 60px 22px; min-height: 36vh; }
     .dark-to-warm { height: 80px; }
@@ -1144,10 +1550,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .story-opening :global(.hero-word) {
-      filter: none;
-    }
-    .story-opening::before { animation: none; }
     .story-opening :global(.scroll-cue-chevron) { animation: none; }
   }
 </style>

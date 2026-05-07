@@ -27,9 +27,12 @@
   export let loadError = '';
 
   $: viz = activeSection?.viz ?? null;
-  $: mapState = activeSection?.mapState ?? 'classified';
+  let mapState = 'gray';
+  $: if (activeSection?.mapState) {
+    mapState = activeSection.mapState;
+  }
   $: sectionId = activeSection?.id ?? 'none';
-  $: isChart = viz === 'timeseries' || viz === 'pricewedge' || viz === 'timeline';
+  $: useCompactChartFrame = viz === 'timeseries' || viz === 'timeline';
 
   /* Per-layer "is this section the active one" flags. */
   $: tsActive = viz === 'timeseries';
@@ -91,7 +94,7 @@
   /* Bloom caption is keyed to the classified state being current
    * AND the reader being on the map layer. When the reader leaves
    * either, the caption fades and the timer is cancelled. */
-  $: if (sectionId === 'map-classified' && mapInViewport) {
+  $: if (sectionId === 'map-intro' && mapInViewport) {
     if (bloomCaptionTimer) clearTimeout(bloomCaptionTimer);
     bloomCaptionTimer = setTimeout(() => {
       bloomCaptionVisible = true;
@@ -99,7 +102,7 @@
     }, 2400);
   }
 
-  $: if (sectionId !== 'map-classified' || !mapInViewport) {
+  $: if (sectionId !== 'map-intro' || !mapInViewport) {
     if (bloomCaptionTimer) {
       clearTimeout(bloomCaptionTimer);
       bloomCaptionTimer = null;
@@ -108,7 +111,7 @@
   }
 </script>
 
-<div class="story-stage" class:story-stage-chart={isChart}>
+<div class="story-stage" class:story-stage-chart={useCompactChartFrame}>
   {#if loadError}
     <div class="stage-message">{loadError}</div>
   {:else}
@@ -124,7 +127,7 @@
       </div>
     </div>
 
-    <div class="chart-stage layer layer-from-left"
+    <div class="chart-stage pw-stage layer layer-from-left"
          class:active={pwActive}
          aria-hidden={!pwActive}
          bind:this={pwLayerEl}>
@@ -166,8 +169,8 @@
   .story-stage {
     position: relative;
     width: 100%;
-    height: min(78vh, 700px);
-    min-height: 460px;
+    height: min(84vh, 760px);
+    min-height: 500px;
   }
   .story-stage.story-stage-chart {
     height: min(72vh, 640px);
@@ -212,6 +215,18 @@
     overflow: hidden;
     padding: 16px 12px 12px;
   }
+  .pw-stage {
+    overflow: visible;
+    -webkit-mask-image: none;
+            mask-image: none;
+    -webkit-mask-size: auto;
+            mask-size: auto;
+    -webkit-mask-position: 0 0;
+            mask-position: 0 0;
+  }
+  .pw-stage .chart-body {
+    overflow: visible;
+  }
 
   .chart-body {
     flex: 1;
@@ -250,7 +265,7 @@
     position: absolute;
     top: clamp(14px, 2.4vh, 22px);
     left: clamp(16px, 2.4vw, 28px);
-    font-family: "IBM Plex Mono", monospace;
+    font-family: "Plus Jakarta Sans", sans-serif;
     font-size: 10.5px;
     font-weight: 700;
     letter-spacing: 0.18em;

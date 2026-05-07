@@ -301,7 +301,7 @@ export function drawDivergingBars(container, props, ranges, cityAverages, accent
       .attr('x', ml + barW + 6).attr('y', rowY + rowH / 2)
       .attr('text-anchor', 'start').attr('dominant-baseline', 'central')
       .attr('fill', '#46433C').attr('font-size', '11px')
-      .attr('font-family', 'IBM Plex Mono, monospace')
+      .attr('font-family', 'Plus Jakarta Sans, sans-serif')
       .attr('font-weight', '500')
       .text(fmtForKey(metric.key)(val));
   }

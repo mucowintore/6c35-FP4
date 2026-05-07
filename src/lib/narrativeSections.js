@@ -7,13 +7,7 @@
 
 export const NARRATIVE_SECTIONS = [
 
-  /* 00 Opening. Dark cinematic full-bleed.
-   *
-   * The hero is one composed sentence with two embedded display
-   * numbers. Reading left to right forces the comparison: the +49 and
-   * the 25 sit inside one thought rather than in parallel cells. The
-   * counter delays are deliberately past the parent fade-in so the
-   * tween is never running while the element is invisible. */
+  /* 00 Opening. One city, two crises. */
   {
     id: 'opening',
     chapter: '00',
@@ -24,50 +18,31 @@ export const NARRATIVE_SECTIONS = [
     viz: null,
     mapState: null,
     content: `
-      <div class="hero-stack">
-        <div class="hero-above">When Boston says</div>
-        <div class="hero-row">
-          <span class="hero-quote hero-quote-l" aria-hidden="true">“</span>
-          <span class="hero-word">speculation</span>
-          <span class="hero-quote hero-quote-r" aria-hidden="true">,”</span>
-        </div>
-        <div class="hero-below">whose neighborhood does it mean?</div>
+      <h1 class="hero-title">Boston. One city. Two crises</h1>
+
+      <div class="hero-card-grid" role="group"
+        aria-label="Two neighborhood examples of speculation">
+        <article class="hero-card hero-card-flip">
+          <h2 class="hero-card-title">Dorchester</h2>
+          <p class="hero-card-body">Investors are far more likely to buy
+            multi-family homes, renovate or convert them, and quickly
+            resell them for profit.</p>
+        </article>
+        <article class="hero-card hero-card-hold">
+          <h2 class="hero-card-title">Back Bay</h2>
+          <p class="hero-card-body">Investors purchase expensive
+            condominiums and hold them as long-term financial assets.</p>
+        </article>
       </div>
 
-      <div class="opening-thesis" aria-label="Headline finding">
-        <span class="thesis-lead">Investors overpay by</span>
-        <span class="thesis-num thesis-num-hold">
-          <span class="thesis-digits"
-            data-count-target="49"
-            data-count-prefix="+"
-            data-count-duration="1100"
-            data-count-delay="200">0</span><span class="thesis-pct">%</span>
-        </span>
-        <span class="thesis-bridge">in white neighborhoods, and pay</span>
-        <span class="thesis-num thesis-num-flip">
-          <span class="thesis-digits"
-            data-count-target="25"
-            data-count-duration="1100"
-            data-count-delay="500">0</span><span class="thesis-pct">%</span>
-          <span class="thesis-bridge thesis-bridge-tight">less</span>
-        </span>
-        <span class="thesis-tail">in communities of color.</span>
-      </div>
-
-      <div class="opening-attribution" aria-hidden="true">
-        180,000 transactions  ·  173 census tracts  ·  2000–2022
-      </div>
-
-      <div class="opening-rule" aria-hidden="true"></div>
-
-      <div class="film-credits">
-        <div class="film-credit-row">
-          <span class="film-credit-tag">A project by</span>
-          <span class="film-credit-names">Joseph Firmansyah   Jessica Shoemaker   Jean-Michel Mucowintore</span>
-        </div>
-        <div class="film-credit-row film-credit-meta">
-          6.C85 Interactive Data Visualization &amp; Society  ·  MIT  ·  Spring 2026
-        </div>
+      <div class="hero-text-block">
+        <p class="hero-summary">These are both forms of speculation.
+          But they affect neighborhoods differently, target different
+          kinds of housing, and create different risks for the people
+          who live there.</p>
+        <p class="hero-question-lead">This project asks a simple question:</p>
+        <p class="hero-question">What happens when we stop treating
+          Boston's housing market as one single story?</p>
       </div>
 
       <div class="scroll-cue-wrap" aria-hidden="true">
@@ -86,26 +61,55 @@ export const NARRATIVE_SECTIONS = [
     id: 'regime-shift',
     chapter: '01',
     label: 'The Shift',
-    title: 'After 2008, investors never left',
+    title: 'Not all speculation works the same way',
     theme: 'hold',
     layout: 'split',
-    viz: 'timeseries',
-    mapState: null,
+    stepLayout: 'text',
+    viz: null,
+    mapState: 'gray',
     content: `
-      <h2>After 2008, investors never left</h2>
-      <p>Before the financial crisis, roughly one in six Boston home
-        purchases was made by an investor. Not a family looking for
-        a place to live, but an LLC, a trust, a bank, or a business
-        entity buying property as a financial instrument.</p>
-      <p>After the crisis, that figure jumped to nearly one in three.
-        It never came back down.</p>
-      <p class="section-takeaway">The crisis did not merely disrupt
-        the housing market. It permanently restructured who
-        participates in it.</p>
+      <h3 class="s1-title">Not all speculation works the same way</h3>
+      <p class="s1-intro">When people talk about housing speculation,
+        they often describe it as a single phenomenon. But investors use
+        very different strategies in different parts of the city. We focus
+        on two recurring patterns visible across more than two decades of
+        Boston home sales.</p>
+
+      <div class="s1-pattern-grid" role="group"
+        aria-label="Two recurring investor patterns">
+        <article class="s1-pattern-card s1-pattern-flip">
+          <div class="s1-pattern-header">
+            <div class="s1-pattern-name">Flipping</div>
+            <div class="s1-pattern-thesis">Fast turnover from lower-cost,
+              multi-family stock.</div>
+          </div>
+          <div class="s1-pattern-body">
+            <p>Flipping investors purchase homes with the intention of
+              reselling quickly, often after renovation, conversion, or
+              repositioning.</p>
+            <p>These transactions concentrate in lower-cost multi-family
+              housing markets and leave a distinct signature in the data.</p>
+          </div>
+        </article>
+
+        <article class="s1-pattern-card s1-pattern-hold">
+          <div class="s1-pattern-header">
+            <div class="s1-pattern-name">Holding</div>
+            <div class="s1-pattern-thesis">Long-term capital parking in
+              expensive condominium markets.</div>
+          </div>
+          <div class="s1-pattern-body">
+            <p>Holding investors purchase homes, often expensive
+              condominiums, and keep them for long periods of time.</p>
+            <p>The property functions less as a residence and more as a
+              financial asset whose value is expected to grow.</p>
+          </div>
+        </article>
+      </div>
     `
   },
 
-  /* 02 The Map. Two states, gray then classified, on consecutive scrolls. */
+  /* 02 The Map. Geography + classification method in one section. */
   {
     id: 'map-intro',
     chapter: '02',
@@ -113,47 +117,93 @@ export const NARRATIVE_SECTIONS = [
     title: 'Two markets hiding in plain sight',
     theme: 'mixed',
     layout: 'split',
-    viz: 'map',
-    mapState: 'gray',
-    content: `
-      <h2>Two markets hiding in plain sight</h2>
-      <p>But where is this happening? And what kind of investing
-        are we actually talking about?</p>
-      <p>We classified every census tract in Boston by the dominant
-        investor strategy observed across two decades of recorded
-        purchases. Each tract received two composite scores. One
-        measures holding behavior. The other measures flipping
-        behavior.</p>
-      <p class="story-cue">Scroll.</p>
-    `
-  },
-
-  {
-    id: 'map-classified',
-    chapter: '02',
-    label: 'The Map',
-    title: 'Two markets hiding in plain sight',
-    theme: 'mixed',
-    layout: 'split',
+    stepLayout: 'split',
     viz: 'map',
     mapState: 'classified',
     content: `
-      <p>The map splits in two.</p>
-      <p><span class="zone-chip zone-chip-hold"><span class="zone-chip-dot" aria-hidden="true"></span>Navy tracts</span>
-        are <strong>holding zones</strong>. Investors here buy
-        expensive condominiums and keep them as long-term financial
-        assets.</p>
-      <p><span class="zone-chip zone-chip-flip"><span class="zone-chip-dot" aria-hidden="true"></span>Amber tracts</span>
-        are <strong>flipping zones</strong>. Investors here buy
-        multi-family homes, renovate or convert them, and resell
-        within months.</p>
-      <p>Can a condo be flipped? Certainly. Can a cheaper home be
-        held? Of course. But across 180,000 transactions, one pattern
-        emerges with striking clarity: the tracts where investors
-        overwhelmingly buy expensive condos and hold them are simply
-        not the same tracts where investors buy multi-family homes
-        and flip them. An independent K-Means clustering algorithm
-        reproduces this same geographic split 85.5% of the time.</p>
+      <h3 class="s2-title">The city splits geographically</h3>
+      <p class="s2-intro">These two forms of speculation do not occur
+        evenly across Boston. When we classify census tracts by their
+        dominant investor behavior, a striking geographic divide
+        appears.</p>
+      <p class="s2-intro">Holding activity concentrates in high-cost
+        neighborhoods with large condominium markets, while flipping
+        activity concentrates in lower-income neighborhoods with larger
+        shares of multi-family housing.</p>
+
+      <p class="s2-method-intro">To classify this divide, each census
+        tract receives two composite scores: one for holding behavior
+        and one for flipping behavior.</p>
+
+      <div class="s2-method-grid" role="group"
+        aria-label="How hold and flip scores are constructed">
+        <article class="s2-method-card s2-method-hold">
+          <div class="s2-method-title">Holding score</div>
+          <p>Built from signals such as median price, condominium share,
+            and investor activity in top-decile sales.</p>
+        </article>
+
+        <article class="s2-method-card s2-method-flip">
+          <div class="s2-method-title">Flipping score</div>
+          <p>Built from rapid resale activity, buy-side flip behavior,
+            and concentration of two-to-three-family housing.</p>
+        </article>
+      </div>
+
+      <p class="s2-method-close">A tract is classified as
+        holding-dominant or flipping-dominant when one score exceeds the
+        other by 0.75 standard deviations; otherwise it is mixed.</p>
+
+      <div class="s2-methodology-block">
+        <button type="button"
+          class="s2-method-link"
+          data-method-dialog-open
+          aria-haspopup="dialog">
+          Learn more about classification methodology
+        </button>
+
+        <dialog class="s2-method-dialog" data-method-dialog
+          aria-labelledby="s2-method-dialog-title">
+          <div class="s2-method-dialog-shell">
+            <div class="s2-method-dialog-head">
+              <p class="s2-method-dialog-kicker">Methodology note</p>
+              <button type="button" class="s2-method-dialog-close"
+                data-method-dialog-close>Close</button>
+            </div>
+            <h4 id="s2-method-dialog-title"
+              class="s2-method-dialog-title">How classification is built</h4>
+            <p class="s2-method-dialog-lead">Each tract gets two
+              standardized composite scores, one for <strong>holding</strong>
+              and one for <strong>flipping</strong>.</p>
+
+            <div class="s2-method-dialog-score-lines"
+              aria-label="Composite score components">
+              <p class="s2-method-dialog-score-line s2-method-dialog-score-line-hold">
+                <span class="s2-method-dialog-score-name">Hold score</span> = z(median_price) + z(condo_share) + z(top_decile_investor_share)
+              </p>
+              <p class="s2-method-dialog-score-line s2-method-dialog-score-line-flip">
+                <span class="s2-method-dialog-score-name">Flip score</span> = z(flip_rate) + z(buy_side_flip_rate) + z(two_three_family_share)
+              </p>
+            </div>
+
+            <p class="s2-method-dialog-ruleline">A tract is classified as
+              <strong>holding-dominant</strong> when its holding score is at
+              least 0.75 standard deviations higher than its flipping score.
+              It is classified as <strong>flipping-dominant</strong> when the
+              reverse is true. Tracts that do not clear either threshold are
+              labeled <strong>mixed</strong>.</p>
+
+            <p class="s2-method-dialog-validation-title">Validation checks</p>
+            <p class="s2-method-dialog-validation-line">We validated this
+              0.75 SD threshold through <strong>Sensitivity analysis</strong>
+              (the classification is stable from 0.5 to 1.25 SD),
+              <strong>K-Means clustering</strong> (85.5% agreement with k=2),
+              <strong>PCA</strong> (73% variance captured in two components),
+              and <strong>Random Forest classification</strong> (F1 = 0.894 in
+              5-fold cross validation).</p>
+          </div>
+        </dialog>
+      </div>
     `
   },
 
@@ -162,25 +212,40 @@ export const NARRATIVE_SECTIONS = [
     id: 'price-wedge',
     chapter: '03',
     label: 'The Wedge',
-    title: 'Investors pay differently in each market',
+    title: 'Two fundamentally different strategies',
     theme: 'mixed',
     layout: 'split',
+    stepLayout: 'split',
     viz: 'pricewedge',
     mapState: null,
     content: `
-      <h2>Investors pay differently in each market</h2>
-      <p>In holding zones, investors consistently pay well above what
-        non-investors pay for comparable properties. That premium has
-        climbed past 80% in recent years. The property is not a home
-        to live in. It is a long-term financial asset, and overpaying
-        is the cost of entry.</p>
-      <p>In flipping zones, investors pay a much smaller premium.
-        During the 2008 crisis, they bought at discounts of up to 25%,
-        targeting distressed properties while holding-zone investors
-        kept overpaying on the other side of the city.</p>
-      <p class="section-takeaway">The gap between these two lines is
-        the visual signature of two fundamentally different investment
-        strategies operating under a single word.</p>
+      <h3 class="s3-title">Two fundamentally different investment strategies</h3>
+      <p class="s3-intro">The price wedge shows that holding and flipping
+        investors do not just invest in different places. They buy with
+        different logics, different risk appetites, and different timing.</p>
+
+      <div class="s3-strategy-grid" role="group"
+        aria-label="How holding and flipping investors buy differently">
+        <article class="s3-strategy-card s3-strategy-hold">
+          <div class="s3-strategy-head">
+            <p class="s3-strategy-name">Holding</p>
+          </div>
+          <p class="s3-strategy-body">In holding tracts, investors
+            consistently pay far above non-investors for comparable
+            properties, with premiums above 80% in recent years. The
+            property is treated as a long-term financial asset.</p>
+        </article>
+
+        <article class="s3-strategy-card s3-strategy-flip">
+          <div class="s3-strategy-head">
+            <p class="s3-strategy-name">Flipping</p>
+          </div>
+          <p class="s3-strategy-body">In flipping tracts, investors pay
+            smaller premiums and sometimes buy below market. During the
+            2008 crisis, they purchased at discounts up to 25%, targeting
+            distressed assets and fast resale opportunities.</p>
+        </article>
+      </div>
     `
   },
 
@@ -196,6 +261,7 @@ export const NARRATIVE_SECTIONS = [
     title: 'The burden falls unevenly',
     theme: 'flip',
     layout: 'split',
+    stepLayout: 'split',
     viz: 'map',
     mapState: 'holdingDimmed',
     content: `
@@ -242,6 +308,7 @@ export const NARRATIVE_SECTIONS = [
     title: 'The same city, different paths',
     theme: 'mixed',
     layout: 'split',
+    stepLayout: 'split',
     viz: 'timeline',
     mapState: null,
     content: `
@@ -263,6 +330,7 @@ export const NARRATIVE_SECTIONS = [
     title: 'Different markets need different tools',
     theme: 'policy',
     layout: 'split',
+    stepLayout: 'split',
     viz: 'map',
     mapState: 'fullViewAnnotated',
     content: `

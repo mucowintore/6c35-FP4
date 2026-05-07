@@ -36,7 +36,7 @@
   }
   .preview-meta {
     font-size: 11px;
-    font-family: IBM Plex Mono, monospace;
+    font-family: Plus Jakarta Sans, sans-serif;
     color: #9C9890;
     background: #F0EFEB;
     padding: 4px 10px;

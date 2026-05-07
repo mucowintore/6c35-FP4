@@ -48,20 +48,20 @@
   let dotGroupFlip = null;
   let hoverLayer = null;
 
-  /* Palette tuned for the dark Section 03 background. */
-  const COLOR_NAVY = '#8AAEC8';
-  const COLOR_AMBER = '#D8A45A';
-  const COLOR_NAVY_PRE = 'rgba(138, 174, 200, 0.55)';
-  const COLOR_AMBER_PRE = 'rgba(216, 164, 90, 0.55)';
-  const COLOR_END = '#F2F0EA';
-  const AXIS_TEXT = 'rgba(242, 240, 234, 0.55)';
-  const AXIS_LINE = 'rgba(242, 240, 234, 0.18)';
-  const GRID_LINE = 'rgba(242, 240, 234, 0.08)';
-  const ZERO_LINE = 'rgba(242, 240, 234, 0.32)';
-  const MARKER_LINE = 'rgba(242, 240, 234, 0.32)';
-  const LEGEND_TEXT = 'rgba(242, 240, 234, 0.7)';
-  const ANNO_LINE = 'rgba(242, 240, 234, 0.32)';
-  const ANNO_TEXT = 'rgba(242, 240, 234, 0.65)';
+  /* Palette tuned for light backgrounds. */
+  const COLOR_NAVY = '#3E6B94';
+  const COLOR_AMBER = '#C68B3C';
+  const COLOR_NAVY_PRE = 'rgba(62, 107, 148, 0.58)';
+  const COLOR_AMBER_PRE = 'rgba(198, 139, 60, 0.58)';
+  const COLOR_END = '#191816';
+  const AXIS_TEXT = 'rgba(70, 67, 60, 0.85)';
+  const AXIS_LINE = 'rgba(156, 152, 144, 0.45)';
+  const GRID_LINE = 'rgba(156, 152, 144, 0.22)';
+  const ZERO_LINE = 'rgba(106, 102, 94, 0.4)';
+  const MARKER_LINE = 'rgba(106, 102, 94, 0.45)';
+  const LEGEND_TEXT = 'rgba(70, 67, 60, 0.86)';
+  const ANNO_LINE = 'rgba(106, 102, 94, 0.46)';
+  const ANNO_TEXT = 'rgba(70, 67, 60, 0.84)';
 
   onMount(async () => {
     try {
@@ -214,14 +214,14 @@
       .filter(function (d) { return d.holding != null && d.flipping != null; })
       .sort(function (a, b) { return a.year - b.year; });
 
-    var m = { top: 38, right: 92, bottom: 56, left: 56 };
+    var m = { top: 34, right: 58, bottom: 52, left: 48 };
     var w = width - m.left - m.right;
     var h = height - m.top - m.bottom;
     chartW = w;
     var yCap = 90;
     var yFloor = -32;
     var font = 'Plus Jakarta Sans, sans-serif';
-    var mono = 'IBM Plex Mono, monospace';
+    var mono = 'Plus Jakarta Sans, sans-serif';
     var serif = '"DM Serif Display", Georgia, serif';
 
     var svg = d3.select(el).append('svg')
@@ -316,7 +316,7 @@
     g.append('text')
       .attr('transform', 'translate(' + (x(2008) - 9) + ',' + (h * 0.18) + ') rotate(-90)')
       .attr('text-anchor', 'end')
-      .attr('fill', 'rgba(242, 240, 234, 0.65)')
+      .attr('fill', 'rgba(106, 102, 94, 0.82)')
       .style('font-size', '10px')
       .style('font-family', font)
       .style('font-weight', '600')
@@ -509,18 +509,18 @@
     hoverLayer = svg.append('g').attr('opacity', 0).style('pointer-events', 'none');
     var hoverLine = hoverLayer.append('line')
       .attr('y1', m.top).attr('y2', m.top + h)
-      .attr('stroke', '#F2F0EA').attr('stroke-width', 1)
+      .attr('stroke', '#6A665E').attr('stroke-width', 1)
       .attr('stroke-opacity', 0.35).attr('stroke-dasharray', '2 3');
     var hoverCard = hoverLayer.append('g');
     hoverCard.append('rect')
       .attr('width', 156).attr('height', 86)
       .attr('rx', 8)
-      .attr('fill', 'rgba(20, 20, 18, 0.82)')
-      .attr('stroke', 'rgba(242, 240, 234, 0.18)')
+      .attr('fill', 'rgba(255, 255, 255, 0.95)')
+      .attr('stroke', 'rgba(156, 152, 144, 0.4)')
       .attr('stroke-width', 0.5);
     var rowYear = hoverCard.append('text')
       .attr('x', 12).attr('y', 18)
-      .attr('fill', '#F2F0EA')
+      .attr('fill', '#191816')
       .style('font-family', mono).style('font-size', '11px')
       .style('font-weight', '700').style('letter-spacing', '0.06em');
     var rowHold = hoverCard.append('text')
@@ -536,10 +536,10 @@
       .attr('fill', AXIS_TEXT)
       .style('font-family', mono).style('font-size', '10.5px');
     var hoverDotHold = hoverLayer.append('circle')
-      .attr('r', 4).attr('fill', '#0F0F0E')
+      .attr('r', 4).attr('fill', '#FFFFFF')
       .attr('stroke', COLOR_NAVY).attr('stroke-width', 2);
     var hoverDotFlip = hoverLayer.append('circle')
-      .attr('r', 4).attr('fill', '#0F0F0E')
+      .attr('r', 4).attr('fill', '#FFFFFF')
       .attr('stroke', COLOR_AMBER).attr('stroke-width', 2);
 
     svg.append('rect')

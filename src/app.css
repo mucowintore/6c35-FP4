@@ -16,12 +16,14 @@
   --navy: #1B3A5C;
   --navy-dark: #0E1F33;
   --navy-mid: #3E6B94;
+  --navy-mid-dark: #264563;
   --navy-light: #8AAEC8;
   --navy-bg: #E2ECF4;
 
   --amber: #C68B3C;
   --amber-dark: #7A5020;
   --amber-mid: #D8A45A;
+  --amber-mid-dark: #A9793D;
   --amber-light: #F0D4A4;
   --amber-bg: #FDF4E6;
 
@@ -111,7 +113,7 @@ body {
 .counter-block { text-align: center; }
 
 .counter-value {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: clamp(28px, 3.5vw, 44px);
   font-weight: 500;
   letter-spacing: -0.03em;
@@ -375,7 +377,7 @@ body {
   opacity: 0.8;
   display: block;
   margin-top: 1px;
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
 }
 
 
@@ -393,7 +395,7 @@ body {
 }
 
 .tract-id-label {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-weight: 400;
   fill: var(--ink);
   pointer-events: none;
@@ -700,7 +702,7 @@ body {
 }
 
 .stat-value {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 20px;
   font-weight: 500;
 }
@@ -742,7 +744,7 @@ body {
 }
 
 .tract-id {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 10px;
   color: var(--faint);
   margin-top: 2px;
@@ -800,7 +802,7 @@ body {
 .metric-name { font-size: 10px; color: var(--faint); }
 
 .metric-value {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 12px;
   font-weight: 500;
 }
@@ -852,7 +854,7 @@ body {
 }
 
 .score-number {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 15px;
   font-weight: 500;
   display: block;
@@ -1003,7 +1005,7 @@ body {
 
 /* The story-cue (a small italic prompt under section 02) */
 .story-step .story-cue {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 11px;
   color: var(--faint);
   letter-spacing: 0.04em;
@@ -1126,7 +1128,7 @@ body {
 }
 
 .detail-panel .explorer-tile-hint {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 9.5px;
   color: var(--faint);
   letter-spacing: 0.06em;
@@ -1185,7 +1187,7 @@ body {
    =================================================== */
 
 .explorer-chapter-tag {
-  font-family: "IBM Plex Mono", monospace;
+  font-family: "Plus Jakarta Sans", sans-serif;
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;

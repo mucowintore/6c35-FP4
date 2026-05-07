@@ -64,6 +64,16 @@
   .story-copy :global(h2) {
     max-width: 520px; margin: 0 0 20px;
     font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(32px, 4vw, 50px); line-height: 1.06;
+    font-weight: 400;
+    font-size: clamp(30px, 3.6vw, 44px); line-height: 1.06;
+  }
+
+  .story-copy :global(h3) {
+    max-width: 520px;
+    margin: 0 0 20px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(30px, 3.6vw, 44px);
+    line-height: 1.06;
   }
 </style>

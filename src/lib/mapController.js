@@ -318,7 +318,7 @@ export function createMapController(callbacks = {}) {
     var hc = clusterCenter(holdFeats);
     var fc = clusterCenter(flipFeats);
     var serif = '"DM Serif Display", Georgia, serif';
-    var mono = 'IBM Plex Mono, monospace';
+    var mono = 'Plus Jakarta Sans, sans-serif';
 
     function placeLabel(centroidXY, offsetX, offsetY, label, tag, accent) {
       var labelX = centroidXY[0] + offsetX;

@@ -42,17 +42,17 @@
   let dotGroup = null;
   let hoverLayer = null;
 
-  /* Palette tuned for the dark Section 01 background. */
-  const COLOR_NAVY = '#A8C5DD';
-  const COLOR_PRE = 'rgba(168, 197, 221, 0.7)';
-  const COLOR_FILL = '#5A88AE';
-  const COLOR_END = '#F2F0EA';
-  const AXIS_TEXT = 'rgba(242, 240, 234, 0.55)';
-  const AXIS_LINE = 'rgba(242, 240, 234, 0.18)';
-  const GRID_LINE = 'rgba(242, 240, 234, 0.08)';
-  const MARKER_LINE = 'rgba(242, 240, 234, 0.32)';
-  const CAPTION_TEXT = 'rgba(242, 240, 234, 0.62)';
-  const ATTR_TEXT = 'rgba(242, 240, 234, 0.32)';
+  /* Palette tuned for light backgrounds. */
+  const COLOR_NAVY = '#3E6B94';
+  const COLOR_PRE = 'rgba(62, 107, 148, 0.58)';
+  const COLOR_FILL = '#7EA7C7';
+  const COLOR_END = '#191816';
+  const AXIS_TEXT = 'rgba(70, 67, 60, 0.85)';
+  const AXIS_LINE = 'rgba(156, 152, 144, 0.45)';
+  const GRID_LINE = 'rgba(156, 152, 144, 0.22)';
+  const MARKER_LINE = 'rgba(106, 102, 94, 0.45)';
+  const CAPTION_TEXT = 'rgba(70, 67, 60, 0.82)';
+  const ATTR_TEXT = 'rgba(106, 102, 94, 0.75)';
 
   onMount(async () => {
     try {
@@ -190,7 +190,7 @@
     var w = width - m.left - m.right;
     var h = height - m.top - m.bottom;
     var font = 'Plus Jakarta Sans, sans-serif';
-    var mono = 'IBM Plex Mono, monospace';
+    var mono = 'Plus Jakarta Sans, sans-serif';
     var serif = '"DM Serif Display", Georgia, serif';
 
     var svg = d3.select(el).append('svg')
@@ -258,7 +258,7 @@
     g.append('text')
       .attr('transform', 'translate(' + (x(2008) - 9) + ',' + (h * 0.18) + ') rotate(-90)')
       .attr('text-anchor', 'end')
-      .attr('fill', 'rgba(242, 240, 234, 0.65)')
+      .attr('fill', 'rgba(106, 102, 94, 0.82)')
       .style('font-size', '10px')
       .style('font-family', font)
       .style('font-weight', '600')
@@ -432,18 +432,18 @@
     hoverLayer = svg.append('g').attr('opacity', 0).style('pointer-events', 'none');
     var hoverLine = hoverLayer.append('line')
       .attr('y1', m.top).attr('y2', m.top + h)
-      .attr('stroke', '#F2F0EA').attr('stroke-width', 1)
+      .attr('stroke', '#6A665E').attr('stroke-width', 1)
       .attr('stroke-opacity', 0.35).attr('stroke-dasharray', '2 3');
     var hoverCard = hoverLayer.append('g');
     hoverCard.append('rect')
       .attr('width', 138).attr('height', 60)
       .attr('rx', 8)
-      .attr('fill', 'rgba(20, 20, 18, 0.82)')
-      .attr('stroke', 'rgba(242, 240, 234, 0.18)')
+      .attr('fill', 'rgba(255, 255, 255, 0.95)')
+      .attr('stroke', 'rgba(156, 152, 144, 0.4)')
       .attr('stroke-width', 0.5);
     var cardYear = hoverCard.append('text')
       .attr('x', 12).attr('y', 18)
-      .attr('fill', '#F2F0EA')
+      .attr('fill', '#191816')
       .style('font-family', mono).style('font-size', '11px')
       .style('font-weight', '700').style('letter-spacing', '0.06em');
     var cardAll = hoverCard.append('text')
@@ -452,13 +452,13 @@
       .style('font-family', font).style('font-size', '11px');
     var cardTop = hoverCard.append('text')
       .attr('x', 12).attr('y', 52)
-      .attr('fill', 'rgba(138, 174, 200, 0.78)')
+      .attr('fill', 'rgba(62, 107, 148, 0.78)')
       .style('font-family', font).style('font-size', '10.5px');
     var hoverDotAll = hoverLayer.append('circle')
-      .attr('r', 4).attr('fill', '#0F0F0E')
+      .attr('r', 4).attr('fill', '#FFFFFF')
       .attr('stroke', COLOR_NAVY).attr('stroke-width', 2);
     var hoverDotTop = hoverLayer.append('circle')
-      .attr('r', 3).attr('fill', '#0F0F0E')
+      .attr('r', 3).attr('fill', '#FFFFFF')
       .attr('stroke', COLOR_NAVY).attr('stroke-width', 1.5)
       .attr('opacity', 0.78);
 
