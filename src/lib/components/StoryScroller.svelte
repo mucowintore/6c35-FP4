@@ -83,12 +83,7 @@
   $: activeStepLayout = currentStoryStep?.stepLayout ?? 'split';
   $: showVizLane = activeStepLayout === 'split';
   $: mapDelayedHidden = currentStoryStepId === 'map-intro' && !mapIntroVizVisible;
-  $: wedgeVizEmphasis = activeSection?.id === 'price-wedge';
   $: explorerWideMode = currentStoryStepId === 'explorer' || activeSection?.id === 'explorer';
-  $: geoAndWedgeWideViz =
-    activeSection?.id === 'map-intro'
-    || activeSection?.id === 'price-wedge'
-    || activeSection?.id === 'equity';
 
   function queueMapIntroReveal() {
     if (mapIntroRevealRaf) cancelAnimationFrame(mapIntroRevealRaf);
@@ -485,9 +480,7 @@
       {/each}
     </nav>
 
-    <div class="story-content-plane"
-      class:geo-wedge-wide-viz={geoAndWedgeWideViz}
-      class:wedge-viz-emphasis={wedgeVizEmphasis}>
+    <div class="story-content-plane">
       <div class="story-viz-column"
         class:viz-hidden={!showVizLane}
         class:viz-delayed-hidden={mapDelayedHidden}
@@ -725,8 +718,9 @@
   /* Progress rail + per-step layout plane. */
   .story-scroll-region {
     --story-top-rail: 28px;
-    --story-viz-width: clamp(460px, 36vw, 620px);
+    --story-viz-width: clamp(500px, 39vw, 680px);
     --story-viz-gap: clamp(16px, 2.2vw, 36px);
+    --story-progress-reclaim: clamp(84px, 10vw, 156px);
     display: grid;
     grid-template-columns: minmax(72px, 0.12fr) minmax(0, 1fr);
     grid-template-areas: "progress content";
@@ -737,23 +731,16 @@
     padding: var(--story-top-rail) clamp(18px, 4vw, 64px) 14vh;
   }
   .story-scroll-region.explorer-wide-mode {
-    grid-template-columns: minmax(0, 0) minmax(0, 1fr);
-    gap: 0;
+    grid-template-columns: minmax(72px, 0.12fr) minmax(0, 1fr);
   }
   .story-scroll-region.explorer-wide-mode .story-progress {
     opacity: 0;
     pointer-events: none;
-    width: 0;
-    padding: 0;
-    overflow: hidden;
   }
   .story-content-plane {
     grid-area: content;
     display: grid;
     position: relative;
-  }
-  .story-content-plane.geo-wedge-wide-viz {
-    --story-viz-width: clamp(500px, 39vw, 680px);
   }
   .story-content-plane > * {
     grid-area: 1 / 1;
@@ -843,14 +830,6 @@
     position: relative;
     z-index: 2;
   }
-  .story-content-plane.wedge-viz-emphasis .story-text-column {
-    width: calc(100% - (var(--story-viz-width) + var(--story-viz-gap)));
-    max-width: calc(100% - (var(--story-viz-width) + var(--story-viz-gap)));
-  }
-  .story-content-plane.wedge-viz-emphasis .story-step-layout.is-split {
-    max-width: 100%;
-    padding-right: 0;
-  }
 
   .story-step {
     display: flex; box-sizing: border-box;
@@ -877,7 +856,7 @@
     padding: clamp(8px, 1.2vh, 16px) 0 clamp(10px, 2vh, 22px);
   }
   .story-step.explorer-inline-step .story-step-layout.is-text {
-    max-width: min(1320px, 100%);
+    max-width: min(1360px, 100%);
   }
   .story-step :global(.s5-title),
   .story-step :global(.s6-title),
@@ -905,11 +884,17 @@
   .inline-explorer-shell {
     margin-top: 8px;
     width: min(1260px, 100%);
+    max-width: 100%;
     border: 1px solid var(--rule);
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 10px 30px rgba(25, 24, 22, 0.08);
     background: #fff;
+  }
+  .story-step.explorer-inline-step .inline-explorer-shell {
+    width: calc(100% + var(--story-progress-reclaim));
+    max-width: none;
+    margin-left: calc(-1 * var(--story-progress-reclaim));
   }
   .inline-explorer-shell :global(.story-explorer-app) {
     height: clamp(620px, 78vh, 920px);
@@ -1543,6 +1528,10 @@
       --story-viz-width: clamp(360px, 42vw, 500px);
     }
     .story-progress { display: none; }
+    .story-step.explorer-inline-step .inline-explorer-shell {
+      width: 100%;
+      margin-left: 0;
+    }
   }
 
   @media (max-width: 760px) {
@@ -1577,10 +1566,6 @@
       box-shadow: 0 8px 18px rgba(25, 24, 22, 0.08);
     }
     .story-text-column { padding: 0 22px; }
-    .story-content-plane.wedge-viz-emphasis .story-text-column {
-      width: auto;
-      max-width: none;
-    }
     .sticky-stage { min-height: auto; }
     .story-step { min-height: 74vh; padding: 18vh 0; }
     .story-step-layout.is-text,
