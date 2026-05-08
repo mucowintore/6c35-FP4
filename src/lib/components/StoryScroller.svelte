@@ -26,7 +26,6 @@
   const openingSection = NARRATIVE_SECTIONS.find((s) => s.layout === 'fullscreen');
   const storySteps = NARRATIVE_SECTIONS.filter((s) => s.layout === 'split');
   const renderedStorySteps = storySteps;
-  const explorerSection = NARRATIVE_SECTIONS.find((s) => s.layout === 'explorer');
   const progressSections = NARRATIVE_SECTIONS.filter((s) => s.layout !== 'fullscreen');
 
   /* activeId starts null on cold load. The observer only flips it
@@ -39,7 +38,6 @@
   let openingSectionEl;
   let storyRegionEl;
   let storyStepNodes = {};
-  let explorerSectionEl;
   let isStepTransitioning = false;
   let stepTransitionTimer;
   let wheelGestureConsumed = false;
@@ -86,7 +84,10 @@
   $: showVizLane = activeStepLayout === 'split';
   $: mapDelayedHidden = currentStoryStepId === 'map-intro' && !mapIntroVizVisible;
   $: wedgeVizEmphasis = activeSection?.id === 'price-wedge';
-  $: geoAndWedgeWideViz = activeSection?.id === 'map-intro' || activeSection?.id === 'price-wedge';
+  $: geoAndWedgeWideViz =
+    activeSection?.id === 'map-intro'
+    || activeSection?.id === 'price-wedge'
+    || activeSection?.id === 'equity';
 
   function queueMapIntroReveal() {
     if (mapIntroRevealRaf) cancelAnimationFrame(mapIntroRevealRaf);
@@ -175,10 +176,6 @@
   function storyStepMode() {
     return storyRegionEl && storyRegionEl.getBoundingClientRect().top <= STORY_TOP_RAIL_PX;
   }
-  function explorerAtTop() {
-    return explorerSectionEl && explorerSectionEl.getBoundingClientRect().top >= -12;
-  }
-
   function activateStep(id) {
     if (!id) return;
     activeId = id;
@@ -215,8 +212,8 @@
   function handleWheel(event) {
     if (!isWide() || event.ctrlKey) return;
     if (Date.now() < wheelGuardUntil) return;
-    var ov = inView(openingSectionEl), sv = inView(storyRegionEl), sm = storyStepMode(), ev = inView(explorerSectionEl);
-    if (!ov && !sv && !ev) return;
+    var ov = inView(openingSectionEl), sv = inView(storyRegionEl), sm = storyStepMode();
+    if (!ov && !sv) return;
     if (isStepTransitioning || wheelGestureConsumed) {
       event.preventDefault();
       queueWheelReset();
@@ -236,25 +233,10 @@
         if (idx >= 0 && idx < storySteps.length - 1) {
           tId = storySteps[idx + 1]?.id ?? '';
           tEl = storyStepNodes[tId];
-        } else if (idx === storySteps.length - 1) {
-          if (ev) {
-            /* Already at the explorer. Prevent any further wheel
-             * events from scrolling the page past it (which would
-             * carry the user into the story outro and footer with
-             * no apparent reason). The explorer is the terminal
-             * interactive section. */
-            event.preventDefault();
-            return;
-          }
-          tEl = explorerSectionEl;
         }
       }
     } else {
-      if (ev) {
-        if (!explorerAtTop()) return;
-        tId = storySteps[storySteps.length - 1]?.id ?? '';
-        tEl = storyStepNodes[tId];
-      } else if (idx > 0) {
+      if (idx > 0) {
         tId = storySteps[idx - 1]?.id ?? '';
         tEl = storyStepNodes[tId];
       } else if (idx === 0) {
@@ -522,30 +504,29 @@
           <section class="story-step"
             class:chapter-one-step={section.id === 'regime-shift'}
             class:chapter-two-step={section.id === 'map-intro'}
+            class:explorer-inline-step={section.id === 'explorer'}
             id={section.id} data-section-id={section.id} use:trackStep>
             <div class="story-step-layout"
               class:is-text={section.stepLayout === 'text'}
               class:is-split={section.stepLayout !== 'text'}>
               <div class="chapter-label {themeOf(section)}">{section.chapter} · {section.label}</div>
               <StoryStepBody html={section.content} />
+              {#if section.id === 'explorer'}
+                <div class="inline-explorer-shell">
+                  <StoryExplorer
+                    {geoData}
+                    {ranges}
+                    {counts}
+                    {cityAverages}
+                    {holdingAverages}
+                    {flippingAverages} />
+                </div>
+              {/if}
             </div>
           </section>
         {/each}
       </div>
     </div>
-  </section>
-
-  <div class="story-transition-strip" aria-hidden="true">
-    <div class="transition-inner">
-      <p>The story above is the city's story.</p>
-      <p>Now explore every tract.</p>
-    </div>
-  </div>
-
-  <section class="story-explorer-section" id={explorerSection.id}
-    data-section-id={explorerSection.id} use:trackStep bind:this={explorerSectionEl}
-    aria-label="Tract explorer">
-    <StoryExplorer {geoData} {ranges} {counts} {cityAverages} {holdingAverages} {flippingAverages} />
   </section>
 
   <div class="story-outro" aria-hidden="true">
@@ -876,6 +857,44 @@
   }
   .story-step.chapter-one-step :global(.story-copy) {
     max-width: 100%;
+  }
+  .story-step.explorer-inline-step .story-step-layout.is-text {
+    max-width: min(1320px, 100%);
+  }
+  .story-step :global(.s5-title),
+  .story-step :global(.s6-title),
+  .story-step :global(.s7-title) {
+    margin: 0 0 14px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(33px, 4.2vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    max-width: 760px;
+  }
+  .story-step :global(.s5-intro),
+  .story-step :global(.s6-intro),
+  .story-step :global(.s7-intro) {
+    margin: 0 0 16px;
+    max-width: 760px;
+    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.66;
+  }
+  .inline-explorer-shell {
+    margin-top: 16px;
+    width: min(1260px, 100%);
+    border: 1px solid var(--rule);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(25, 24, 22, 0.08);
+    background: #fff;
+  }
+  .inline-explorer-shell :global(.story-explorer-app) {
+    height: clamp(560px, 72vh, 860px);
+    min-height: 560px;
+    border-radius: 0;
   }
 
   .chapter-label {
@@ -1271,6 +1290,78 @@
     line-height: 1.6;
   }
 
+  /* Section 04 policy redesign: blended framing + explicit tools. */
+  .story-step :global(.s4-title) {
+    margin: 0 0 14px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(33px, 4.2vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    max-width: 760px;
+  }
+  .story-step :global(.s4-intro) {
+    margin: 0 0 18px;
+    max-width: 760px;
+    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.66;
+  }
+  .story-step :global(.s4-policy-grid) {
+    max-width: 860px;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .story-step :global(.s4-policy-card) {
+    border-radius: 12px;
+    border: 1px solid var(--rule);
+    background: #fff;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgba(25, 24, 22, 0.06);
+  }
+  .story-step :global(.s4-policy-head) {
+    padding: 12px 14px;
+  }
+  .story-step :global(.s4-policy-hold .s4-policy-head) {
+    background: var(--navy-mid-dark);
+  }
+  .story-step :global(.s4-policy-flip .s4-policy-head) {
+    background: var(--amber-mid-dark);
+  }
+  .story-step :global(.s4-policy-tag) {
+    margin: 0 0 5px;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: rgba(255, 255, 255, 0.92);
+  }
+  .story-step :global(.s4-policy-name) {
+    margin: 0;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 24px;
+    line-height: 1.08;
+    color: #fff;
+  }
+  .story-step :global(.s4-policy-body) {
+    margin: 0;
+    padding: 12px 14px 14px;
+    color: var(--text);
+    font-size: 14.5px;
+    line-height: 1.6;
+  }
+  .story-step :global(.s4-close) {
+    margin: 0;
+    max-width: 860px;
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.66;
+  }
+
   /* Hairline rule above the human sentence. Echoes the closing rule
    * in Section 06. The two emotionally heaviest beats rhyme. */
   .story-step :global(.human-rule) {
@@ -1385,28 +1476,6 @@
     pointer-events: none;
   }
   .sticky-stage { display: flex; width: 100%; height: 100%; align-items: center; }
-
-  /* Transition strip between the story and the explorer. */
-  .story-transition-strip {
-    background: #F2EFE6;
-    color: rgba(25, 24, 22, 0.72);
-    border-top: 1px solid #E4DFD2;
-    border-bottom: 1px solid #E4DFD2;
-    text-align: center;
-    min-height: 38vh;
-    display: grid; place-items: center;
-    padding: clamp(48px, 8vh, 96px) 24px;
-    font-family: "DM Serif Display", Georgia, serif;
-    font-size: clamp(22px, 3.2vw, 32px);
-    line-height: 1.45;
-  }
-  .transition-inner { max-width: 720px; }
-  .story-transition-strip p { margin: 0; }
-  .story-transition-strip p + p { margin-top: 14px; color: rgba(25, 24, 22, 0.5); }
-
-  .story-explorer-section {
-    width: 100%; margin: 0 auto;
-  }
 
   /* Quiet outro band between the explorer and the footer. */
   .story-outro {
@@ -1541,8 +1610,32 @@
       font-size: 14px;
       line-height: 1.58;
     }
-    .story-explorer-section { width: 100%; }
-    .story-transition-strip { font-size: 19px; padding: 60px 22px; min-height: 36vh; }
+    .story-step :global(.s4-title) { font-size: clamp(30px, 9vw, 40px); }
+    .story-step :global(.s4-intro),
+    .story-step :global(.s4-close) { font-size: 14.5px; }
+    .story-step :global(.s4-policy-name) { font-size: 22px; }
+    .story-step :global(.s4-policy-body) {
+      font-size: 14px;
+      line-height: 1.58;
+    }
+    .story-step :global(.s5-title),
+    .story-step :global(.s6-title),
+    .story-step :global(.s7-title) { font-size: clamp(30px, 9vw, 40px); }
+    .story-step :global(.s5-intro),
+    .story-step :global(.s6-intro),
+    .story-step :global(.s7-intro) { font-size: 14.5px; }
+    .story-step.explorer-inline-step .story-step-layout.is-text {
+      max-width: 100%;
+    }
+    .inline-explorer-shell {
+      margin-top: 14px;
+      width: 100%;
+      border-radius: 10px;
+    }
+    .inline-explorer-shell :global(.story-explorer-app) {
+      height: auto;
+      min-height: 0;
+    }
     .dark-to-warm { height: 80px; }
     .story-step :global(.eq-inline-num) { font-size: 24px; }
     .story-step :global(.closing-takeaway) { font-size: 22px; }

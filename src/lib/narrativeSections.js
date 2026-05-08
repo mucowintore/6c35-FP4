@@ -249,139 +249,125 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* 04 The Cost.
-   *
-   * The two equity figures are now embedded inside one Bloomberg-style
-   * sentence rather than two parallel cells. Reading the sentence is
-   * the comparison. */
+  /* 04 The Policy. Different mechanisms, different tools. */
   {
     id: 'equity',
     chapter: '04',
-    label: 'The Cost',
-    title: 'The burden falls unevenly',
-    theme: 'flip',
-    layout: 'split',
-    stepLayout: 'split',
-    viz: 'map',
-    mapState: 'holdingDimmed',
-    content: `
-      <h2>The burden falls unevenly</h2>
-      <p>The geography of flipping is not random. It maps almost
-        perfectly onto the geography of race and income in Boston.</p>
-
-      <p class="equity-sentence" aria-label="Demographic comparison">
-        <span class="eq-inline-num"
-              data-count-target="87"
-              data-count-suffix="%"
-              data-count-duration="1600"
-              style="color: var(--amber-dark)">0%</span>
-        non-white in flipping tracts, against
-        <span class="eq-inline-num"
-              data-count-target="34"
-              data-count-suffix="%"
-              data-count-duration="1600"
-              data-count-delay="200"
-              style="color: var(--navy)">0%</span>
-        in holding tracts.
-      </p>
-
-      <p>Median renter household income in flipping tracts is $40,625.
-        In holding tracts it is $85,390.</p>
-
-      <div class="human-rule" aria-hidden="true"></div>
-      <p class="human-sentence">A family in Dorchester whose landlord
-        flips their building before the lease ends, and a family in
-        Back Bay whose investor neighbor never leaves, are both living
-        with speculation. They are not living with the same one.</p>
-
-      <p class="section-takeaway">The communities least equipped to
-        absorb speculative pressure are the ones absorbing the most
-        of it.</p>
-    `
-  },
-
-  /* 05 The Paths */
-  {
-    id: 'neighborhood-trajectories',
-    chapter: '05',
-    label: 'The Paths',
-    title: 'The same city, different paths',
-    theme: 'mixed',
-    layout: 'split',
-    stepLayout: 'split',
-    viz: 'timeline',
-    mapState: null,
-    content: `
-      <h2>The same city, different paths</h2>
-      <p>The map shows where holding and flipping dominate today. But
-        it does not show how each neighborhood arrived there.</p>
-      <p>Some places saw investor activity rise steadily over two
-        decades. Others were transformed overnight by the 2008 crisis.
-        Pick any neighborhoods in the chart to lay their trajectories
-        side by side.</p>
-    `
-  },
-
-  /* 06 The Policy */
-  {
-    id: 'policy',
-    chapter: '06',
     label: 'The Policy',
-    title: 'Different markets need different tools',
+    title: 'Different mechanisms require different tools',
     theme: 'policy',
     layout: 'split',
     stepLayout: 'split',
     viz: 'map',
     mapState: 'fullViewAnnotated',
     content: `
-      <h2>Different markets need different tools</h2>
-      <p>A blanket anti-speculation policy will be too weak for
-        $800,000 condos in the Seaport and too blunt for $300,000
-        triple-deckers in Dorchester. The data does not prescribe a
-        single fix. It insists on two.</p>
+      <h3 class="s4-title">Different mechanisms require different tools</h3>
+      <p class="s4-intro">A single anti-speculation policy cannot address both housing
+        markets equally well. The forces reshaping luxury condominium
+        markets are not the same forces reshaping multi-family
+        neighborhoods vulnerable to displacement.</p>
 
-      <div class="policy-callout policy-callout-hold">
-        <span class="policy-tag">Holding zones</span>
-        <strong class="policy-name">A transfer fee on high-value sales</strong>
-        <span class="policy-body">Capture speculative gains where
-          investors are willing to pay 49% above market, and direct
-          them back into the affordable housing fund.</span>
+      <div class="s4-policy-grid" role="group"
+        aria-label="Policy tools for holding and flipping markets">
+        <article class="s4-policy-card s4-policy-hold">
+          <div class="s4-policy-head">
+            <p class="s4-policy-tag">Holding-dominant neighborhoods</p>
+            <p class="s4-policy-name">Luxury transfer fee on high-value sales</p>
+          </div>
+          <p class="s4-policy-body">In holding-dominant neighborhoods,
+            speculation is driven by the long-term accumulation of
+            high-value property assets. This tool captures a portion
+            of those speculative gains and redirects those funds
+            toward affordable housing production.</p>
+        </article>
+
+        <article class="s4-policy-card s4-policy-flip">
+          <div class="s4-policy-head">
+            <p class="s4-policy-tag">Flipping-dominant neighborhoods</p>
+            <p class="s4-policy-name">TOPA protections and anti-flipping fees</p>
+          </div>
+          <p class="s4-policy-body">In flipping-dominant neighborhoods,
+            the immediate risk is rapid turnover and tenant
+            displacement. TOPA (Tenant Opportunity to Purchase Act)
+            gives tenants a right of first refusal before a building
+            is sold to an investor. This can be paired with
+            anti-flipping transfer fees on properties resold within
+            two years to discourage churn.</p>
+        </article>
       </div>
 
-      <div class="policy-callout policy-callout-flip">
-        <span class="policy-tag">Flipping zones</span>
-        <strong class="policy-name">A tenant opportunity to purchase act</strong>
-        <span class="policy-body">Give tenants the first right to buy
-          their building before it can be sold to an investor, so
-          flipping cannot quietly displace the families already living
-          there.</span>
-      </div>
-
-      <div class="closing-rule" aria-hidden="true"></div>
-      <p class="closing-takeaway">This data is public. These tracts
-        are named. A policy that treats Back Bay and Dorchester as
-        the same market will fail both.</p>
-      <p class="closing-footnote">A policy choice by the Commonwealth
-        of Massachusetts, not a forecast.</p>
+      <p class="s4-close">Treating these markets as identical
+        risks creating policies that are too weak in some neighborhoods
+        and too blunt in others.</p>
     `
   },
 
-  /* 07 Explorer.
-   *
-   * The reader has just walked the entire argument. The body copy
-   * here used to repeat it. One sentence is enough. */
+  /* 05 Interactive Map */
   {
     id: 'explorer',
-    chapter: '07',
+    chapter: '05',
     label: 'Explore',
-    title: 'Now it is your turn',
+    title: 'Explore every tract',
     theme: 'mixed',
-    layout: 'explorer',
-    viz: 'explorer',
-    mapState: 'interactive',
+    layout: 'split',
+    stepLayout: 'text',
+    viz: null,
+    mapState: null,
     content: `
-      <h2>Now it is your turn</h2>
-      <p>Hover any tract to read its full investor profile.</p>
+      <h3 class="s5-title">Explore every tract</h3>
+      <p class="s5-intro">Hover any tract to inspect its investor
+        profile, housing mix, and comparative metrics against city
+        averages.</p>
+    `
+  },
+
+  /* 06 Neighborhood trajectories */
+  {
+    id: 'neighborhood-trajectories',
+    chapter: '06',
+    label: 'The Paths',
+    title: 'Today’s housing landscape emerged through decades of uneven change',
+    theme: 'mixed',
+    layout: 'split',
+    stepLayout: 'split',
+    viz: 'timeline',
+    mapState: null,
+    content: `
+      <h3 class="s6-title">Today’s housing landscape emerged through decades of uneven change.</h3>
+      <p class="s6-intro">Some neighborhoods experienced steady investor
+        growth over time. Others saw dramatic shifts after the 2008
+        financial crisis. In some places, flipping intensified rapidly.
+        In others, holding activity became dominant.</p>
+      <p class="s6-intro">Compare neighborhoods to see how investor
+        behavior, pricing patterns, and housing turnover evolved across
+        Boston over the past two decades.</p>
+    `
+  },
+
+  /* 07 Takeaways */
+  {
+    id: 'policy',
+    chapter: '07',
+    label: 'Takeaways',
+    title: 'Where intervention could matter most',
+    theme: 'policy',
+    layout: 'split',
+    stepLayout: 'text',
+    viz: null,
+    mapState: null,
+    content: `
+      <h3 class="s7-title">Where intervention could matter most</h3>
+      <p class="s7-intro">Housing markets are not abstract systems.
+        They shape whether families can remain in their neighborhoods,
+        whether renters can absorb rising costs, and whether
+        communities retain long-term stability.</p>
+      <p class="s7-intro">By identifying where speculative pressure is
+        strongest and what form it takes, policymakers can better
+        target interventions where they may have the greatest positive
+        impact.</p>
+      <p class="s7-intro">The neighborhoods with the strongest overlap
+        between speculative pressure and vulnerability to displacement
+        are where targeted housing policy could matter most.</p>
     `
   }
 ];
