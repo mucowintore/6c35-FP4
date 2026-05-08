@@ -3,16 +3,13 @@
   import {
     buildOverviewSections,
     buildDetailModel,
-    drawDivergingBars,
-    drawPairedDivergingBars
+    drawDivergingBars
   } from '$lib/panelContent';
 
   export let hoveredTract = null;
   export let counts = { holdCount: 0, flipCount: 0, mixedCount: 0, lowDataCount: 0 };
   export let ranges = {};
   export let cityAverages = {};
-  export let holdingAverages = {};
-  export let flippingAverages = {};
 
   const dispatch = createEventDispatcher();
 
@@ -26,7 +23,6 @@
   let overviewTab = 'overview';
 
   let lastDrawnGeoid = null;
-  let pairedDrawn = false;
   let lastBoundTiles = null;
 
   $: overviewSections = buildOverviewSections(counts);
@@ -37,10 +33,6 @@
   } else {
     detail = null;
     lastDrawnGeoid = null;
-  }
-
-  $: if (!activeTract) {
-    pairedDrawn = false;
   }
 
   /* Bind hover and focus on the overview's preview tiles. The tiles
@@ -84,15 +76,6 @@
       }
     }
 
-    if (!activeTract && overviewTab === 'overview' && overviewPanelEl
-        && holdingAverages && Object.keys(holdingAverages).length > 0 && !pairedDrawn) {
-      var pairedHost = overviewPanelEl.querySelector('.paired-bars-container');
-      if (pairedHost) {
-        drawPairedDivergingBars(pairedHost, holdingAverages, flippingAverages, ranges, cityAverages);
-        pairedDrawn = true;
-      }
-    }
-
     bindPreviewTiles();
   });
 
@@ -109,7 +92,7 @@
 
   {#if !activeTract}
     <div class="overview-tabs">
-      <button class:active={overviewTab === 'overview'} on:click={() => { overviewTab = 'overview'; pairedDrawn = false; }}>Overview</button>
+      <button class:active={overviewTab === 'overview'} on:click={() => (overviewTab = 'overview')}>Overview</button>
       <button class:active={overviewTab === 'howToExplore'} on:click={() => (overviewTab = 'howToExplore')}>
         How to explore
       </button>

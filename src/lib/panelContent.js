@@ -83,19 +83,7 @@ export function buildOverviewSections({ holdCount, flipCount }) {
 
     <div class="explorer-tile-hint" aria-hidden="true">
       Hover a tile to preview that subset on the map.
-    </div>
-
-    <div class="overview-section-divider"></div>
-
-    <div class="overview-title overview-section-title">
-      Citywide comparison
-    </div>
-    <div class="overview-text">
-      Holding-dominant tracts (navy) compared with flipping-dominant
-      tracts (amber) across six core metrics. The center line is the
-      city average for each measure.
-    </div>
-    <div class="paired-bars-container"></div>`;
+    </div>`;
 
   const howToExplore = `
     <div class="overview-title">How to explore</div>
@@ -154,7 +142,10 @@ export function buildDetailModel(props) {
       deviations, so the tract is not classified as either type.`;
   }
 
-  const policyName = props.policy_fit || 'Layered approach';
+  let policyName = props.policy_fit || 'Layered approach';
+  if (policyName === 'TOPA / anti-flip / stabilization' || policyName === 'TOPA + Flip + Stabilization') {
+    policyName = 'TOPA + Anti-flip transfer fees';
+  }
   let policyDesc = '';
   if (dominant === 'holding') {
     policyDesc = `A <b>transfer fee on high-value condominium sales</b>
@@ -195,6 +186,28 @@ function formatDeltaLabel(key, delta) {
     return (delta >= 0 ? '+' : '-') + compact;
   }
   return (delta >= 0 ? '+' : '-') + (Math.abs(delta) * 100).toFixed(1) + ' pts';
+}
+
+function interpretationText(key, delta) {
+  var nearBaseline = key === 'median_price'
+    ? Math.abs(delta) < 25000
+    : Math.abs(delta) < 0.015;
+  if (nearBaseline) return 'Near city baseline';
+
+  if (key === 'median_price') {
+    return delta > 0 ? 'Higher capital pressure' : 'Lower capital pressure';
+  }
+  if (key === 'condo_share') {
+    return delta > 0 ? 'Stronger luxury-market signal' : 'Weaker luxury-market signal';
+  }
+  if (key === 'flip_rate') {
+    return delta > 0 ? 'Higher turnover risk' : 'Lower turnover risk';
+  }
+  if (key === 'r23_share') {
+    return delta > 0 ? 'Higher tenant exposure' : 'Lower tenant exposure';
+  }
+
+  return delta > 0 ? 'Above city baseline' : 'Below city baseline';
 }
 
 function policyEvidenceRows(props, ranges, cityAverages) {
@@ -266,10 +279,10 @@ export function drawDivergingBars(container, props, ranges, cityAverages, accent
   if (rows.length === 0) return;
 
   var W = Math.max(330, (container.clientWidth || 396) - 4);
-  var rowH = 50;
+  var rowH = 54;
   var barH = 10;
-  var ml = 80, mr = 162;
-  var barW = Math.max(120, W - ml - mr);
+  var ml = 84, mr = 104;
+  var barW = Math.max(170, W - ml - mr);
   var totalH = 8 + rows.length * rowH + 8;
 
   var svg = d3.select(container).append('svg')
@@ -336,6 +349,17 @@ export function drawDivergingBars(container, props, ranges, cityAverages, accent
     labelLine.append('tspan')
       .attr('fill', '#7F7A6F')
       .text(formatDeltaLabel(metric.key, metric.delta) + ')');
+
+    svg.append('text')
+      .attr('x', ml + 6)
+      .attr('y', barY + barH + 13)
+      .attr('text-anchor', 'start')
+      .attr('dominant-baseline', 'central')
+      .attr('fill', '#8E897F')
+      .attr('font-family', 'Plus Jakarta Sans, sans-serif')
+      .attr('font-size', '11px')
+      .attr('font-weight', '600')
+      .text(interpretationText(metric.key, metric.delta));
   }
 }
 

@@ -67,8 +67,6 @@
   let geoData = null;
   let ranges = {};
   let cityAverages = {};
-  let holdingAverages = {};
-  let flippingAverages = {};
   let counts = { holdCount: 0, flipCount: 0, mixedCount: 0, lowDataCount: 0 };
   let loadError = '';
 
@@ -105,8 +103,6 @@
       mapIntroVizVisible = false;
     }
   }
-
-  function themeOf(s) { return 'theme-' + (s?.theme ?? 'mixed'); }
 
   function trackStep(node) {
     observedNodes = [...observedNodes, node];
@@ -368,8 +364,6 @@
       counts = ld.counts;
       ranges = ld.ranges;
       cityAverages = ld.cityAverages;
-      holdingAverages = ld.holdingAverages;
-      flippingAverages = ld.flippingAverages;
       geoData = ld.geoData;
     } catch (e) {
       console.error('Could not load story data:', e);
@@ -505,7 +499,6 @@
             <div class="story-step-layout"
               class:is-text={section.stepLayout === 'text'}
               class:is-split={section.stepLayout !== 'text'}>
-              <div class="chapter-label {themeOf(section)}">{section.chapter} · {section.label}</div>
               <StoryStepBody html={section.content} />
               {#if section.id === 'explorer'}
                 <div class="inline-explorer-shell">
@@ -513,9 +506,7 @@
                     {geoData}
                     {ranges}
                     {counts}
-                    {cityAverages}
-                    {holdingAverages}
-                    {flippingAverages} />
+                    {cityAverages} />
                 </div>
               {/if}
             </div>
@@ -734,8 +725,14 @@
     grid-template-columns: minmax(72px, 0.12fr) minmax(0, 1fr);
   }
   .story-scroll-region.explorer-wide-mode .story-progress {
-    opacity: 0;
-    pointer-events: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .story-scroll-region.explorer-wide-mode .prog-text {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    transform: none !important;
   }
   .story-content-plane {
     grid-area: content;
@@ -854,6 +851,7 @@
   .story-step.explorer-inline-step {
     justify-content: flex-start;
     padding: clamp(8px, 1.2vh, 16px) 0 clamp(10px, 2vh, 22px);
+    --explorer-inline-shift: 30px;
   }
   .story-step.explorer-inline-step .story-step-layout.is-text {
     max-width: min(1360px, 100%);
@@ -880,6 +878,7 @@
   }
   .story-step.explorer-inline-step :global(.s5-title) {
     margin: 0 0 8px;
+    margin-left: calc((-1 * var(--story-progress-reclaim)) + var(--explorer-inline-shift));
   }
   .inline-explorer-shell {
     margin-top: 8px;
@@ -892,27 +891,15 @@
     background: #fff;
   }
   .story-step.explorer-inline-step .inline-explorer-shell {
-    width: calc(100% + var(--story-progress-reclaim));
+    width: calc(100% + var(--story-progress-reclaim) - var(--explorer-inline-shift));
     max-width: none;
-    margin-left: calc(-1 * var(--story-progress-reclaim));
+    margin-left: calc((-1 * var(--story-progress-reclaim)) + var(--explorer-inline-shift));
   }
   .inline-explorer-shell :global(.story-explorer-app) {
     height: clamp(620px, 78vh, 920px);
     min-height: 620px;
     border-radius: 0;
   }
-
-  .chapter-label {
-    margin-bottom: 16px;
-    font-family: "Plus Jakarta Sans", sans-serif;
-    font-size: 11px; font-weight: 500;
-    letter-spacing: 0.04em;
-    color: var(--faint);
-    transition: color 600ms cubic-bezier(0.4, 0, 0.2, 1);
-  }
-  .chapter-label.theme-hold { color: var(--navy); }
-  .chapter-label.theme-flip { color: var(--amber-dark); }
-  .chapter-label.theme-policy { color: var(--ink); }
 
   .story-step :global(.section-takeaway) {
     font-family: "DM Serif Display", Georgia, serif;
@@ -1530,6 +1517,9 @@
     .story-progress { display: none; }
     .story-step.explorer-inline-step .inline-explorer-shell {
       width: 100%;
+      margin-left: 0;
+    }
+    .story-step.explorer-inline-step :global(.s5-title) {
       margin-left: 0;
     }
   }

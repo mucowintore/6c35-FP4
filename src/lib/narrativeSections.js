@@ -60,7 +60,7 @@ export const NARRATIVE_SECTIONS = [
   {
     id: 'regime-shift',
     chapter: '01',
-    label: 'The Shift',
+    label: 'Investor Strategies',
     title: 'Not all speculation works the same way',
     theme: 'hold',
     layout: 'split',
@@ -113,7 +113,7 @@ export const NARRATIVE_SECTIONS = [
   {
     id: 'map-intro',
     chapter: '02',
-    label: 'The Map',
+    label: 'Geographic Divide',
     title: 'Two markets hiding in plain sight',
     theme: 'mixed',
     layout: 'split',
@@ -211,7 +211,7 @@ export const NARRATIVE_SECTIONS = [
   {
     id: 'price-wedge',
     chapter: '03',
-    label: 'The Wedge',
+    label: 'Price Wedge',
     title: 'Two fundamentally different strategies',
     theme: 'mixed',
     layout: 'split',
@@ -253,7 +253,7 @@ export const NARRATIVE_SECTIONS = [
   {
     id: 'equity',
     chapter: '04',
-    label: 'The Policy',
+    label: 'Policy Tools',
     title: 'Different mechanisms require different tools',
     theme: 'policy',
     layout: 'split',
@@ -306,7 +306,7 @@ export const NARRATIVE_SECTIONS = [
   {
     id: 'explorer',
     chapter: '05',
-    label: 'Explore',
+    label: 'Policy Explorer',
     title: 'Policy Exploration Map',
     theme: 'mixed',
     layout: 'split',
@@ -322,7 +322,7 @@ export const NARRATIVE_SECTIONS = [
   {
     id: 'neighborhood-trajectories',
     chapter: '06',
-    label: 'The Paths',
+    label: 'Trajectories',
     title: 'Today’s housing landscape emerged through decades of uneven change',
     theme: 'mixed',
     layout: 'split',

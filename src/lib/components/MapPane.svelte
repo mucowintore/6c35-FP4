@@ -181,9 +181,6 @@
   <div class="site-title">
     Tract Policy Explorer
   </div>
-  <div class="explorer-chapter-tag" aria-label="Section five of seven, Explore">
-    05 &middot; Explore
-  </div>
 </header>
 
 <div class="context-bar" id="context-bar">

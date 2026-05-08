@@ -12,8 +12,6 @@
   export let ranges = {};
   export let counts = { holdCount: 0, flipCount: 0, mixedCount: 0, lowDataCount: 0 };
   export let cityAverages = {};
-  export let holdingAverages = {};
-  export let flippingAverages = {};
 
   let focusMode = 'all';
   let hoveredTract = null;
@@ -143,8 +141,6 @@
     {counts}
     {ranges}
     {cityAverages}
-    {holdingAverages}
-    {flippingAverages}
     on:preview={handlePreview}
     on:previewClear={handlePreviewClear}
   />
