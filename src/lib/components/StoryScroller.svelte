@@ -78,10 +78,11 @@
     : null;
   $: currentStoryStepId = stepCursorId || activeId || '';
   $: currentStoryStep = storySteps.find((s) => s.id === currentStoryStepId) ?? activeSection;
-  $: activeStepLayout = currentStoryStep?.stepLayout ?? 'split';
+  $: activeStepLayout = activeSection?.stepLayout ?? currentStoryStep?.stepLayout ?? 'split';
   $: showVizLane = activeStepLayout === 'split';
-  $: mapDelayedHidden = currentStoryStepId === 'map-intro' && !mapIntroVizVisible;
-  $: explorerWideMode = currentStoryStepId === 'explorer' || activeSection?.id === 'explorer';
+  $: mapDelayedHidden = activeSection?.id === 'map-intro' && !mapIntroVizVisible;
+  $: explorerWideMode = activeSection?.id === 'explorer';
+  $: activeObservedStepId = activeSection?.id ?? '';
 
   function queueMapIntroReveal() {
     if (mapIntroRevealRaf) cancelAnimationFrame(mapIntroRevealRaf);
@@ -92,9 +93,9 @@
     });
   }
 
-  $: if (currentStoryStepId !== prevStepId) {
-    prevStepId = currentStoryStepId;
-    if (currentStoryStepId === 'map-intro') queueMapIntroReveal();
+  $: if (activeObservedStepId !== prevStepId) {
+    prevStepId = activeObservedStepId;
+    if (activeObservedStepId === 'map-intro') queueMapIntroReveal();
     else {
       if (mapIntroRevealRaf) {
         cancelAnimationFrame(mapIntroRevealRaf);
@@ -709,7 +710,9 @@
   /* Progress rail + per-step layout plane. */
   .story-scroll-region {
     --story-top-rail: 28px;
-    --story-viz-width: clamp(500px, 39vw, 680px);
+    --story-left-shift: clamp(18px, 2vw, 34px);
+    --story-viz-base-width: clamp(500px, 39vw, 680px);
+    --story-viz-width: calc(var(--story-viz-base-width) + var(--story-left-shift));
     --story-viz-gap: clamp(16px, 2.2vw, 36px);
     --story-progress-reclaim: clamp(84px, 10vw, 156px);
     display: grid;
@@ -738,6 +741,8 @@
     grid-area: content;
     display: grid;
     position: relative;
+    width: calc(100% + var(--story-left-shift));
+    margin-left: calc(-1 * var(--story-left-shift));
   }
   .story-content-plane > * {
     grid-area: 1 / 1;
@@ -752,6 +757,7 @@
     justify-content: center;
     gap: 22px;
     padding-left: 8px;
+    margin-left: calc(-1 * var(--story-left-shift));
   }
 
   .story-progress .progress-rail {
@@ -826,6 +832,7 @@
     flex-direction: column;
     position: relative;
     z-index: 2;
+    pointer-events: none;
   }
 
   .story-step {
@@ -834,7 +841,13 @@
     flex-direction: column; justify-content: center;
     padding: clamp(18px, 4vh, 42px) 0;
   }
-  .story-step-layout { width: 100%; }
+  .story-step-layout {
+    width: 100%;
+    pointer-events: none;
+  }
+  .story-step-layout > * {
+    pointer-events: auto;
+  }
   .story-step-layout.is-text {
     max-width: min(940px, 100%);
   }
@@ -1512,7 +1525,8 @@
     .story-scroll-region {
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas: "content";
-      --story-viz-width: clamp(360px, 42vw, 500px);
+      --story-left-shift: 0px;
+      --story-viz-base-width: clamp(360px, 42vw, 500px);
     }
     .story-progress { display: none; }
     .story-step.explorer-inline-step .inline-explorer-shell {

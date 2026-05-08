@@ -32,7 +32,7 @@
     mapState = activeSection.mapState;
   }
   $: sectionId = activeSection?.id ?? 'none';
-  $: useCompactChartFrame = viz === 'timeseries' || viz === 'timeline';
+  $: useCompactChartFrame = viz === 'timeseries';
 
   /* Per-layer "is this section the active one" flags. */
   $: tsActive = viz === 'timeseries';
@@ -139,7 +139,7 @@
       </div>
     </div>
 
-    <div class="chart-stage layer layer-from-right"
+    <div class="chart-stage timeline-stage layer layer-from-right"
          class:active={tlActive}
          aria-hidden={!tlActive}
          bind:this={tlLayerEl}>
@@ -246,6 +246,10 @@
     flex: 1;
     min-height: 0;
     overflow: hidden;
+  }
+  .timeline-stage {
+    padding-left: 6px;
+    padding-right: 4px;
   }
 
   .stage-message {

@@ -116,7 +116,7 @@
     var cw = wrapperEl.clientWidth;
     if (cw < 200) cw = 720;
     var ch = 380;
-    var margin = { top: 22, right: 132, bottom: 38, left: 56 };
+    var margin = { top: 22, right: 90, bottom: 38, left: 40 };
     var font = 'Plus Jakarta Sans, sans-serif';
     var mono = 'Plus Jakarta Sans, sans-serif';
     var serif = '"DM Serif Display", Georgia, serif';

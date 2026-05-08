@@ -220,9 +220,10 @@ export const NARRATIVE_SECTIONS = [
     mapState: null,
     content: `
       <h3 class="s3-title">Two fundamentally different investment strategies</h3>
-      <p class="s3-intro">The price wedge shows that holding and flipping
-        investors do not just invest in different places. They buy with
-        different logics, different risk appetites, and different timing.</p>
+      <p class="s3-intro">The wedge in investor price premiums by strategy
+        shows that holding and flipping
+        investors do not just invest in different places. They are
+        pursuing fundamentally different investment strategies.</p>
 
       <div class="s3-strategy-grid" role="group"
         aria-label="How holding and flipping investors buy differently">
@@ -231,9 +232,10 @@ export const NARRATIVE_SECTIONS = [
             <p class="s3-strategy-name">Holding</p>
           </div>
           <p class="s3-strategy-body">In holding tracts, investors
-            consistently pay far above non-investors for comparable
-            properties, with premiums above 80% in recent years. The
-            property is treated as a long-term financial asset.</p>
+            pay far above non-investors for comparable properties,
+            with premiums above 80% in recent years. Property is
+            treated as a long-term financial asset, and overpaying is
+            the cost of entry.</p>
         </article>
 
         <article class="s3-strategy-card s3-strategy-flip">
