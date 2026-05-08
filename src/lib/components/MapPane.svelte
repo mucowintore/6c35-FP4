@@ -179,10 +179,10 @@
 
 <header class="site-header">
   <div class="site-title">
-    When Boston says &ldquo;speculation,&rdquo; whose <em>neighborhood</em> does it mean?
+    Tract Policy Explorer
   </div>
-  <div class="explorer-chapter-tag" aria-label="Section seven of seven, Explore">
-    07 &middot; Explore
+  <div class="explorer-chapter-tag" aria-label="Section five of seven, Explore">
+    05 &middot; Explore
   </div>
 </header>
 

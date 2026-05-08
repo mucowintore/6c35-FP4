@@ -307,17 +307,14 @@ export const NARRATIVE_SECTIONS = [
     id: 'explorer',
     chapter: '05',
     label: 'Explore',
-    title: 'Explore every tract',
+    title: 'Policy Exploration Map',
     theme: 'mixed',
     layout: 'split',
     stepLayout: 'text',
     viz: null,
     mapState: null,
     content: `
-      <h3 class="s5-title">Explore every tract</h3>
-      <p class="s5-intro">Hover any tract to inspect its investor
-        profile, housing mix, and comparative metrics against city
-        averages.</p>
+      <h3 class="s5-title">Policy Exploration Map</h3>
     `
   },
 

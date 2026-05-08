@@ -84,6 +84,7 @@
   $: showVizLane = activeStepLayout === 'split';
   $: mapDelayedHidden = currentStoryStepId === 'map-intro' && !mapIntroVizVisible;
   $: wedgeVizEmphasis = activeSection?.id === 'price-wedge';
+  $: explorerWideMode = currentStoryStepId === 'explorer' || activeSection?.id === 'explorer';
   $: geoAndWedgeWideViz =
     activeSection?.id === 'map-intro'
     || activeSection?.id === 'price-wedge'
@@ -461,7 +462,9 @@
 
   <div class="dark-to-warm" aria-hidden="true"></div>
 
-  <section class="story-scroll-region" bind:this={storyRegionEl}
+  <section class="story-scroll-region"
+    class:explorer-wide-mode={explorerWideMode}
+    bind:this={storyRegionEl}
     aria-label="Scrollytelling narrative">
     <nav class="story-progress" aria-label="Story sections">
       <span class="progress-rail" aria-hidden="true"></span>
@@ -733,6 +736,17 @@
     margin: 0 auto;
     padding: var(--story-top-rail) clamp(18px, 4vw, 64px) 14vh;
   }
+  .story-scroll-region.explorer-wide-mode {
+    grid-template-columns: minmax(0, 0) minmax(0, 1fr);
+    gap: 0;
+  }
+  .story-scroll-region.explorer-wide-mode .story-progress {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    padding: 0;
+    overflow: hidden;
+  }
   .story-content-plane {
     grid-area: content;
     display: grid;
@@ -858,6 +872,10 @@
   .story-step.chapter-one-step :global(.story-copy) {
     max-width: 100%;
   }
+  .story-step.explorer-inline-step {
+    justify-content: flex-start;
+    padding: clamp(8px, 1.2vh, 16px) 0 clamp(10px, 2vh, 22px);
+  }
   .story-step.explorer-inline-step .story-step-layout.is-text {
     max-width: min(1320px, 100%);
   }
@@ -873,7 +891,6 @@
     color: var(--ink);
     max-width: 760px;
   }
-  .story-step :global(.s5-intro),
   .story-step :global(.s6-intro),
   .story-step :global(.s7-intro) {
     margin: 0 0 16px;
@@ -882,8 +899,11 @@
     font-size: 15.5px;
     line-height: 1.66;
   }
+  .story-step.explorer-inline-step :global(.s5-title) {
+    margin: 0 0 8px;
+  }
   .inline-explorer-shell {
-    margin-top: 16px;
+    margin-top: 8px;
     width: min(1260px, 100%);
     border: 1px solid var(--rule);
     border-radius: 12px;
@@ -892,8 +912,8 @@
     background: #fff;
   }
   .inline-explorer-shell :global(.story-explorer-app) {
-    height: clamp(560px, 72vh, 860px);
-    min-height: 560px;
+    height: clamp(620px, 78vh, 920px);
+    min-height: 620px;
     border-radius: 0;
   }
 
@@ -1621,9 +1641,14 @@
     .story-step :global(.s5-title),
     .story-step :global(.s6-title),
     .story-step :global(.s7-title) { font-size: clamp(30px, 9vw, 40px); }
-    .story-step :global(.s5-intro),
     .story-step :global(.s6-intro),
     .story-step :global(.s7-intro) { font-size: 14.5px; }
+    .story-step.explorer-inline-step {
+      padding-top: 8px;
+    }
+    .story-step.explorer-inline-step :global(.s5-title) {
+      margin-bottom: 6px;
+    }
     .story-step.explorer-inline-step .story-step-layout.is-text {
       max-width: 100%;
     }

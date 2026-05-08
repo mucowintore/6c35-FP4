@@ -19,6 +19,15 @@ const METRIC_EXPLANATIONS = {
   pct_nonwhite: 'ACS 5-Year Estimates, Census 2020'
 };
 
+const POLICY_METRIC_SET = ['median_price', 'condo_share', 'flip_rate', 'r23_share'];
+
+const POLICY_SIGNAL_LABEL = {
+  median_price: 'Holding signal',
+  condo_share: 'Holding signal',
+  flip_rate: 'Flipping signal',
+  r23_share: 'Flipping signal'
+};
+
 function fmtForKey(key) {
   return key === 'median_price' ? formatDollars : formatPercent;
 }
@@ -33,9 +42,9 @@ function fmtForKey(key) {
 export function buildOverviewSections({ holdCount, flipCount }) {
   const overview = `
     <div class="explorer-welcome">
-      Now it is your turn. Hover any tract to read its full investor
-      profile. Click to lock the panel on that tract. The metrics
-      below are how every tract earned its color.
+      Use this map to identify where speculative pressure is strongest,
+      then inspect the policy response most aligned with local market
+      behavior. Hover any tract to see the recommendation and evidence.
     </div>
 
     <div class="overview-section-divider"></div>
@@ -91,10 +100,9 @@ export function buildOverviewSections({ holdCount, flipCount }) {
   const howToExplore = `
     <div class="overview-title">How to explore</div>
     <div class="how-to">
-      <b>Hover</b> any tract to see its full investor profile, a diverging bar
-      chart comparing it to the city average, and a contextual description. When
-      you hover in the default "All tracts" view, the opposite type will fade
-      out, revealing the geographic split between the two markets.
+      <b>Hover</b> any tract to see a recommended policy response and the top
+      three metrics that justify it. The chart shows each metric's deviation
+      from the city average.
     </div>
     <div class="how-to">
       <b>Neighborhood buttons</b> on the left edge of the map zoom to key areas.
@@ -107,35 +115,7 @@ export function buildOverviewSections({ holdCount, flipCount }) {
       tract IDs appear at high zoom. Drag to pan.
     </div>`;
 
-  const about = `
-    <div class="overview-title">Classification method</div>
-    <div class="overview-text">
-      Each tract receives two composite scores. The hold score combines
-      z-scores of median price, condo share, and top-decile investor
-      presence. The flip score combines z-scores of flip rate, buy-side
-      flip rate, and 2-3 family property share. A tract is classified
-      when one score exceeds the other by more than 0.75 standard
-      deviations. This threshold was validated with K-Means clustering
-      (85.5% agreement) and Random Forest classification (F1&nbsp;=&nbsp;0.894).
-    </div>
-
-    <div class="overview-section-divider"></div>
-    <div class="overview-title overview-section-title">About this project</div>
-    <div class="overview-text">
-      This project was developed with guidance and feedback from the
-      <a href="https://www.mapc.org/" target="_blank"
-         rel="noopener noreferrer">Metropolitan Area Planning
-      Commission&nbsp;(MAPC)</a>.
-    </div>
-
-    <div class="source-credit">
-      Data: MAPC Residential Sales Transactions 2000&ndash;2022,
-      American Community Survey 5-Year Estimates, Census 2020.
-      173 census tracts with &ge;250 recorded sales each.<br>
-      Joseph Firmansyah, Jessica Shoemaker, Jean-Michel Mucowintore
-    </div>`;
-
-  return { overview, howToExplore, about };
+  return { overview, howToExplore };
 }
 
 export function buildDetailModel(props) {
@@ -178,27 +158,66 @@ export function buildDetailModel(props) {
   let policyDesc = '';
   if (dominant === 'holding') {
     policyDesc = `A <b>transfer fee on high-value condominium sales</b>
-      would capture a portion of speculative gains from luxury transactions
-      and redirect those funds toward affordable housing production in the
-      neighborhoods that need it most.`;
+      can recapture speculative gains from luxury transactions and
+      redirect those funds toward affordable housing production and
+      preservation.`;
   } else if (dominant === 'flipping') {
     policyDesc = `The <b>Tenant Opportunity to Purchase Act (TOPA)</b> gives
       tenants in multi-family rental buildings the right of first refusal
       when their building is sold. Combined with an <b>anti-flip transfer
-      fee</b> on properties resold within two years, these measures can slow
-      the rapid turnover that drives displacement in communities like this one.
-      Note: TOPA applies to multi-family rental properties, which make up
-      <b>${(props.r23_share * 100).toFixed(0)}%</b> of the housing stock
-      in this tract.`;
+      fee</b> on properties resold within two years, this policy package
+      can discourage churn and reduce displacement pressure.`;
   } else {
-    policyDesc = `Both transfer fees and tenant protections may be warranted
-      here, calibrated to the relative intensity of each strategy.`;
+    policyDesc = `This tract shows both holding and flipping pressures.
+      A <b>layered response</b> is appropriate: combine transfer-fee tools
+      with tenant protections and anti-flipping fees.`;
   }
 
   return {
     neighborhood, accent, barColor, tagLabel, tagBg,
     contextText, policyName, policyDesc
   };
+}
+
+function formatDeltaLabel(key, delta) {
+  if (key === 'median_price') {
+    var abs = Math.abs(delta);
+    var compact = '';
+    if (abs >= 1e6) {
+      var m = abs / 1e6;
+      compact = (m >= 10 ? Math.round(m).toString() : m.toFixed(1).replace(/\.0$/, '')) + 'M';
+    } else if (abs >= 1e3) {
+      var k = abs / 1e3;
+      compact = (k >= 100 ? Math.round(k).toString() : k.toFixed(1).replace(/\.0$/, '')) + 'K';
+    } else {
+      compact = Math.round(abs).toString();
+    }
+    return (delta >= 0 ? '+' : '-') + compact;
+  }
+  return (delta >= 0 ? '+' : '-') + (Math.abs(delta) * 100).toFixed(1) + ' pts';
+}
+
+function policyEvidenceRows(props, ranges, cityAverages) {
+  var rows = [];
+
+  POLICY_METRIC_SET.forEach(function (key) {
+    var val = props[key];
+    var avg = cityAverages[key];
+    var rng = ranges[key];
+    if (val == null || avg == null || !Number.isFinite(val) || !Number.isFinite(avg)) return;
+    if (!rng || rng.max === rng.min) return;
+    rows.push({
+      key: key,
+      label: BAR_METRICS.find(function (m) { return m.key === key; })?.label || key,
+      value: val,
+      avg: avg,
+      range: rng,
+      delta: val - avg,
+      signal: POLICY_SIGNAL_LABEL[key] || ''
+    });
+  });
+
+  return rows;
 }
 
 export function renderMetric(label, value, key, formatter, color, ranges, cityAverages) {
@@ -243,24 +262,27 @@ export function drawDivergingBars(container, props, ranges, cityAverages, accent
   if (!container) return;
   container.innerHTML = '';
 
-  var W = 396, rowH = 36, barH = 14;
-  var ml = 76, mr = 54;
-  var barW = W - ml - mr;
-  var totalH = 8 + BAR_METRICS.length * rowH + 8;
+  var rows = policyEvidenceRows(props, ranges, cityAverages);
+  if (rows.length === 0) return;
+
+  var W = Math.max(330, (container.clientWidth || 396) - 4);
+  var rowH = 50;
+  var barH = 10;
+  var ml = 80, mr = 162;
+  var barW = Math.max(120, W - ml - mr);
+  var totalH = 8 + rows.length * rowH + 8;
 
   var svg = d3.select(container).append('svg')
-    .attr('width', W).attr('height', totalH).style('max-width', '100%');
+    .attr('width', W).attr('height', totalH).style('width', '100%').style('max-width', '100%');
 
-  for (var i = 0; i < BAR_METRICS.length; i++) {
-    var metric = BAR_METRICS[i];
-    var val = props[metric.key];
-    var avg = cityAverages[metric.key];
-    var rng = ranges[metric.key];
-
-    if (val == null || avg == null || !rng || rng.max === rng.min) continue;
-
+  for (var i = 0; i < rows.length; i++) {
+    var metric = rows[i];
+    var val = metric.value;
+    var avg = metric.avg;
+    var rng = metric.range;
     var rowY = 8 + i * rowH;
     var barY = rowY + (rowH - barH) / 2;
+    var barMidY = barY + barH / 2;
 
     var scale = d3.scaleLinear().domain([rng.min, rng.max]).range([0, barW]);
     var cx = scale(avg);
@@ -284,26 +306,36 @@ export function drawDivergingBars(container, props, ranges, cityAverages, accent
     /* center line marks the city average */
     svg.append('line')
       .attr('x1', ml + cx).attr('x2', ml + cx)
-      .attr('y1', barY - 4).attr('y2', barY + barH + 4)
+      .attr('y1', barY - 2).attr('y2', barY + barH + 2)
       .attr('stroke', '#9C9890').attr('stroke-width', 1);
 
     /* metric label on the left */
     svg.append('text')
-      .attr('x', ml - 8).attr('y', rowY + rowH / 2)
+      .attr('x', ml - 8).attr('y', barMidY)
       .attr('text-anchor', 'end').attr('dominant-baseline', 'central')
-      .attr('fill', '#9C9890').attr('font-size', '11px')
+      .attr('fill', '#8A867C').attr('font-size', '12px')
       .attr('font-family', 'Plus Jakarta Sans, sans-serif')
-      .attr('font-weight', '600')
+      .attr('font-weight', '700')
       .text(metric.label);
 
-    /* tract value on the right */
-    svg.append('text')
-      .attr('x', ml + barW + 6).attr('y', rowY + rowH / 2)
+    var labelLine = svg.append('text')
+      .attr('x', ml + barW + 8).attr('y', barMidY)
       .attr('text-anchor', 'start').attr('dominant-baseline', 'central')
-      .attr('fill', '#46433C').attr('font-size', '11px')
       .attr('font-family', 'Plus Jakarta Sans, sans-serif')
-      .attr('font-weight', '500')
+      .attr('font-size', '10.5px')
+      .attr('font-weight', '600');
+
+    labelLine.append('tspan')
+      .attr('fill', '#46433C')
       .text(fmtForKey(metric.key)(val));
+
+    labelLine.append('tspan')
+      .attr('fill', '#9C9890')
+      .text(' (');
+
+    labelLine.append('tspan')
+      .attr('fill', '#7F7A6F')
+      .text(formatDeltaLabel(metric.key, metric.delta) + ')');
   }
 }
 

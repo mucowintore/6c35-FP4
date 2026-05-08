@@ -282,8 +282,8 @@ body {
   padding: 0 22px;
   font-size: 13px;
   color: var(--sub);
-  border-bottom: 1px solid var(--rule);
-  background: var(--surface);
+  border-bottom: 1px solid #E4DFD3;
+  background: #FCFCFA;
   line-height: 1.52;
   letter-spacing: 0.01em;
   word-spacing: 0.04em;
@@ -777,7 +777,11 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.1em;
   color: var(--faint);
-  margin: 12px 0 6px;
+  margin: 14px 0 8px;
+}
+
+.detail-panel .policy-box + .section-heading {
+  margin-top: 24px;
 }
 
 .radar-container {
@@ -862,44 +866,47 @@ body {
 }
 
 .policy-box {
-  padding: 10px 12px;
-  border-radius: 6px;
-  border: 1px solid var(--rule);
+  padding: 14px 14px 15px;
+  border-radius: 8px;
+  border: 1px solid #D8D2C4;
+  background: #FBF9F3;
   margin-top: 10px;
+  box-shadow: 0 4px 14px rgba(25, 24, 22, 0.05);
 }
 
 .policy-header {
-  font-size: 10px;
+  font-size: 10.5px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
-  color: var(--faint);
-  margin-bottom: 2px;
+  letter-spacing: 0.1em;
+  color: #6A665E;
+  margin-bottom: 4px;
 }
 
 .policy-name {
-  font-size: 13px;
+  font-size: 16px;
   font-weight: 700;
-  margin-bottom: 3px;
+  line-height: 1.3;
+  margin-bottom: 6px;
 }
 
 .policy-description {
-  font-size: 12px;
-  color: var(--sub);
-  line-height: 1.55;
+  font-size: 13px;
+  color: #46433C;
+  line-height: 1.58;
 }
 
 .profile-chart-container {
-  margin: 0 auto 6px;
+  margin: 0 auto 8px;
   text-align: center;
 }
 
 .profile-caption {
-  font-size: 10px;
+  font-size: 10.5px;
   color: var(--faint);
   text-align: center;
-  line-height: 1.45;
-  margin-bottom: 8px;
+  line-height: 1.5;
+  margin-bottom: 14px;
 }
 
 .metric-explanation {

@@ -26,7 +26,7 @@ export const METRIC_KEYS = [
 ];
 
 export const DEFAULT_CONTEXT =
-  'Explore <b>173 census tracts</b> across <b>180,000 residential sales</b>. Hover any tract to learn its story.';
+  'Hover a tract to see which policy intervention fits local speculative pressure and why.';
 
 export function formatDollars(v) {
   if (v >= 1e6) return '$' + (v / 1e6).toFixed(1) + 'M';
