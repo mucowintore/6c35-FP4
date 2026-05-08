@@ -1126,10 +1126,15 @@
   .story-step :global(.s2-method-link:focus-visible) {
     color: var(--navy);
   }
+  .story-step :global(.s2-methodology-block),
+  .story-step :global(.s2-method-link) {
+    pointer-events: auto;
+  }
   .story-step :global(.s2-method-dialog) {
     position: fixed;
     inset: 0;
     margin: auto;
+    z-index: 1400;
     border: 1px solid var(--rule);
     border-radius: 12px;
     padding: 0;
@@ -1188,13 +1193,14 @@
     margin-top: 16px;
   }
   .story-step :global(.s2-method-dialog-lead) {
-    margin-bottom: 34px;
+    margin-bottom: 0;
     color: var(--text);
   }
   .story-step :global(.s2-method-dialog-score-lines) {
+    margin-top: 14px;
     margin-bottom: 22px;
     display: grid;
-    gap: 8px;
+    gap: 4px;
   }
   .story-step :global(.s2-method-dialog-score-lines p + p) {
     margin-top: 0;
@@ -1230,13 +1236,32 @@
     text-transform: uppercase;
     letter-spacing: 0.08em;
     color: var(--sub);
-    margin-top: 24px;
+    margin-top: 34px;
     margin-bottom: 0;
   }
   .story-step :global(.s2-method-dialog-validation-line) {
     color: var(--text);
     line-height: 1.68;
     margin-top: 6px !important;
+  }
+  .story-step :global(.s2-method-dialog-validation-list) {
+    margin: 8px 0 0 18px;
+    padding: 0;
+    list-style: disc;
+    color: var(--text);
+  }
+  .story-step :global(.s2-method-dialog-validation-list li) {
+    margin: 0;
+    padding: 0;
+    position: static;
+    font-size: 14.5px;
+    line-height: 1.62;
+  }
+  .story-step :global(.s2-method-dialog-validation-list li)::before {
+    content: none;
+  }
+  .story-step :global(.s2-method-dialog-validation-list li + li) {
+    margin-top: 6px;
   }
 
   /* Section 03 redesign: title, short framing paragraph, two strategy cards. */

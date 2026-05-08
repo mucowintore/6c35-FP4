@@ -195,12 +195,15 @@ export const NARRATIVE_SECTIONS = [
 
             <p class="s2-method-dialog-validation-title">Validation checks</p>
             <p class="s2-method-dialog-validation-line">We validated this
-              0.75 SD threshold through <strong>Sensitivity analysis</strong>
-              (the classification is stable from 0.5 to 1.25 SD),
-              <strong>K-Means clustering</strong> (85.5% agreement with k=2),
-              <strong>PCA</strong> (73% variance captured in two components),
-              and <strong>Random Forest classification</strong> (F1 = 0.894 in
-              5-fold cross validation).</p>
+              0.75 SD threshold through:</p>
+            <ul class="s2-method-dialog-validation-list">
+              <li><strong>Sensitivity analysis</strong>: the classification is
+                stable from 0.5 to 1.25 SD.</li>
+              <li><strong>K-Means clustering</strong>: 85.5% agreement with k=2.</li>
+              <li><strong>PCA</strong>: 73% variance captured in two components.</li>
+              <li><strong>Random Forest classification</strong>: F1 = 0.894 in
+                5-fold cross validation.</li>
+            </ul>
           </div>
         </dialog>
       </div>
