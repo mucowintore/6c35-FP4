@@ -351,6 +351,7 @@
           <section class="story-step"
             class:chapter-one-step={section.id === 'regime-shift'}
             class:chapter-two-step={section.id === 'map-intro'}
+            class:policy-step={section.id === 'policy'}
             class:explorer-inline-step={section.id === 'explorer'}
             id={section.id} data-section-id={section.id} use:trackStep>
             <div class="story-step-layout"
@@ -727,8 +728,8 @@
   }
   .story-split-grid {
     display: grid;
-    grid-template-columns: minmax(0, 56%) minmax(0, 44%);
-    gap: var(--story-viz-gap);
+    grid-template-columns: minmax(0, 44%) minmax(0, 56%);
+    gap: clamp(12px, 1.6vw, 24px);
     align-items: center;
     width: 100%;
   }
@@ -739,6 +740,9 @@
     min-width: 0;
     display: flex;
     align-items: center;
+  }
+  .story-step.policy-step .story-split-grid {
+    grid-template-columns: minmax(0, 44%) minmax(0, 56%);
   }
   .story-step.chapter-two-step :global(.story-copy) {
     min-height: clamp(280px, 34vh, 420px);

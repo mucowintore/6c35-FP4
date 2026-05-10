@@ -115,8 +115,8 @@
 
 <style>
   .leaderboard-shell {
-    width: min(740px, 100%);
-    margin: 0 auto;
+    width: min(920px, 100%);
+    margin: 0;
     background: #fff;
     border: 1px solid var(--rule);
     border-radius: 12px;
