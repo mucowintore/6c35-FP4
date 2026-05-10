@@ -3,9 +3,7 @@
    *
    * Three things this component owns:
    *
-   *   1. Wheel-snap scrolling between sections, with a brief cooldown
-   *      after each transition so the browser does not chain a second
-   *      step into the same gesture.
+   *   1. Active-step tracking as readers scroll through the narrative.
    *
    *   2. The counter system. Elements with data-count-target tween from
    *      zero, and reset when the section scrolls out of view so a
@@ -19,7 +17,7 @@
   import { onMount } from 'svelte';
   import { NARRATIVE_SECTIONS, FOOTER_CONTENT, STORY_OUTRO } from '$lib/narrativeSections';
   import { loadTractProfileData } from '$lib/mapData';
-  import StoryStage from '$lib/components/StoryStage.svelte';
+  import StoryStepViz from '$lib/components/StoryStepViz.svelte';
   import StoryExplorer from '$lib/components/StoryExplorer.svelte';
   import StoryStepBody from '$lib/components/StoryStepBody.svelte';
 
@@ -35,30 +33,12 @@
   let activeId = null;
   let observer;
   let observedNodes = [];
+  let stepVisibility = {};
   let openingSectionEl;
   let storyRegionEl;
-  let storyStepNodes = {};
-  let isStepTransitioning = false;
-  let stepTransitionTimer;
-  let wheelGestureConsumed = false;
-  let wheelGestureResetTimer;
   let previousScrollRestoration = null;
-  let wheelGuardUntil = 0;
-  let stepCursorId = null;
-  let activeLockUntil = 0;
-  let mapIntroVizVisible = false;
-  let mapIntroRevealRaf = 0;
-  let prevStepId = '';
   let methodDialogEls = [];
   let methodDialogClickHandler = null;
-
-  const STEP_SCROLL_COOLDOWN_MS = 640;
-  const WHEEL_GESTURE_IDLE_MS = 320;
-  /* Cinematic pause after the opening choreography settles before
-   * scroll is allowed to move the reader off the title screen. */
-  const INITIAL_WHEEL_GUARD_MS = 1300;
-  const ACTIVE_LOCK_MS = 950;
-  const STORY_TOP_RAIL_PX = 28;
 
   /* Opening counters, when present, are deferred until after the
    * opening choreography so any tween runs while content is visible. */
@@ -76,48 +56,23 @@
   $: activeChapter = activeId
     ? NARRATIVE_SECTIONS.find((s) => s.id === activeId)?.chapter
     : null;
-  $: currentStoryStepId = stepCursorId || activeId || '';
-  $: currentStoryStep = storySteps.find((s) => s.id === currentStoryStepId) ?? activeSection;
-  $: activeStepLayout = activeSection?.stepLayout ?? currentStoryStep?.stepLayout ?? 'split';
-  $: showVizLane = activeStepLayout === 'split';
-  $: mapDelayedHidden = activeSection?.id === 'map-intro' && !mapIntroVizVisible;
   $: explorerWideMode = activeSection?.id === 'explorer';
-  $: activeObservedStepId = activeSection?.id ?? '';
-
-  function queueMapIntroReveal() {
-    if (mapIntroRevealRaf) cancelAnimationFrame(mapIntroRevealRaf);
-    mapIntroVizVisible = false;
-    mapIntroRevealRaf = requestAnimationFrame(function () {
-      mapIntroRevealRaf = 0;
-      mapIntroVizVisible = true;
-    });
-  }
-
-  $: if (activeObservedStepId !== prevStepId) {
-    prevStepId = activeObservedStepId;
-    if (activeObservedStepId === 'map-intro') queueMapIntroReveal();
-    else {
-      if (mapIntroRevealRaf) {
-        cancelAnimationFrame(mapIntroRevealRaf);
-        mapIntroRevealRaf = 0;
-      }
-      mapIntroVizVisible = false;
-    }
-  }
 
   function trackStep(node) {
     observedNodes = [...observedNodes, node];
     var sid = node?.dataset?.sectionId;
-    if (sid) storyStepNodes = { ...storyStepNodes, [sid]: node };
+    if (sid) {
+      stepVisibility = { ...stepVisibility, [sid]: 0 };
+    }
     observer?.observe(node);
     return {
       destroy() {
         observer?.unobserve(node);
         observedNodes = observedNodes.filter((e) => e !== node);
-        if (sid && storyStepNodes[sid] === node) {
-          var next = { ...storyStepNodes };
+        if (sid && sid in stepVisibility) {
+          var next = { ...stepVisibility };
           delete next[sid];
-          storyStepNodes = next;
+          stepVisibility = next;
         }
       }
     };
@@ -158,89 +113,6 @@
         }
       });
     });
-  }
-
-  function isWide() { return typeof window !== 'undefined' && window.innerWidth > 760; }
-  function inView(el) {
-    if (!el) return false;
-    var r = el.getBoundingClientRect();
-    return r.bottom > 0 && r.top < window.innerHeight;
-  }
-  function storyStepMode() {
-    return storyRegionEl && storyRegionEl.getBoundingClientRect().top <= STORY_TOP_RAIL_PX;
-  }
-  function activateStep(id) {
-    if (!id) return;
-    activeId = id;
-    stepCursorId = id;
-    activeLockUntil = Date.now() + ACTIVE_LOCK_MS;
-    isStepTransitioning = true;
-    window.clearTimeout(stepTransitionTimer);
-    stepTransitionTimer = window.setTimeout(() => { isStepTransitioning = false; }, STEP_SCROLL_COOLDOWN_MS);
-  }
-
-  function scrollToStep(tEl, tId) {
-    tId = tId || '';
-    if (!tEl) return;
-    var isStep = tId && storySteps.some((s) => s.id === tId);
-    if (isStep) activateStep(tId);
-    else {
-      isStepTransitioning = true;
-      window.clearTimeout(stepTransitionTimer);
-      stepTransitionTimer = window.setTimeout(() => { isStepTransitioning = false; }, STEP_SCROLL_COOLDOWN_MS);
-    }
-    if (isWide() && isStep) {
-      var top = window.scrollY + tEl.getBoundingClientRect().top - STORY_TOP_RAIL_PX;
-      window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-      return;
-    }
-    tEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }
-
-  function queueWheelReset() {
-    window.clearTimeout(wheelGestureResetTimer);
-    wheelGestureResetTimer = window.setTimeout(() => { wheelGestureConsumed = false; }, WHEEL_GESTURE_IDLE_MS);
-  }
-
-  function handleWheel(event) {
-    if (!isWide() || event.ctrlKey) return;
-    if (Date.now() < wheelGuardUntil) return;
-    var ov = inView(openingSectionEl), sv = inView(storyRegionEl), sm = storyStepMode();
-    if (!ov && !sv) return;
-    if (isStepTransitioning || wheelGestureConsumed) {
-      event.preventDefault();
-      queueWheelReset();
-      return;
-    }
-    if (event.deltaY === 0) return;
-    var dir = event.deltaY > 0 ? 1 : -1;
-    var ref = stepCursorId || activeId;
-    var idx = ref ? storySteps.findIndex((s) => s.id === ref) : -1;
-    var tEl = null, tId = '';
-    if (dir > 0) {
-      if (ov && !sm) {
-        tEl = storyStepNodes[storySteps[0]?.id];
-        tId = storySteps[0]?.id ?? '';
-      } else {
-        if (!sv || !sm) return;
-        if (idx >= 0 && idx < storySteps.length - 1) {
-          tId = storySteps[idx + 1]?.id ?? '';
-          tEl = storyStepNodes[tId];
-        }
-      }
-    } else {
-      if (idx > 0) {
-        tId = storySteps[idx - 1]?.id ?? '';
-        tEl = storyStepNodes[tId];
-      } else if (idx === 0) {
-        tEl = openingSectionEl;
-      }
-    }
-    if (!tEl) return;
-    event.preventDefault();
-    wheelGestureConsumed = true;
-    queueWheelReset();
-    scrollToStep(tEl, tId);
   }
 
   /* Counter system.
@@ -383,20 +255,26 @@
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     requestAnimationFrame(() => { window.scrollTo({ top: 0, left: 0, behavior: 'auto' }); });
 
-    wheelGuardUntil = Date.now() + INITIAL_WHEEL_GUARD_MS;
-
     observer = new IntersectionObserver((entries) => {
-      var vis = entries
-        .filter((e) => e.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (vis?.target?.dataset?.sectionId) {
-        var oid = vis.target.dataset.sectionId;
-        if (Date.now() < activeLockUntil && oid !== stepCursorId) return;
-        activeId = oid;
-        if (storySteps.some((s) => s.id === oid)) {
-          stepCursorId = oid;
+      entries.forEach((entry) => {
+        var sid = entry?.target?.dataset?.sectionId;
+        if (!sid) return;
+        stepVisibility = {
+          ...stepVisibility,
+          [sid]: entry.isIntersecting ? entry.intersectionRatio : 0
+        };
+      });
+
+      var bestId = null;
+      var bestRatio = 0;
+      Object.entries(stepVisibility).forEach(function ([sid, ratio]) {
+        if (ratio > bestRatio) {
+          bestRatio = ratio;
+          bestId = sid;
         }
-      }
+      });
+
+      activeId = bestRatio > 0 ? bestId : null;
     }, {
       root: null,
       rootMargin: '-34% 0px -42% 0px',
@@ -404,7 +282,6 @@
     });
     observedNodes.forEach((n) => observer.observe(n));
 
-    window.addEventListener('wheel', handleWheel, { passive: false });
     setupMethodologyDialogs();
 
     /* Defer counter setup until after @html'd content has rendered. */
@@ -417,7 +294,6 @@
     return () => {
       observer?.disconnect();
       counterObserver?.disconnect();
-      window.removeEventListener('wheel', handleWheel);
       if (storyRegionEl && methodDialogClickHandler) {
         storyRegionEl.removeEventListener('click', methodDialogClickHandler);
       }
@@ -426,12 +302,6 @@
       });
       methodDialogEls = [];
       methodDialogClickHandler = null;
-      if (mapIntroRevealRaf) {
-        cancelAnimationFrame(mapIntroRevealRaf);
-        mapIntroRevealRaf = 0;
-      }
-      window.clearTimeout(stepTransitionTimer);
-      window.clearTimeout(wheelGestureResetTimer);
       if (typeof history !== 'undefined' && 'scrollRestoration' in history && previousScrollRestoration) {
         history.scrollRestoration = previousScrollRestoration;
       }
@@ -476,20 +346,6 @@
     </nav>
 
     <div class="story-content-plane">
-      <div class="story-viz-column"
-        class:viz-hidden={!showVizLane}
-        class:viz-delayed-hidden={mapDelayedHidden}
-        aria-live="polite">
-        <div class="sticky-stage">
-          <StoryStage
-            {activeSection}
-            {geoData}
-            {ranges}
-            {counts}
-            {loadError} />
-        </div>
-      </div>
-
       <div class="story-text-column">
         {#each renderedStorySteps as section}
           <section class="story-step"
@@ -500,7 +356,24 @@
             <div class="story-step-layout"
               class:is-text={section.stepLayout === 'text'}
               class:is-split={section.stepLayout !== 'text'}>
-              <StoryStepBody html={section.content} />
+              {#if section.stepLayout !== 'text'}
+                <div class="story-split-grid">
+                  <div class="story-split-copy">
+                    <StoryStepBody html={section.content} />
+                  </div>
+                  <div class="story-split-viz">
+                    <StoryStepViz
+                      {section}
+                      active={activeId === section.id}
+                      {geoData}
+                      {ranges}
+                      {counts}
+                      {loadError} />
+                  </div>
+                </div>
+              {:else}
+                <StoryStepBody html={section.content} />
+              {/if}
               {#if section.id === 'explorer'}
                 <div class="inline-explorer-shell">
                   <StoryExplorer
@@ -739,13 +612,10 @@
   }
   .story-content-plane {
     grid-area: content;
-    display: grid;
+    display: block;
     position: relative;
     width: calc(100% + var(--story-left-shift));
     margin-left: calc(-1 * var(--story-left-shift));
-  }
-  .story-content-plane > * {
-    grid-area: 1 / 1;
   }
 
   .story-progress {
@@ -840,6 +710,7 @@
     min-height: calc(100vh - var(--story-top-rail));
     flex-direction: column; justify-content: center;
     padding: clamp(18px, 4vh, 42px) 0;
+    scroll-margin-top: calc(var(--story-top-rail) + 12px);
   }
   .story-step-layout {
     width: 100%;
@@ -852,8 +723,22 @@
     max-width: min(940px, 100%);
   }
   .story-step-layout.is-split {
-    max-width: min(1220px, 100%);
-    padding-right: calc(var(--story-viz-width) + var(--story-viz-gap));
+    max-width: min(1460px, 100%);
+  }
+  .story-split-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 56%) minmax(0, 44%);
+    gap: var(--story-viz-gap);
+    align-items: center;
+    width: 100%;
+  }
+  .story-split-copy {
+    min-width: 0;
+  }
+  .story-split-viz {
+    min-width: 0;
+    display: flex;
+    align-items: center;
   }
   .story-step.chapter-two-step :global(.story-copy) {
     min-height: clamp(280px, 34vh, 420px);
@@ -1510,32 +1395,6 @@
     max-width: 560px;
   }
 
-  .story-viz-column {
-    position: sticky; top: var(--story-top-rail);
-    align-self: start;
-    justify-self: end;
-    width: var(--story-viz-width);
-    display: flex;
-    height: calc(100vh - var(--story-top-rail));
-    align-items: center;
-    opacity: 1;
-    transform: translateY(0);
-    transition: opacity 420ms cubic-bezier(0.4, 0, 0.2, 1),
-                transform 420ms cubic-bezier(0.4, 0, 0.2, 1);
-    z-index: 1;
-  }
-  .story-viz-column.viz-hidden {
-    opacity: 0;
-    transform: translateY(0);
-    pointer-events: none;
-  }
-  .story-viz-column.viz-delayed-hidden {
-    opacity: 0;
-    transform: translateY(8px);
-    pointer-events: none;
-  }
-  .sticky-stage { display: flex; width: 100%; height: 100%; align-items: center; }
-
   /* Quiet outro band between the explorer and the footer. */
   .story-outro {
     background: #F2EFE6;
@@ -1590,6 +1449,11 @@
     .story-step.explorer-inline-step :global(.s5-title) {
       margin-left: 0;
     }
+    .story-split-grid {
+      grid-template-columns: 1fr;
+      gap: 14px;
+      align-items: start;
+    }
   }
 
   @media (max-width: 760px) {
@@ -1617,14 +1481,7 @@
       display: block; gap: 0; padding: 0 0 8vh;
     }
     .story-content-plane { display: block; }
-    .story-viz-column {
-      position: sticky; top: 0; z-index: 4;
-      width: 100%;
-      height: 46vh; background: var(--bg);
-      box-shadow: 0 8px 18px rgba(25, 24, 22, 0.08);
-    }
     .story-text-column { padding: 0 22px; }
-    .sticky-stage { min-height: auto; }
     .story-step { min-height: 74vh; padding: 18vh 0; }
     .story-step-layout.is-text,
     .story-step-layout.is-split {

@@ -100,12 +100,13 @@
         </ol>
       </section>
     </div>
-    <p class="lb-interpretation">Values are the neighborhood’s
-      <strong>average dominant tract score</strong> (mean
-      <strong>hold score</strong> for the holding list, mean
-      <strong>flip score</strong> for the flipping list), using tracts
-      with at least 250 sales. Neighborhoods are ranked from highest
-      to lowest score, so larger positive values indicate stronger
+    <p class="lb-interpretation">Each value is a neighborhood average
+      across tracts with at least 250 sales: the
+      <strong>Holding</strong> leaderboard uses mean
+      <strong>hold score</strong>, while the
+      <strong>Flipping</strong> leaderboard uses mean
+      <strong>flip score</strong>. Neighborhoods are then ranked from
+      highest to lowest, so larger positive values indicate stronger
       concentration of that pattern.</p>
   {:else}
     <div class="lb-empty">Leaderboard data is not available yet.</div>
