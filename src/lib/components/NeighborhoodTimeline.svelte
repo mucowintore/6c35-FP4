@@ -115,7 +115,12 @@
 
     var cw = wrapperEl.clientWidth;
     if (cw < 200) cw = 720;
-    var ch = 380;
+    var wrapH = wrapperEl.clientHeight;
+    if (!Number.isFinite(wrapH) || wrapH <= 0) wrapH = 680;
+    /* Reserve vertical space for title, controls, chips, and helper text.
+     * The chart then shrinks on short viewports instead of being clipped. */
+    var reservedH = 292;
+    var ch = Math.max(230, Math.min(380, wrapH - reservedH));
     var margin = { top: 22, right: 90, bottom: 38, left: 40 };
     var font = 'Plus Jakarta Sans, sans-serif';
     var mono = 'Plus Jakarta Sans, sans-serif';
@@ -422,6 +427,7 @@
   .tl-wrap {
     width: 100%;
     height: 100%;
+    min-height: 0;
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -568,7 +574,7 @@
   .tl-chart {
     flex: 1;
     width: 100%;
-    min-height: 320px;
+    min-height: 0;
     margin-top: 2px;
   }
 
