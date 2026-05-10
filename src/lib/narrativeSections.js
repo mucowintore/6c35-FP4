@@ -381,8 +381,8 @@ export const NARRATIVE_SECTIONS = [
     title: 'Where intervention could matter most',
     theme: 'policy',
     layout: 'split',
-    stepLayout: 'text',
-    viz: null,
+    stepLayout: 'split',
+    viz: 'leaderboard',
     mapState: null,
     content: `
       <h3 class="s7-title">Where intervention could matter most</h3>

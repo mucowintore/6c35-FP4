@@ -861,6 +861,10 @@
   .story-step.chapter-one-step :global(.story-copy) {
     max-width: 100%;
   }
+  .story-step.chapter-one-step .story-step-layout.is-text {
+    margin-left: auto;
+    margin-right: auto;
+  }
   .story-step.explorer-inline-step {
     justify-content: flex-start;
     padding: clamp(8px, 1.2vh, 16px) 0 clamp(10px, 2vh, 22px);

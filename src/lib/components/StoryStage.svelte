@@ -19,6 +19,7 @@
   import PriceWedgeChart from '$lib/components/PriceWedgeChart.svelte';
   import StoryMap from '$lib/components/StoryMap.svelte';
   import NeighborhoodTimeline from '$lib/components/NeighborhoodTimeline.svelte';
+  import NeighborhoodLeaderboard from '$lib/components/NeighborhoodLeaderboard.svelte';
 
   export let activeSection = null;
   export let geoData = null;
@@ -39,11 +40,12 @@
   $: pwActive = viz === 'pricewedge';
   $: tlActive = viz === 'timeline';
   $: mapActive = viz === 'map';
+  $: lbActive = viz === 'leaderboard';
 
   /* Per-layer "is the layer's DOM actually on screen" flags. The
    * combination of active and inViewport is what unlocks the chart
    * draw animation. */
-  let tsLayerEl, pwLayerEl, tlLayerEl, mapLayerEl;
+  let tsLayerEl, pwLayerEl, tlLayerEl, mapLayerEl, lbLayerEl;
   let tsInViewport = false;
   let pwInViewport = false;
   let tlInViewport = false;
@@ -76,6 +78,7 @@
     if (pwLayerEl) observer.observe(pwLayerEl);
     if (tlLayerEl) observer.observe(tlLayerEl);
     if (mapLayerEl) observer.observe(mapLayerEl);
+    if (lbLayerEl) observer.observe(lbLayerEl);
   }
 
   onMount(() => {
@@ -128,9 +131,16 @@
     </div>
 
     <div class="chart-stage pw-stage layer layer-from-left"
+         class:pricewedge-titled={sectionId === 'price-wedge'}
          class:active={pwActive}
          aria-hidden={!pwActive}
          bind:this={pwLayerEl}>
+      {#if sectionId === 'price-wedge'}
+        <div class="stage-title-block" aria-hidden="true">
+          <p class="stage-title">Investor Price Premium by Strategy</p>
+          <p class="stage-subtitle">Holding and flipping tracts, 2000 to 2022</p>
+        </div>
+      {/if}
       <div class="chart-body">
         <PriceWedgeChart width={680} height={420}
                          active={pwActive}
@@ -161,6 +171,13 @@
            aria-hidden={!bloomCaptionVisible}>
         173 tracts  ·  Two strategies
       </div>
+    </div>
+
+    <div class="leaderboard-stage layer layer-from-left"
+         class:active={lbActive}
+         aria-hidden={!lbActive}
+         bind:this={lbLayerEl}>
+      <NeighborhoodLeaderboard {geoData} />
     </div>
   {/if}
 </div>
@@ -230,6 +247,24 @@
   .pw-stage .chart-body {
     overflow: visible;
   }
+  .pw-stage.pricewedge-titled {
+    justify-content: center;
+    padding-top: 0;
+  }
+  .pw-stage.pricewedge-titled .stage-title-block {
+    position: relative;
+    top: auto;
+    left: auto;
+    margin: 0 0 8px 14px;
+    max-width: min(520px, calc(100% - 24px));
+  }
+  .pw-stage.pricewedge-titled .chart-body {
+    flex: 0 0 auto;
+    min-height: auto;
+    width: 100%;
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
 
   .chart-body {
     flex: 1;
@@ -253,6 +288,18 @@
   .timeline-stage {
     padding-left: 6px;
     padding-right: 4px;
+  }
+  .leaderboard-stage {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 8px;
+    -webkit-mask-image: none;
+            mask-image: none;
+    -webkit-mask-size: auto;
+            mask-size: auto;
+    -webkit-mask-position: 0 0;
+            mask-position: 0 0;
   }
 
   .stage-message {
@@ -289,10 +336,52 @@
     transform: translateY(0);
   }
 
+  .stage-title-block {
+    position: absolute;
+    top: 24px;
+    left: 14px;
+    z-index: 4;
+    pointer-events: none;
+    max-width: min(520px, calc(100% - 28px));
+  }
+  .stage-title {
+    margin: 0;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 20px;
+    font-weight: 400;
+    line-height: 1.06;
+    color: #191816;
+    letter-spacing: -0.01em;
+  }
+  .stage-subtitle {
+    margin: 4px 0 0;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    font-size: 10.5px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(70, 67, 60, 0.85);
+    line-height: 1.3;
+  }
+
   @media (max-width: 760px) {
     .story-stage { height: 100%; min-height: 0; }
     .chart-stage { padding: 12px 6px 8px; }
     .bloom-caption { font-size: 9.5px; }
+    .stage-title-block {
+      top: 8px;
+      left: 8px;
+    }
+    .stage-title { font-size: 18px; }
+    .stage-subtitle { font-size: 9px; }
+    .pw-stage.pricewedge-titled {
+      padding-top: 0;
+    }
+    .pw-stage.pricewedge-titled .stage-title-block {
+      margin-left: 8px;
+      margin-bottom: 6px;
+      max-width: calc(100% - 16px);
+    }
   }
 
 </style>
