@@ -115,12 +115,12 @@
   {#if loadError}
     <div class="stage-message">{loadError}</div>
   {:else}
-    <div class="chart-stage layer layer-from-right"
+    <div class="chart-stage ts-stage layer layer-from-right"
          class:active={tsActive}
          aria-hidden={!tsActive}
          bind:this={tsLayerEl}>
       <div class="chart-body">
-        <TimeSeriesChart width={680} height={420}
+        <TimeSeriesChart width={680} height={620}
                          active={tsActive}
                          inViewport={tsInViewport}
                          visible={tsActive} />
@@ -173,8 +173,8 @@
     min-height: 500px;
   }
   .story-stage.story-stage-chart {
-    height: min(72vh, 640px);
-    min-height: 440px;
+    height: min(88vh, 860px);
+    min-height: 620px;
   }
 
   /* Persistent stacked layers. Active fades in, others fade out.
@@ -214,6 +214,9 @@
     justify-content: center;
     overflow: hidden;
     padding: 16px 12px 12px;
+  }
+  .ts-stage {
+    padding: 8px 10px 6px;
   }
   .pw-stage {
     overflow: visible;

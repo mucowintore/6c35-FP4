@@ -56,10 +56,37 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* 01 The Shift */
+  /* 01 The Permanent Shift */
+  {
+    id: 'market-shift',
+    chapter: '01',
+    label: 'Market Shift',
+    title: 'After 2008, investors never left',
+    theme: 'mixed',
+    layout: 'split',
+    stepLayout: 'split',
+    viz: 'timeseries',
+    mapState: null,
+    content: `
+      <h3 class="s0-title">After 2008, investors never left</h3>
+      <p class="s0-intro">Before the 2008 financial crisis, investors
+        accounted for roughly 16% of all residential purchases in
+        Boston. After the crisis, that figure rose to about 28% and
+        stayed elevated for more than a decade.</p>
+      <p class="s0-intro">In the top price decile, the shift was even
+        sharper, from roughly 34% to 62%.</p>
+      <p class="s0-intro">This was not a temporary spike. Investor
+        participation became a permanent structural feature of
+        Boston’s housing market.</p>
+      <p class="s0-bridge">But that rise did not follow a single pattern.
+        It split into distinct strategies across different neighborhoods.</p>
+    `
+  },
+
+  /* 02 The Shift */
   {
     id: 'regime-shift',
-    chapter: '01',
+    chapter: '02',
     label: 'Investor Strategies',
     title: 'Not all speculation works the same way',
     theme: 'hold',
@@ -109,10 +136,10 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* 02 The Map. Geography + classification method in one section. */
+  /* 03 The Map. Geography + classification method in one section. */
   {
     id: 'map-intro',
-    chapter: '02',
+    chapter: '03',
     label: 'Geographic Divide',
     title: 'Two markets hiding in plain sight',
     theme: 'mixed',
@@ -210,10 +237,10 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* 03 The Wedge */
+  /* 04 The Wedge */
   {
     id: 'price-wedge',
-    chapter: '03',
+    chapter: '04',
     label: 'Price Wedge',
     title: 'Two fundamentally different strategies',
     theme: 'mixed',
@@ -254,10 +281,10 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* 04 The Policy. Different mechanisms, different tools. */
+  /* 05 The Policy. Different mechanisms, different tools. */
   {
     id: 'equity',
-    chapter: '04',
+    chapter: '05',
     label: 'Policy Tools',
     title: 'Different mechanisms require different tools',
     theme: 'policy',
@@ -307,10 +334,10 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* 05 Interactive Map */
+  /* 06 Interactive Map */
   {
     id: 'explorer',
-    chapter: '05',
+    chapter: '06',
     label: 'Policy Explorer',
     title: 'Policy Exploration Map',
     theme: 'mixed',
@@ -323,10 +350,10 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* 06 Neighborhood trajectories */
+  /* 07 Neighborhood trajectories */
   {
     id: 'neighborhood-trajectories',
-    chapter: '06',
+    chapter: '07',
     label: 'Trajectories',
     title: 'Today’s housing landscape emerged through decades of uneven change',
     theme: 'mixed',
@@ -346,10 +373,10 @@ export const NARRATIVE_SECTIONS = [
     `
   },
 
-  /* 07 Takeaways */
+  /* 08 Takeaways */
   {
     id: 'policy',
-    chapter: '07',
+    chapter: '08',
     label: 'Takeaways',
     title: 'Where intervention could matter most',
     theme: 'policy',

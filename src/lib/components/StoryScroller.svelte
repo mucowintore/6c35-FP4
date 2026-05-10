@@ -441,7 +441,7 @@
 
 <svelte:head><title>Speculation Has a Geography</title></svelte:head>
 
-<a class="skip-link" href="#regime-shift">Skip to the story</a>
+<a class="skip-link" href="#market-shift">Skip to the story</a>
 
 <article class="story-page">
 
@@ -922,6 +922,31 @@
     border-left: 3px solid var(--neutral);
     transition: color 600ms cubic-bezier(0.4, 0, 0.2, 1),
                 border-left-color 600ms cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Section 01 context: market shift before strategy split. */
+  .story-step :global(.s0-title) {
+    margin: 0 0 14px;
+    font-family: "DM Serif Display", Georgia, serif;
+    font-weight: 400;
+    font-size: clamp(33px, 4.2vw, 50px);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+    max-width: 760px;
+  }
+  .story-step :global(.s0-intro),
+  .story-step :global(.s0-bridge) {
+    margin: 0 0 14px;
+    max-width: 760px;
+    color: var(--text);
+    font-size: 15.5px;
+    line-height: 1.66;
+  }
+  .story-step :global(.s0-bridge) {
+    margin-bottom: 0;
+    color: var(--ink);
+    font-weight: 600;
   }
 
   /* Section 01 redesign: title, framing paragraph, then two strategy cards. */
@@ -1601,6 +1626,12 @@
     .story-step-layout.is-split {
       max-width: 100%;
       padding-right: 0;
+    }
+    .story-step :global(.s0-title) { font-size: clamp(30px, 9vw, 40px); }
+    .story-step :global(.s0-intro),
+    .story-step :global(.s0-bridge) {
+      font-size: 15px;
+      line-height: 1.64;
     }
     .story-step :global(.s1-title) { font-size: clamp(30px, 9vw, 40px); }
     .story-step :global(.s1-intro) { font-size: 15px; margin-bottom: 18px; }
